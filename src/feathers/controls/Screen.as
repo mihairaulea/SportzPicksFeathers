@@ -24,16 +24,16 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 package feathers.controls
 {
+	import feathers.core.FeathersControl;
+	import feathers.events.FeathersEventType;
+	import feathers.system.DeviceCapabilities;
+	import feathers.utils.display.calculateScaleRatioToFit;
+
 	import flash.display.DisplayObjectContainer;
 	import flash.display.LoaderInfo;
 	import flash.events.KeyboardEvent;
-	import flash.system.Capabilities;
 	import flash.ui.Keyboard;
-	
-	import feathers.core.FeathersControl;
-	import feathers.system.DeviceCapabilities;
-	import feathers.utils.display.calculateScaleRatioToFit;
-	
+
 	import starling.core.Starling;
 	import starling.events.Event;
 	import starling.events.ResizeEvent;
@@ -41,17 +41,19 @@ package feathers.controls
 	/**
 	 * Provides useful capabilities for a menu screen displayed by
 	 * <code>ScreenNavigator</code>.
-	 * 
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/screen
 	 * @see ScreenNavigator
 	 */
-	public class Screen extends FeathersControl
+	public class Screen extends FeathersControl implements IScreen
 	{
 		/**
 		 * Constructor.
 		 */
 		public function Screen()
 		{
-			this.addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
+			this.addEventListener(Event.ADDED_TO_STAGE, screen_addedToStageHandler);
+			this.addEventListener(FeathersEventType.RESIZE, screen_resizeHandler);
 			super();
 			this.originalDPI = 168;
 		}
@@ -59,7 +61,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _originalWidth:Number = NaN;
+		protected var _originalWidth:Number = NaN;
 		
 		/**
 		 * The original intended width of the application. If not set manually,
@@ -90,7 +92,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _originalHeight:Number = NaN;
+		protected var _originalHeight:Number = NaN;
 		
 		/**
 		 * The original intended height of the application. If not set manually,
@@ -121,7 +123,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _originalDPI:int = 0;
+		protected var _originalDPI:int = 0;
 		
 		/**
 		 * The original intended DPI of the application. This value cannot be
@@ -145,15 +147,57 @@ package feathers.controls
 			this._dpiScale = DeviceCapabilities.dpi / this._originalDPI;
 			this.invalidate(INVALIDATION_FLAG_SIZE);
 		}
-		
+
 		/**
 		 * @private
 		 */
-		private var _pixelScale:Number = 1;
+		protected var _screenID:String;
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get screenID():String
+		{
+			return this._screenID;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set screenID(value:String):void
+		{
+			this._screenID = value;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _owner:ScreenNavigator;
+
+		/**
+		 * @inheritDoc
+		 */
+		public function get owner():ScreenNavigator
+		{
+			return this._owner;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set owner(value:ScreenNavigator):void
+		{
+			this._owner = value;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _pixelScale:Number = 1;
 		
 		/**
 		 * Uses <code>originalWidth</code>, <code>originalHeight</code>,
-		 * <code>stage.stageWidth</code>, and <code>stage.stageHeight</code>,
+		 * <code>actualWidth</code>, and <code>actualHeight</code>,
 		 * to calculate a scale value that will allow all content will fit
 		 * within the current stage bounds using the same relative layout. This
 		 * scale value does not account for differences between the original DPI
@@ -167,7 +211,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _dpiScale:Number = 1;
+		protected var _dpiScale:Number = 1;
 		
 		/**
 		 * Uses <code>originalDPI</code> and <code>DeviceCapabilities.dpi</code>
@@ -205,8 +249,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private function refreshPixelScale():void
+		protected function refreshPixelScale():void
 		{
+			if(!this.stage)
+			{
+				return;
+			}
 			const loaderInfo:LoaderInfo = DisplayObjectContainer(Starling.current.nativeStage.root).getChildAt(0).loaderInfo;
 			//if originalWidth or originalHeight is NaN, it's because the Screen
 			//has been added to the display list, and we really need values now.
@@ -232,42 +280,40 @@ package feathers.controls
 					this._originalHeight = this.stage.stageHeight;
 				}
 			}
-			this._pixelScale = calculateScaleRatioToFit(originalWidth, originalHeight, this.stage.stageWidth, this.stage.stageHeight);
+			this._pixelScale = calculateScaleRatioToFit(originalWidth, originalHeight, this.actualWidth, this.actualHeight);
 		}
 		
 		/**
 		 * @private
 		 */
-		private function addedToStageHandler(event:Event):void
+		protected function screen_addedToStageHandler(event:Event):void
 		{
 			if(event.target != this)
 			{
 				return;
 			}
 			this.refreshPixelScale();
-			this.addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
-			this.stage.addEventListener(ResizeEvent.RESIZE, stage_resizeHandler);
-			Starling.current.nativeStage.addEventListener(KeyboardEvent.KEY_DOWN, stage_keyDownHandler, false, 0, true);
+			this.addEventListener(Event.REMOVED_FROM_STAGE, screen_removedFromStageHandler);
+			Starling.current.nativeStage.addEventListener(KeyboardEvent.KEY_DOWN, screen_stage_keyDownHandler, false, 0, true);
 		}
 
 		/**
 		 * @private
 		 */
-		private function removedFromStageHandler(event:Event):void
+		protected function screen_removedFromStageHandler(event:Event):void
 		{
 			if(event.target != this)
 			{
 				return;
 			}
-			this.removeEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
-			this.stage.removeEventListener(ResizeEvent.RESIZE, stage_resizeHandler);
-			Starling.current.nativeStage.removeEventListener(KeyboardEvent.KEY_DOWN, stage_keyDownHandler);
+			this.removeEventListener(Event.REMOVED_FROM_STAGE, screen_removedFromStageHandler);
+			Starling.current.nativeStage.removeEventListener(KeyboardEvent.KEY_DOWN, screen_stage_keyDownHandler);
 		}
 		
 		/**
 		 * @private
 		 */
-		private function stage_resizeHandler(event:ResizeEvent):void
+		protected function screen_resizeHandler(event:Event):void
 		{
 			this.refreshPixelScale();
 		}
@@ -275,7 +321,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private function stage_keyDownHandler(event:KeyboardEvent):void
+		protected function screen_stage_keyDownHandler(event:KeyboardEvent):void
 		{
 			//we're accessing Keyboard.BACK (and others) using a string because
 			//this code may be compiled for both Flash Player and AIR.

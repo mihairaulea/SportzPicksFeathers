@@ -26,6 +26,8 @@ package feathers.controls.renderers
 {
 	import feathers.controls.GroupedList;
 
+	import starling.events.Event;
+
 	/**
 	 * The default item renderer for a GroupedList control. Supports up to three
 	 * optional sub-views, including a label to display text, an icon to display
@@ -47,7 +49,7 @@ package feathers.controls.renderers
 		/**
 		 * @private
 		 */
-		private var _groupIndex:int = -1;
+		protected var _groupIndex:int = -1;
 		
 		/**
 		 * @inheritDoc
@@ -68,7 +70,7 @@ package feathers.controls.renderers
 		/**
 		 * @private
 		 */
-		private var _itemIndex:int = -1;
+		protected var _itemIndex:int = -1;
 
 		/**
 		 * @inheritDoc
@@ -89,7 +91,7 @@ package feathers.controls.renderers
 		/**
 		 * @private
 		 */
-		private var _layoutIndex:int = -1;
+		protected var _layoutIndex:int = -1;
 
 		/**
 		 * @inheritDoc
@@ -126,14 +128,14 @@ package feathers.controls.renderers
 			}
 			if(this._owner)
 			{
-				GroupedList(this._owner).onScroll.remove(owner_onScroll);
+				GroupedList(this._owner).removeEventListener(Event.SCROLL, owner_scrollHandler);
 			}
 			this._owner = value;
 			if(this._owner)
 			{
 				const list:GroupedList = GroupedList(this._owner);
 				this.isToggle = list.isSelectable;
-				list.onScroll.add(owner_onScroll);
+				list.addEventListener(Event.SCROLL, owner_scrollHandler);
 			}
 			this.invalidate(INVALIDATION_FLAG_DATA);
 		}
@@ -141,7 +143,7 @@ package feathers.controls.renderers
 		/**
 		 * @private
 		 */
-		protected function owner_onScroll(list:GroupedList):void
+		protected function owner_scrollHandler(event:Event):void
 		{
 			this.handleOwnerScroll();
 		}

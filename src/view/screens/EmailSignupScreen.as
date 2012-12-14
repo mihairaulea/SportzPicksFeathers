@@ -1,18 +1,21 @@
 package view.screens 
 {
 	import feathers.controls.Screen;
-	import feathers.display.Image;
+	import feathers.controls.supportClasses.TextFieldViewPort;
+	import feathers.controls.text.*;
+	import feathers.core.ITextEditor;
 	import flash.text.TextRenderer;
 	import starling.events.Event;
+	import starling.display.Image;
 	
 	import feathers.controls.Screen;
-	import feathers.controls.ScreenHeader;
 	import feathers.controls.Button;
 	import feathers.controls.TextInput;
 	import feathers.controls.text.TextFieldTextRenderer;
 	import feathers.system.DeviceCapabilities;
 	
 	import flash.text.TextFormat;
+	import feathers.core.ITextRenderer;
 	
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
@@ -44,11 +47,12 @@ package view.screens
 		private var usernameInput:TextInput;
 		private var usernameErrorFeedback:TextFieldTextRenderer;
 		
-		private var textFormatCreateYourAccount:TextFormat;
-		private var textFormatWithFacebook:TextFormat;
+		private var textFormatCreateYourAccount:TextFormat;		
+		private var textFormatFacebookLabel:TextFormat;
 		private var textFormatTitleField:TextFormat;
 		private var textFormatInputField:TextFormat;
 		private var textFormatError:TextFormat;
+		private var textFormatGoBtn:TextFormat;
 		
 		private var backgroundPanel:Image;
 		private var goBtn:Button;
@@ -76,7 +80,11 @@ package view.screens
 			
 			textFormatCreateYourAccount = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0xFFFFFF);
 			textFormatTitleField = new TextFormat("HelveticaNeueLTCom", 14, 0x4D4D4D);
+			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
+			textFormatFacebookLabel.align = "left";
+			textFormatInputField = new TextFormat("HelveticaNeueLTCom-BdCn", 15, 0xB3B3B3, true);
 			textFormatError = new TextFormat("HelveticaNeueLTCom-BdCn", 9, 0x890B0B);
+			textFormatGoBtn = new TextFormat("HelveticaNeueLTCom-BdCn", 18, 0xFFFFFF);
 			
 			createYourAccount = new TextFieldTextRenderer();
 			createYourAccount.text = "Create your account";
@@ -105,8 +113,11 @@ package view.screens
 			var inputBackImage:Image = new Image(Assets.getAssetsTexture("form_field"));
 			inputBackImage.pivotX = 5;
 			inputBackImage.pivotY = 3;
+			emailInput.textEditorFactory = getTextInputField;
 			emailInput.backgroundSkin = inputBackImage;
+			
 			addChild(emailInput);	
+			
 			emailInput.validate();
 			
 			emailErrorFeedback = new TextFieldTextRenderer();
@@ -126,6 +137,7 @@ package view.screens
 			inputBackImage2.pivotX = 5;
 			inputBackImage2.pivotY = 3;
 			usernameInput.backgroundSkin = inputBackImage2;
+			usernameInput.textEditorFactory = getTextInputField;
 			addChild(usernameInput);
 			usernameInput.validate();
 		
@@ -139,7 +151,10 @@ package view.screens
 			goBtn.defaultSkin = new Image( Assets.getAssetsTexture("go_btn"));
 			goBtn.downSkin = new Image( Assets.getAssetsTexture("go_btn_press"));
 			goBtn.label = "Go";
-			//goBtn.validate();
+			goBtn.labelFactory = getGoBtnTextRenderer;
+			goBtn.validate();
+			
+			triggerSignalOnButtonRelease(goBtn, EVENTS[0]);
 		}
 		
 		override protected function draw():void
@@ -154,6 +169,7 @@ package view.screens
 			
 			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
 			facebookButton.y = createYourAccount.y + createYourAccount.height + 20;
+			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			backgroundPanel.x = facebookButton.x;
 			backgroundPanel.y = facebookButton.y + facebookButton.height;
@@ -188,6 +204,45 @@ package view.screens
 			
 			goBtn.x = backgroundPanel.x + ( (backgroundPanel.width - goBtn.defaultSkin.width) / 2 );
 			goBtn.y = usernameErrorFeedback.y + 20;
+		}
+		
+		private function triggerSignalOnButtonRelease(button:Button, event:String):void
+		{
+			button.addEventListener( Event.TRIGGERED,(function(e:Event):void
+			{
+				dispatchEvent(new Event(event));
+			}));
+
+		}
+		
+		private function getFacebookTextRenderer():ITextRenderer
+		{
+			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			
+			facebookLabel.textFormat = textFormatFacebookLabel;
+			facebookLabel.embedFonts = true;
+			
+			return facebookLabel;
+		}
+		
+		private function getGoBtnTextRenderer():ITextRenderer
+		{
+			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			
+			goLabel.textFormat = textFormatGoBtn;
+			goLabel.embedFonts = true;
+			
+			return goLabel;
+		}
+		
+		private function getTextInputField():ITextEditor
+		{
+			var label:TextFieldTextEditor = new TextFieldTextEditor();
+			
+			label.textFormat = textFormatInputField;
+			label.embedFonts = true;
+			
+			return label;
 		}
 		
 	}

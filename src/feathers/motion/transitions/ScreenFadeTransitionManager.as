@@ -24,16 +24,18 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 package feathers.motion.transitions
 {
-	import com.gskinner.motion.easing.Sine;
-
 	import feathers.controls.ScreenNavigator;
-	import feathers.motion.GTween;
 
+	import starling.animation.Transitions;
+	import starling.animation.Tween;
+	import starling.core.Starling;
 	import starling.display.DisplayObject;
 
 	/**
 	 * A transition for <code>ScreenNavigator</code> that fades out the old
 	 * screen and fades in the new screen.
+	 *
+	 * @see feathers.controls.ScreenNavigator
 	 */
 	public class ScreenFadeTransitionManager
 	{
@@ -46,28 +48,52 @@ package feathers.motion.transitions
 			{
 				throw new ArgumentError("ScreenNavigator cannot be null.");
 			}
-			this._navigator = navigator;
-			this._navigator.transition = this.onTransition;
+			this.navigator = navigator;
+			this.navigator.transition = this.onTransition;
 		}
-		
-		private var _navigator:ScreenNavigator;
-		private var _activeTransition:GTween;
-		private var _savedCompleteHandler:Function;
-		
+
 		/**
-		 * The duration of the transition.
+		 * The <code>ScreenNavigator</code> being managed.
 		 */
-		public var duration:Number = 0.25;
-		
-		/**
-		 * The GTween easing function to use.
-		 */
-		public var ease:Function = Sine.easeOut;
-		
+		protected var navigator:ScreenNavigator;
+
 		/**
 		 * @private
 		 */
-		private function onTransition(oldScreen:DisplayObject, newScreen:DisplayObject, onComplete:Function):void
+		protected var _activeTransition:Tween;
+
+		/**
+		 * @private
+		 */
+		protected var _savedOtherTarget:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _savedCompleteHandler:Function;
+		
+		/**
+		 * The duration of the transition, measured in seconds.
+		 */
+		public var duration:Number = 0.25;
+
+		/**
+		 * A delay before the transition starts, measured in seconds. This may
+		 * be required on low-end systems that will slow down for a short time
+		 * after heavy texture uploads.
+		 */
+		public var delay:Number = 0.1;
+		
+		/**
+		 * The easing function to use.
+		 */
+		public var ease:Object = Transitions.EASE_OUT;
+		
+		/**
+		 * The function passed to the <code>transition</code> property of the
+		 * <code>ScreenNavigator</code>.
+		 */
+		protected function onTransition(oldScreen:DisplayObject, newScreen:DisplayObject, onComplete:Function):void
 		{
 			if(!oldScreen && !newScreen)
 			{
@@ -76,7 +102,8 @@ package feathers.motion.transitions
 			
 			if(this._activeTransition)
 			{
-				this._activeTransition.end();
+				this._savedOtherTarget = null;
+				this._activeTransition.advanceTime(this._activeTransition.totalTime);
 				this._activeTransition = null;
 			}
 			
@@ -89,48 +116,43 @@ package feathers.motion.transitions
 				{
 					oldScreen.alpha = 1;
 				}
-				this._activeTransition = new GTween(newScreen, this.duration,
-				{
-					alpha: 1
-				},
-				{
-					ease: this.ease,
-					onChange: activeTransition_onChange,
-					onComplete: activeTransition_onComplete
-				});
+				this._savedOtherTarget = oldScreen;
+				this._activeTransition = new Tween(newScreen, this.duration, this.ease);
+				this._activeTransition.fadeTo(1);
+				this._activeTransition.delay = this.delay;
+				this._activeTransition.onUpdate = activeTransition_onUpdate;
+				this._activeTransition.onComplete = activeTransition_onComplete;
+				Starling.juggler.add(this._activeTransition);
 			}
 			else //we only have the old screen
 			{
 				oldScreen.alpha = 1;
-				this._activeTransition = new GTween(oldScreen, this.duration,
-				{
-					alpha: 0
-				},
-				{
-					ease: this.ease,
-					onComplete: activeTransition_onComplete
-				});
+				this._activeTransition = new Tween(oldScreen, this.duration, this.ease);
+				this._activeTransition.fadeTo(0);
+				this._activeTransition.delay = this.delay;
+				this._activeTransition.onComplete = activeTransition_onComplete;
+				Starling.juggler.add(this._activeTransition);
 			}
 		}
 		
 		/**
 		 * @private
 		 */
-		private function activeTransition_onChange(tween:GTween):void
+		protected function activeTransition_onUpdate():void
 		{
-			var oldScreen:DisplayObject = tween.data as DisplayObject;
-			if(oldScreen)
+			if(this._savedOtherTarget)
 			{
-				var newScreen:DisplayObject = DisplayObject(tween.target);
-				oldScreen.alpha = 1 - newScreen.alpha;
+				const newScreen:DisplayObject = DisplayObject(this._activeTransition.target);
+				this._savedOtherTarget.alpha = 1 - newScreen.alpha;
 			}
 		}
 		
 		/**
 		 * @private
 		 */
-		private function activeTransition_onComplete(tween:GTween):void
+		protected function activeTransition_onComplete():void
 		{
+			this._savedOtherTarget = null;
 			this._activeTransition = null;
 			if(this._savedCompleteHandler != null)
 			{

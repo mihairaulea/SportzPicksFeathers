@@ -24,21 +24,65 @@
  */
 package feathers.controls
 {
-	import flash.geom.Point;
-
 	import feathers.controls.renderers.DefaultGroupedListHeaderOrFooterRenderer;
 	import feathers.controls.renderers.DefaultGroupedListItemRenderer;
 	import feathers.controls.supportClasses.GroupedListDataViewPort;
 	import feathers.core.FeathersControl;
 	import feathers.core.PropertyProxy;
 	import feathers.data.HierarchicalCollection;
+	import feathers.events.CollectionEventType;
+	import feathers.events.FeathersEventType;
 	import feathers.layout.ILayout;
 	import feathers.layout.VerticalLayout;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
+
+	import flash.geom.Point;
 
 	import starling.display.DisplayObject;
+	import starling.events.Event;
 
+	/**
+	 * Dispatched when the selected item changes.
+	 *
+	 * @eventType starling.events.Event.CHANGE
+	 */
+	[Event(name="change",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the list is scrolled.
+	 *
+	 * @eventType starling.events.Event.SCROLL
+	 */
+	[Event(name="scroll",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the list finishes scrolling in either direction after
+	 * being thrown.
+	 *
+	 * @eventType feathers.events.FeathersEventType.SCROLL_COMPLETE
+	 */
+	[Event(name="scrollComplete",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when an item renderer is added to the list. When the layout is
+	 * virtualized, item renderers may not exist for every item in the data
+	 * provider. This event can be used to track which items currently have
+	 * renderers.
+	 *
+	 * @eventType feathers.events.FeathersEventType.RENDERER_ADD
+	 */
+	[Event(name="rendererAdd",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when an item renderer is removed from the list. When the layout is
+	 * virtualized, item renderers may not exist for every item in the data
+	 * provider. This event can be used to track which items currently have
+	 * renderers.
+	 *
+	 * @eventType feathers.events.FeathersEventType.RENDERER_REMOVE
+	 */
+	[Event(name="rendererRemove",type="starling.events.Event")]
+
+	[DefaultProperty("dataProvider")]
 	/**
 	 * Displays a list of items divided into groups or sections. Takes a
 	 * hierarchical provider limited to two levels of hierarchy. This component
@@ -50,18 +94,77 @@ package feathers.controls
 	 * renderers to display a subset of the data provider instead of creating a
 	 * renderer for every single item. This allows for optimal performance with
 	 * very large data providers.</p>
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/grouped-list
 	 */
 	public class GroupedList extends FeathersControl
 	{
 		/**
 		 * @private
 		 */
-		private static const helperPoint:Point = new Point();
+		private static const HELPER_POINT:Point = new Point();
 
 		/**
 		 * The default value added to the <code>nameList</code> of the scroller.
 		 */
 		public static const DEFAULT_CHILD_NAME_SCROLLER:String = "feathers-list-scroller";
+
+		/**
+		 * An alternate name to use with GroupedList to allow a theme to give it
+		 * an inset style. If a theme does not provide a skin for this name, it
+		 * will fall back to its default style instead of leaving the list
+		 * unskinned.
+		 */
+		public static const ALTERNATE_NAME_INSET_GROUPED_LIST:String = "feathers-inset-grouped-list";
+
+		/**
+		 * The default name to use with header renderers.
+		 */
+		public static const DEFAULT_CHILD_NAME_HEADER_RENDERER:String = "feathers-grouped-list-header-renderer";
+
+		/**
+		 * An alternate name to use with header renderers to give them an inset
+		 * style.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_HEADER_RENDERER:String = "feathers-grouped-list-inset-header-renderer";
+
+		/**
+		 * The default name to use with footer renderers.
+		 */
+		public static const DEFAULT_CHILD_NAME_FOOTER_RENDERER:String = "feathers-grouped-list-footer-renderer";
+
+		/**
+		 * An alternate name to use with footer renderers to give them an inset
+		 * style.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_FOOTER_RENDERER:String = "feathers-grouped-list-inset-footer-renderer";
+
+		/**
+		 * An alternate name to use with item renderers to give them an inset
+		 * style.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_ITEM_RENDERER:String = "feathers-grouped-list-inset-item-renderer";
+
+		/**
+		 * An alternate name to use for item renderers to give them an inset
+		 * style. Typically meant to be used for the renderer of the first item
+		 * in a group.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_FIRST_ITEM_RENDERER:String = "feathers-grouped-list-inset-first-item-renderer";
+
+		/**
+		 * An alternate name to use for item renderers to give them an inset
+		 * style. Typically meant to be used for the renderer of the last item
+		 * in a group.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_LAST_ITEM_RENDERER:String = "feathers-grouped-list-inset-last-item-renderer";
+
+		/**
+		 * An alternate name to use for item renderers to give them an inset
+		 * style. Typically meant to be used for the renderer of an item in a
+		 * group that has no other items.
+		 */
+		public static const ALTERNATE_CHILD_NAME_INSET_SINGLE_ITEM_RENDERER:String = "feathers-grouped-list-inset-single-item-renderer";
 
 		/**
 		 * Constructor.
@@ -76,8 +179,7 @@ package feathers.controls
 		protected var scrollerName:String = DEFAULT_CHILD_NAME_SCROLLER;
 
 		/**
-		 * @private
-		 * The Scroller instance.
+		 * The grouped list's scroller sub-component.
 		 */
 		protected var scroller:Scroller;
 
@@ -100,12 +202,22 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected var _scrollToHorizontalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _scrollToVerticalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
 		protected var _scrollToIndexDuration:Number;
 
 		/**
 		 * @private
 		 */
-		private var _layout:ILayout;
+		protected var _layout:ILayout;
 
 		/**
 		 * The layout algorithm used to position and, optionally, size the
@@ -158,7 +270,7 @@ package feathers.controls
 			}
 			this._horizontalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
@@ -177,6 +289,20 @@ package feathers.controls
 		public function get maxHorizontalScrollPosition():Number
 		{
 			return this._maxHorizontalScrollPosition;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _horizontalPageIndex:int = 0;
+
+		/**
+		 * The index of the horizontal page, if snapping is enabled. If snapping
+		 * is disabled, the index will always be <code>0</code>.
+		 */
+		public function get horizontalPageIndex():int
+		{
+			return this._horizontalPageIndex;
 		}
 
 		/**
@@ -208,7 +334,7 @@ package feathers.controls
 			}
 			this._verticalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
@@ -228,6 +354,22 @@ package feathers.controls
 		public function get maxVerticalScrollPosition():Number
 		{
 			return this._maxVerticalScrollPosition;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _verticalPageIndex:int = 0;
+
+		/**
+		 * The index of the vertical page, if snapping is enabled. If snapping
+		 * is disabled, the index will always be <code>0</code>.
+		 *
+		 * @default 0
+		 */
+		public function get verticalPageIndex():int
+		{
+			return this._verticalPageIndex;
 		}
 
 		/**
@@ -254,12 +396,12 @@ package feathers.controls
 			}
 			if(this._dataProvider)
 			{
-				this._dataProvider.onReset.remove(dataProvider_onReset);
+				this._dataProvider.removeEventListener(CollectionEventType.RESET, dataProvider_resetHandler);
 			}
 			this._dataProvider = value;
 			if(this._dataProvider)
 			{
-				this._dataProvider.onReset.add(dataProvider_onReset);
+				this._dataProvider.addEventListener(CollectionEventType.RESET, dataProvider_resetHandler);
 			}
 
 			//reset the scroll position because this is a drastic change and
@@ -319,7 +461,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _selectedItemIndex:int = -1;
+		protected var _selectedItemIndex:int = -1;
 
 		/**
 		 * The item index of the currently selected item. Returns -1 if no item
@@ -364,33 +506,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _onChange:Signal = new Signal(GroupedList);
-
-		/**
-		 * Dispatched when the selected item changes.
-		 */
-		public function get onChange():ISignal
-		{
-			return this._onChange;
-		}
-
-		/**
-		 * @private
-		 */
-		protected var _onScroll:Signal = new Signal(GroupedList);
-
-		/**
-		 * Dispatched when the list is scrolled.
-		 */
-		public function get onScroll():ISignal
-		{
-			return this._onScroll;
-		}
-
-		/**
-		 * @private
-		 */
-		private var _scrollerProperties:PropertyProxy;
+		protected var _scrollerProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to the list's scroller
@@ -409,7 +525,7 @@ package feathers.controls
 		{
 			if(!this._scrollerProperties)
 			{
-				this._scrollerProperties = new PropertyProxy(scrollerProperties_onChange);
+				this._scrollerProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._scrollerProperties;
 		}
@@ -438,12 +554,12 @@ package feathers.controls
 			}
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.remove(scrollerProperties_onChange);
+				this._scrollerProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._scrollerProperties = PropertyProxy(value);
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.add(scrollerProperties_onChange);
+				this._scrollerProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -456,7 +572,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _backgroundSkin:DisplayObject;
+		protected var _backgroundSkin:DisplayObject;
 
 		/**
 		 * A display object displayed behind the item renderers.
@@ -492,7 +608,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _backgroundDisabledSkin:DisplayObject;
+		protected var _backgroundDisabledSkin:DisplayObject;
 
 		/**
 		 * A background to display when the list is disabled.
@@ -636,12 +752,19 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererType:Class = DefaultGroupedListItemRenderer;
+		protected var _itemRendererType:Class = DefaultGroupedListItemRenderer;
 
 		/**
 		 * The class used to instantiate item renderers.
 		 *
+		 * @see feathers.controls.renderer.IGroupedListItemRenderer
 		 * @see #itemRendererFactory
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
 		 */
 		public function get itemRendererType():Class
 		{
@@ -665,7 +788,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererFactory:Function;
+		protected var _itemRendererFactory:Function;
 
 		/**
 		 * A function called that is expected to return a new item renderer. Has
@@ -676,9 +799,16 @@ package feathers.controls
 		 *
 		 * <p>The function is expected to have the following signature:</p>
 		 *
-		 * <pre>function():IListItemRenderer</pre>
+		 * <pre>function():IGroupedListItemRenderer</pre>
 		 *
+		 * @see feathers.controls.renderers.IGroupedListItemRenderer
 		 * @see #itemRendererType
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
 		 */
 		public function get itemRendererFactory():Function
 		{
@@ -702,12 +832,11 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _typicalItem:Object = null;
+		protected var _typicalItem:Object = null;
 
 		/**
-		 * Used to auto-size the list. If the list's width or height is NaN, the
-		 * list will try to automatically pick an ideal size. This item is
-		 * used in that process to create a sample item renderer.
+		 * An item used to create a sample item renderer used for virtual layout
+		 * measurement.
 		 */
 		public function get typicalItem():Object
 		{
@@ -737,6 +866,9 @@ package feathers.controls
 		 * theme to provide different skins to different lists.
 		 *
 		 * @see feathers.core.FeathersControl#nameList
+		 * @see #firstItemRendererName
+		 * @see #lastItemRendererName
+		 * @see #singleItemRendererName
 		 */
 		public function get itemRendererName():String
 		{
@@ -759,7 +891,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererProperties:PropertyProxy;
+		protected var _itemRendererProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to all of the list's item
@@ -775,13 +907,14 @@ package feathers.controls
 		 * you can use the following syntax:</p>
 		 * <pre>list.scrollerProperties.&#64;verticalScrollBarProperties.&#64;thumbProperties.defaultSkin = new Image(texture);</pre>
 		 *
+		 * @see feathers.controls.renderers.IGroupedListItemRenderer
 		 * @see #itemRendererFactory
 		 */
 		public function get itemRendererProperties():Object
 		{
 			if(!this._itemRendererProperties)
 			{
-				this._itemRendererProperties = new PropertyProxy(itemRendererProperties_onChange);
+				this._itemRendererProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._itemRendererProperties;
 		}
@@ -810,12 +943,12 @@ package feathers.controls
 			}
 			if(this._itemRendererProperties)
 			{
-				this._itemRendererProperties.onChange.remove(itemRendererProperties_onChange);
+				this._itemRendererProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._itemRendererProperties = PropertyProxy(value);
 			if(this._itemRendererProperties)
 			{
-				this._itemRendererProperties.onChange.add(itemRendererProperties_onChange);
+				this._itemRendererProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -823,11 +956,364 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _headerRendererType:Class = DefaultGroupedListHeaderOrFooterRenderer;
+		protected var _firstItemRendererType:Class;
+
+		/**
+		 * The class used to instantiate the item renderer for the first item in
+		 * a group.
+		 *
+		 * @see feathers.controls.renderer.IGroupedListItemRenderer
+		 * @see #firstItemRendererFactory
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
+		 */
+		public function get firstItemRendererType():Class
+		{
+			return this._firstItemRendererType;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set firstItemRendererType(value:Class):void
+		{
+			if(this._firstItemRendererType == value)
+			{
+				return;
+			}
+
+			this._firstItemRendererType = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _firstItemRendererFactory:Function;
+
+		/**
+		 * A function called that is expected to return a new item renderer for
+		 * the first item in a group. Has a higher priority than
+		 * <code>firstItemRendererType</code>. Typically, you would use an
+		 * <code>firstItemRendererFactory</code> instead of an
+		 * <code>firstItemRendererType</code> if you wanted to initialize some
+		 * properties on each separate item renderer, such as skins.
+		 *
+		 * <p>The function is expected to have the following signature:</p>
+		 *
+		 * <pre>function():IGroupedListItemRenderer</pre>
+		 *
+		 * @see feathers.controls.renderers.IGroupedListItemRenderer
+		 * @see #firstItemRendererType
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
+		 */
+		public function get firstItemRendererFactory():Function
+		{
+			return this._firstItemRendererFactory;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set firstItemRendererFactory(value:Function):void
+		{
+			if(this._firstItemRendererFactory === value)
+			{
+				return;
+			}
+
+			this._firstItemRendererFactory = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _firstItemRendererName:String;
+
+		/**
+		 * A name to add to all item renderers in this list that are the first
+		 * item in a group. Typically used by a theme to provide different skins
+		 * to different lists, and to differentiate first items from regular
+		 * items if they are created with the same class. If this value is null
+		 * the regular <code>itemRendererName</code> will be used instead.
+		 *
+		 * @see feathers.core.FeathersControl#nameList
+		 * @see #itemRendererName
+		 * @see #lastItemRendererName
+		 * @see #singleItemRendererName
+		 */
+		public function get firstItemRendererName():String
+		{
+			return this._firstItemRendererName;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set firstItemRendererName(value:String):void
+		{
+			if(this._firstItemRendererName == value)
+			{
+				return;
+			}
+			this._firstItemRendererName = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _lastItemRendererType:Class;
+
+		/**
+		 * The class used to instantiate the item renderer for the last item in
+		 * a group.
+		 *
+		 * @see feathers.controls.renderer.IGroupedListItemRenderer
+		 * @see #lastItemRendererFactory
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
+		 */
+		public function get lastItemRendererType():Class
+		{
+			return this._lastItemRendererType;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set lastItemRendererType(value:Class):void
+		{
+			if(this._lastItemRendererType == value)
+			{
+				return;
+			}
+
+			this._lastItemRendererType = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _lastItemRendererFactory:Function;
+
+		/**
+		 * A function called that is expected to return a new item renderer for
+		 * the last item in a group. Has a higher priority than
+		 * <code>lastItemRendererType</code>. Typically, you would use an
+		 * <code>lastItemRendererFactory</code> instead of an
+		 * <code>lastItemRendererType</code> if you wanted to initialize some
+		 * properties on each separate item renderer, such as skins.
+		 *
+		 * <p>The function is expected to have the following signature:</p>
+		 *
+		 * <pre>function():IGroupedListItemRenderer</pre>
+		 *
+		 * @see feathers.controls.renderers.IGroupedListItemRenderer
+		 * @see #lastItemRendererType
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #singleItemRendererType
+		 * @see #singleItemRendererFactory
+		 */
+		public function get lastItemRendererFactory():Function
+		{
+			return this._lastItemRendererFactory;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set lastItemRendererFactory(value:Function):void
+		{
+			if(this._lastItemRendererFactory === value)
+			{
+				return;
+			}
+
+			this._lastItemRendererFactory = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _lastItemRendererName:String;
+
+		/**
+		 * A name to add to all item renderers in this list that are the last
+		 * item in a group. Typically used by a theme to provide different skins
+		 * to different lists, and to differentiate last items from regular
+		 * items if they are created with the same class. If this value is null
+		 * the regular <code>itemRendererName</code> will be used instead.
+		 *
+		 * @see feathers.core.FeathersControl#nameList
+		 * @see #itemRendererName
+		 * @see #firstItemRendererName
+		 * @see #singleItemRendererName
+		 */
+		public function get lastItemRendererName():String
+		{
+			return this._lastItemRendererName;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set lastItemRendererName(value:String):void
+		{
+			if(this._lastItemRendererName == value)
+			{
+				return;
+			}
+			this._lastItemRendererName = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _singleItemRendererType:Class;
+
+		/**
+		 * The class used to instantiate the item renderer for an item in a
+		 * group with no other items.
+		 *
+		 * @see feathers.controls.renderer.IGroupedListItemRenderer
+		 * @see #singleItemRendererFactory
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 */
+		public function get singleItemRendererType():Class
+		{
+			return this._singleItemRendererType;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set singleItemRendererType(value:Class):void
+		{
+			if(this._singleItemRendererType == value)
+			{
+				return;
+			}
+
+			this._singleItemRendererType = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _singleItemRendererFactory:Function;
+
+		/**
+		 * A function called that is expected to return a new item renderer for
+		 * an item in a group with no other items. Has a higher priority than
+		 * <code>singleItemRendererType</code>. Typically, you would use an
+		 * <code>singleItemRendererFactory</code> instead of an
+		 * <code>singleItemRendererType</code> if you wanted to initialize some
+		 * properties on each separate item renderer, such as skins.
+		 *
+		 * <p>The function is expected to have the following signature:</p>
+		 *
+		 * <pre>function():IGroupedListItemRenderer</pre>
+		 *
+		 * @see feathers.controls.renderers.IGroupedListItemRenderer
+		 * @see #singleItemRendererType
+		 * @see #itemRendererType
+		 * @see #itemRendererFactory
+		 * @see #firstItemRendererType
+		 * @see #firstItemRendererFactory
+		 * @see #lastItemRendererType
+		 * @see #lastItemRendererFactory
+		 */
+		public function get singleItemRendererFactory():Function
+		{
+			return this._singleItemRendererFactory;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set singleItemRendererFactory(value:Function):void
+		{
+			if(this._singleItemRendererFactory === value)
+			{
+				return;
+			}
+
+			this._singleItemRendererFactory = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _singleItemRendererName:String;
+
+		/**
+		 * A name to add to all item renderers in this list that are an item in
+		 * a group with no other items. Typically used by a theme to provide
+		 * different skins to different lists, and to differentiate single items
+		 * from other items if they are created with the same class. If this
+		 * value is null the regular <code>itemRendererName</code> will be used
+		 * instead.
+		 *
+		 * @see feathers.core.FeathersControl#nameList
+		 * @see #itemRendererName
+		 * @see #firstItemRendererName
+		 * @see #lastItemRendererName
+		 */
+		public function get singleItemRendererName():String
+		{
+			return this._singleItemRendererName;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set singleItemRendererName(value:String):void
+		{
+			if(this._singleItemRendererName == value)
+			{
+				return;
+			}
+			this._singleItemRendererName = value;
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _headerRendererType:Class = DefaultGroupedListHeaderOrFooterRenderer;
 
 		/**
 		 * The class used to instantiate header renderers.
 		 *
+		 * @see feathers.controls.renderers.IGroupedListHeaderOrFooterRenderer
 		 * @see #headerRendererFactory
 		 */
 		public function get headerRendererType():Class
@@ -852,7 +1338,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _headerRendererFactory:Function;
+		protected var _headerRendererFactory:Function;
 
 		/**
 		 * A function called that is expected to return a new header renderer.
@@ -866,6 +1352,7 @@ package feathers.controls
 		 *
 		 * <pre>function():IGroupedListHeaderOrFooterRenderer</pre>
 		 *
+		 * @see feathers.controls.renderers.IGroupedListHeaderOrFooterRenderer
 		 * @see #headerRendererType
 		 */
 		public function get headerRendererFactory():Function
@@ -890,7 +1377,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _typicalHeader:Object = null;
+		protected var _typicalHeader:Object = null;
 
 		/**
 		 * Used to auto-size the grouped list. If the list's width or height is
@@ -918,7 +1405,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _headerRendererName:String;
+		protected var _headerRendererName:String = DEFAULT_CHILD_NAME_HEADER_RENDERER;
 
 		/**
 		 * A name to add to all header renderers in this grouped list. Typically
@@ -947,7 +1434,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _headerRendererProperties:PropertyProxy;
+		protected var _headerRendererProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to all of the grouped
@@ -970,7 +1457,7 @@ package feathers.controls
 		{
 			if(!this._headerRendererProperties)
 			{
-				this._headerRendererProperties = new PropertyProxy(headerRendererProperties_onChange);
+				this._headerRendererProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._headerRendererProperties;
 		}
@@ -999,12 +1486,12 @@ package feathers.controls
 			}
 			if(this._headerRendererProperties)
 			{
-				this._headerRendererProperties.onChange.remove(headerRendererProperties_onChange);
+				this._headerRendererProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._headerRendererProperties = PropertyProxy(value);
 			if(this._headerRendererProperties)
 			{
-				this._headerRendererProperties.onChange.add(headerRendererProperties_onChange);
+				this._headerRendererProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -1012,11 +1499,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _footerRendererType:Class = DefaultGroupedListHeaderOrFooterRenderer;
+		protected var _footerRendererType:Class = DefaultGroupedListHeaderOrFooterRenderer;
 
 		/**
 		 * The class used to instantiate footer renderers.
 		 *
+		 * @see feathers.controls.renderers.IGroupedListHeaderOrFooterRenderer
 		 * @see #footerRendererFactory
 		 */
 		public function get footerRendererType():Class
@@ -1041,7 +1529,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _footerRendererFactory:Function;
+		protected var _footerRendererFactory:Function;
 
 		/**
 		 * A function called that is expected to return a new footer renderer.
@@ -1055,6 +1543,7 @@ package feathers.controls
 		 *
 		 * <pre>function():IGroupedListHeaderOrFooterRenderer</pre>
 		 *
+		 * @see feathers.controls.renderers.IGroupedListHeaderOrFooterRenderer
 		 * @see #footerRendererType
 		 */
 		public function get footerRendererFactory():Function
@@ -1079,7 +1568,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _typicalFooter:Object = null;
+		protected var _typicalFooter:Object = null;
 
 		/**
 		 * Used to auto-size the grouped list. If the grouped list's width or
@@ -1108,7 +1597,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _footerRendererName:String;
+		protected var _footerRendererName:String = DEFAULT_CHILD_NAME_FOOTER_RENDERER;
 
 		/**
 		 * A name to add to all footer renderers in this grouped list. Typically
@@ -1137,7 +1626,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _footerRendererProperties:PropertyProxy;
+		protected var _footerRendererProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to all of the grouped
@@ -1160,7 +1649,7 @@ package feathers.controls
 		{
 			if(!this._footerRendererProperties)
 			{
-				this._footerRendererProperties = new PropertyProxy(footerRendererProperties_onChange);
+				this._footerRendererProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._footerRendererProperties;
 		}
@@ -1189,12 +1678,12 @@ package feathers.controls
 			}
 			if(this._footerRendererProperties)
 			{
-				this._footerRendererProperties.onChange.remove(footerRendererProperties_onChange);
+				this._footerRendererProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._footerRendererProperties = PropertyProxy(value);
 			if(this._footerRendererProperties)
 			{
-				this._footerRendererProperties.onChange.add(footerRendererProperties_onChange);
+				this._footerRendererProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -1239,7 +1728,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _headerFunction:Function;
+		protected var _headerFunction:Function;
 
 		/**
 		 * A function used to generate header data for a specific group. If this
@@ -1312,7 +1801,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _footerFunction:Function;
+		protected var _footerFunction:Function;
 
 		/**
 		 * A function used to generate footer data for a specific group. If this
@@ -1356,6 +1845,8 @@ package feathers.controls
 			{
 				return;
 			}
+			this._scrollToHorizontalPageIndex = -1;
+			this._scrollToVerticalPageIndex = -1;
 			this._scrollToGroupIndex = groupIndex;
 			this._scrollToItemIndex = itemIndex;
 			this._scrollToIndexDuration = animationDuration;
@@ -1363,13 +1854,23 @@ package feathers.controls
 		}
 
 		/**
-		 * @private
+		 * Scrolls the list to a specific page, horizontally and vertically. If
+		 * <code>horizontalPageIndex</code> or <code>verticalPageIndex</code> is
+		 * -1, it will be ignored
 		 */
-		override public function dispose():void
+		public function scrollToPageIndex(horizontalPageIndex:int, verticalPageIndex:int, animationDuration:Number = 0):void
 		{
-			this._onChange.removeAll();
-			this._onScroll.removeAll();
-			super.dispose();
+			if(this._scrollToHorizontalPageIndex == horizontalPageIndex &&
+				this._scrollToVerticalPageIndex == verticalPageIndex)
+			{
+				return;
+			}
+			this._scrollToHorizontalPageIndex = horizontalPageIndex;
+			this._scrollToVerticalPageIndex = verticalPageIndex;
+			this._scrollToGroupIndex = -1;
+			this._scrollToItemIndex = -1;
+			this._scrollToIndexDuration = animationDuration;
+			this.invalidate(INVALIDATION_FLAG_SCROLL);
 		}
 
 		/**
@@ -1389,7 +1890,7 @@ package feathers.controls
 			this._selectedItemIndex = itemIndex;
 
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
-			this._onChange.dispatch(this);
+			this.dispatchEventWith(Event.CHANGE);
 		}
 
 		/**
@@ -1453,7 +1954,8 @@ package feathers.controls
 				this.scroller.nameList.add(this.scrollerName);
 				this.scroller.verticalScrollPolicy = Scroller.SCROLL_POLICY_AUTO;
 				this.scroller.horizontalScrollPolicy = Scroller.SCROLL_POLICY_AUTO;
-				this.scroller.onScroll.add(scroller_onScroll);
+				this.scroller.addEventListener(Event.SCROLL, scroller_scrollHandler);
+				this.scroller.addEventListener(FeathersEventType.SCROLL_COMPLETE, scroller_scrollCompleteHandler);
 				this.addChild(this.scroller);
 			}
 
@@ -1461,7 +1963,7 @@ package feathers.controls
 			{
 				this.dataViewPort = new GroupedListDataViewPort();
 				this.dataViewPort.owner = this;
-				this.dataViewPort.onChange.add(dataViewPort_onChange);
+				this.dataViewPort.addEventListener(Event.CHANGE, dataViewPort_changeHandler);
 				this.scroller.viewPort = this.dataViewPort;
 			}
 
@@ -1499,7 +2001,6 @@ package feathers.controls
 				this.refreshBackgroundSkin();
 			}
 
-			this.dataViewPort.isEnabled = this._isEnabled;
 			this.dataViewPort.isSelectable = this._isSelectable;
 			this.dataViewPort.setSelectedLocation(this._selectedGroupIndex, this._selectedItemIndex);
 			this.dataViewPort.dataProvider = this._dataProvider;
@@ -1509,6 +2010,18 @@ package feathers.controls
 			this.dataViewPort.itemRendererProperties = this._itemRendererProperties;
 			this.dataViewPort.itemRendererName = this._itemRendererName;
 			this.dataViewPort.typicalItem = this._typicalItem;
+
+			this.dataViewPort.firstItemRendererType = this._firstItemRendererType;
+			this.dataViewPort.firstItemRendererFactory = this._firstItemRendererFactory;
+			this.dataViewPort.firstItemRendererName = this._firstItemRendererName;
+
+			this.dataViewPort.lastItemRendererType = this._lastItemRendererType;
+			this.dataViewPort.lastItemRendererFactory = this._lastItemRendererFactory;
+			this.dataViewPort.lastItemRendererName = this._lastItemRendererName;
+
+			this.dataViewPort.singleItemRendererType = this._singleItemRendererType;
+			this.dataViewPort.singleItemRendererFactory = this._singleItemRendererFactory;
+			this.dataViewPort.singleItemRendererName = this._singleItemRendererName;
 
 			this.dataViewPort.headerRendererType = this._headerRendererType;
 			this.dataViewPort.headerRendererFactory = this._headerRendererFactory;
@@ -1556,10 +2069,13 @@ package feathers.controls
 
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
 
-			if((sizeInvalid || stylesInvalid) && this.currentBackgroundSkin)
+			if(sizeInvalid || stylesInvalid || stateInvalid)
 			{
-				this.currentBackgroundSkin.width = this.actualWidth;
-				this.currentBackgroundSkin.height = this.actualHeight;
+				if(this.currentBackgroundSkin)
+				{
+					this.currentBackgroundSkin.width = this.actualWidth;
+					this.currentBackgroundSkin.height = this.actualHeight;
+				}
 			}
 
 			this.scroller.validate();
@@ -1567,32 +2083,10 @@ package feathers.controls
 			this._maxVerticalScrollPosition = this.scroller.maxVerticalScrollPosition;
 			this._horizontalScrollPosition = this.scroller.horizontalScrollPosition;
 			this._verticalScrollPosition = this.scroller.verticalScrollPosition;
+			this._horizontalPageIndex = this.scroller.horizontalPageIndex;
+			this._verticalPageIndex = this.scroller.verticalPageIndex;
 
-			if(this._scrollToGroupIndex >= 0 && this._scrollToItemIndex >= 0)
-			{
-				const item:Object = this._dataProvider.getItemAt(this._scrollToGroupIndex, this._scrollToItemIndex);
-				if(item is Object)
-				{
-					this.dataViewPort.getScrollPositionForIndex(this._scrollToGroupIndex, this._scrollToItemIndex, helperPoint);
-
-					if(this._scrollToIndexDuration > 0)
-					{
-						this.scroller.throwTo(Math.max(0, Math.min(helperPoint.x, this._maxHorizontalScrollPosition)),
-							Math.max(0, Math.min(helperPoint.y, this._maxVerticalScrollPosition)), this._scrollToIndexDuration);
-					}
-					else
-					{
-						this.horizontalScrollPosition = Math.max(0, Math.min(helperPoint.x, this._maxHorizontalScrollPosition));
-						this.verticalScrollPosition = Math.max(0, Math.min(helperPoint.y, this._maxVerticalScrollPosition));
-					}
-				}
-				this._scrollToGroupIndex = -1;
-				this._scrollToItemIndex = -1;
-			}
-			if(this._dataProvider && this._dataProvider.getLength() > 0)
-			{
-				this.scroller.horizontalScrollStep = this.scroller.verticalScrollStep = this.dataViewPort.typicalItemHeight;
-			}
+			this.scroll();
 		}
 
 		/**
@@ -1664,7 +2158,42 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scrollerProperties_onChange(proxy:PropertyProxy, name:Object):void
+		protected function scroll():void
+		{
+			if(this._scrollToHorizontalPageIndex >= 0 || this._scrollToVerticalPageIndex >= 0)
+			{
+				this.scroller.throwToPage(this._scrollToHorizontalPageIndex, this._scrollToVerticalPageIndex, this._scrollToIndexDuration);
+				this._scrollToHorizontalPageIndex = -1;
+				this._scrollToVerticalPageIndex = -1;
+			}
+			else if(this._scrollToGroupIndex >= 0 && this._scrollToItemIndex >= 0)
+			{
+				const item:Object = this._dataProvider.getItemAt(this._scrollToGroupIndex, this._scrollToItemIndex);
+				if(item is Object)
+				{
+					this.dataViewPort.getScrollPositionForIndex(this._scrollToGroupIndex, this._scrollToItemIndex, HELPER_POINT);
+
+					if(this._scrollToIndexDuration > 0)
+					{
+						this.scroller.throwTo(Math.max(0, Math.min(HELPER_POINT.x, this._maxHorizontalScrollPosition)),
+							Math.max(0, Math.min(HELPER_POINT.y, this._maxVerticalScrollPosition)), this._scrollToIndexDuration);
+					}
+					else
+					{
+						this.horizontalScrollPosition = Math.max(0, Math.min(HELPER_POINT.x, this._maxHorizontalScrollPosition));
+						this.verticalScrollPosition = Math.max(0, Math.min(HELPER_POINT.y, this._maxVerticalScrollPosition));
+					}
+				}
+				this._scrollToGroupIndex = -1;
+				this._scrollToItemIndex = -1;
+			}
+		}
+
+
+		/**
+		 * @private
+		 */
+		protected function childProperties_onChange(proxy:PropertyProxy, name:String):void
 		{
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -1672,31 +2201,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function itemRendererProperties_onChange(proxy:PropertyProxy, name:Object):void
-		{
-			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected function headerRendererProperties_onChange(proxy:PropertyProxy, name:Object):void
-		{
-			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected function footerRendererProperties_onChange(proxy:PropertyProxy, name:Object):void
-		{
-			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected function dataProvider_onReset(collection:HierarchicalCollection):void
+		protected function dataProvider_resetHandler(event:Event):void
 		{
 			this.horizontalScrollPosition = 0;
 			this.verticalScrollPosition = 0;
@@ -1705,18 +2210,30 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scroller_onScroll(scroller:Scroller):void
+		protected function scroller_scrollHandler(event:Event):void
 		{
 			this._maxHorizontalScrollPosition = this.scroller.maxHorizontalScrollPosition;
 			this._maxVerticalScrollPosition = this.scroller.maxVerticalScrollPosition;
-			this.horizontalScrollPosition = this.scroller.horizontalScrollPosition;
-			this.verticalScrollPosition = this.scroller.verticalScrollPosition;
+			this._horizontalPageIndex = this.scroller.horizontalPageIndex;
+			this._verticalPageIndex = this.scroller.verticalPageIndex;
+			this._horizontalScrollPosition = this.scroller.horizontalScrollPosition;
+			this._verticalScrollPosition = this.scroller.verticalScrollPosition;
+			this.invalidate(INVALIDATION_FLAG_SCROLL);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
 		 * @private
 		 */
-		protected function dataViewPort_onChange(dataViewPort:GroupedListDataViewPort):void
+		protected function scroller_scrollCompleteHandler(event:Event):void
+		{
+			this.dispatchEventWith(FeathersEventType.SCROLL_COMPLETE);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function dataViewPort_changeHandler(event:Event):void
 		{
 			this.setSelectedLocation(this.dataViewPort.selectedGroupIndex, this.dataViewPort.selectedItemIndex);
 		}

@@ -24,29 +24,40 @@
  */
 package feathers.controls.popups
 {
+	import feathers.core.IFeathersControl;
+	import feathers.core.PopUpManager;
+	import feathers.events.FeathersEventType;
+
 	import flash.errors.IllegalOperationError;
 	import flash.events.KeyboardEvent;
 	import flash.ui.Keyboard;
 
-	import feathers.core.FeathersControl;
-	import feathers.core.PopUpManager;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
-
 	import starling.core.Starling;
 	import starling.display.DisplayObject;
+	import starling.events.Event;
+	import starling.events.EventDispatcher;
 	import starling.events.ResizeEvent;
 	import starling.events.Touch;
 	import starling.events.TouchEvent;
 	import starling.events.TouchPhase;
 
 	/**
+	 * @inheritDoc
+	 */
+	[Event(name="close",type="starling.events.Event")]
+
+	/**
 	 * Displays a pop-up at the center of the stage, filling the vertical space.
 	 * The content will be sized horizontally so that it is no larger than the
 	 * the width or height of the stage (whichever is smaller).
 	 */
-	public class VerticalCenteredPopUpContentManager implements IPopUpContentManager
+	public class VerticalCenteredPopUpContentManager extends EventDispatcher implements IPopUpContentManager
 	{
+		/**
+		 * @private
+		 */
+		private static const HELPER_TOUCHES_VECTOR:Vector.<Touch> = new <Touch>[];
+
 		/**
 		 * Constructor.
 		 */
@@ -89,19 +100,6 @@ package feathers.controls.popups
 		protected var touchPointID:int = -1;
 
 		/**
-		 * @private
-		 */
-		private var _onClose:Signal = new Signal(VerticalCenteredPopUpContentManager);
-
-		/**
-		 * @inheritDoc
-		 */
-		public function get onClose():ISignal
-		{
-			return this._onClose;
-		}
-
-		/**
 		 * @inheritDoc
 		 */
 		public function open(content:DisplayObject, source:DisplayObject):void
@@ -113,10 +111,10 @@ package feathers.controls.popups
 
 			this.content = content;
 			PopUpManager.addPopUp(this.content, true, false);
-			if(this.content is FeathersControl)
+			if(this.content is IFeathersControl)
 			{
-				const uiContent:FeathersControl = FeathersControl(this.content);
-				uiContent.onResize.add(content_resizeHandler);
+				const uiContent:IFeathersControl = IFeathersControl(this.content);
+				this.content.addEventListener(FeathersEventType.RESIZE, content_resizeHandler);
 			}
 			this.layout();
 			Starling.current.stage.addEventListener(TouchEvent.TOUCH, stage_touchHandler);
@@ -136,13 +134,13 @@ package feathers.controls.popups
 			Starling.current.stage.removeEventListener(TouchEvent.TOUCH, stage_touchHandler);
 			Starling.current.stage.removeEventListener(ResizeEvent.RESIZE, stage_resizeHandler);
 			Starling.current.nativeStage.removeEventListener(KeyboardEvent.KEY_DOWN, stage_keyDownHandler);
-			if(this.content is FeathersControl)
+			if(this.content is IFeathersControl)
 			{
-				FeathersControl(this.content).onResize.remove(content_resizeHandler);
+				this.content.removeEventListener(FeathersEventType.RESIZE, content_resizeHandler);
 			}
 			PopUpManager.removePopUp(this.content);
 			this.content = null;
-			this._onClose.dispatch(this);
+			this.dispatchEventWith(Event.CLOSE);
 		}
 
 		/**
@@ -151,7 +149,6 @@ package feathers.controls.popups
 		public function dispose():void
 		{
 			this.close();
-			this._onClose.removeAll();
 		}
 
 		/**
@@ -161,9 +158,9 @@ package feathers.controls.popups
 		{
 			const maxWidth:Number = Math.min(Starling.current.stage.stageWidth, Starling.current.stage.stageHeight) - this.marginLeft - this.marginRight;
 			const maxHeight:Number = Starling.current.stage.stageHeight - this.marginTop - this.marginBottom;
-			if(this.content is FeathersControl)
+			if(this.content is IFeathersControl)
 			{
-				const uiContent:FeathersControl = FeathersControl(this.content);
+				const uiContent:IFeathersControl = IFeathersControl(this.content);
 				uiContent.minWidth = uiContent.maxWidth = maxWidth;
 				uiContent.maxHeight = maxHeight;
 				uiContent.validate();
@@ -190,7 +187,7 @@ package feathers.controls.popups
 		/**
 		 * @private
 		 */
-		protected function content_resizeHandler(content:FeathersControl, oldWidth:Number, oldHeight:Number):void
+		protected function content_resizeHandler(event:Event):void
 		{
 			this.layout();
 		}
@@ -228,7 +225,7 @@ package feathers.controls.popups
 			{
 				return;
 			}
-			const touches:Vector.<Touch> = event.getTouches(Starling.current.stage);
+			const touches:Vector.<Touch> = event.getTouches(Starling.current.stage, null, HELPER_TOUCHES_VECTOR);
 			if(touches.length == 0)
 			{
 				return;
@@ -246,13 +243,13 @@ package feathers.controls.popups
 				}
 				if(!touch)
 				{
+					HELPER_TOUCHES_VECTOR.length = 0;
 					return;
 				}
 				if(touch.phase == TouchPhase.ENDED)
 				{
 					this.touchPointID = -1;
 					this.close();
-					return;
 				}
 			}
 			else
@@ -262,10 +259,11 @@ package feathers.controls.popups
 					if(touch.phase == TouchPhase.BEGAN)
 					{
 						this.touchPointID = touch.id;
-						return;
+						break;
 					}
 				}
 			}
+			HELPER_TOUCHES_VECTOR.length = 0;
 		}
 
 

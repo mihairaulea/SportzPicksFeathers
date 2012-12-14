@@ -24,12 +24,17 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 package feathers.core
 {
-	import org.osflash.signals.ISignal;
+	/**
+	 * Dispatched when the selection changes.
+	 *
+	 * @eventType starling.events.Event.CHANGE
+	 */
+	[Event(name="change",type="starling.events.Event")]
 
 	/**
 	 * An interface for something that may be selected.
 	 */
-	public interface IToggle
+	public interface IToggle extends IFeathersControl
 	{
 		/**
 		 * Indicates if the IToggle is selected or not.
@@ -40,10 +45,5 @@ package feathers.core
 		 * @private
 		 */
 		function set isSelected(value:Boolean):void;
-		
-		/**
-		 * Dispatched when the selection changes.
-		 */
-		function get onChange():ISignal;
 	}
 }

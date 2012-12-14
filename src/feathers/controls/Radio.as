@@ -24,9 +24,10 @@
  */
 package feathers.controls
 {
-	import flash.errors.IllegalOperationError;
-
+	import feathers.core.IGroupedToggle;
 	import feathers.core.ToggleGroup;
+
+	import flash.errors.IllegalOperationError;
 
 	import starling.events.Event;
 
@@ -36,9 +37,10 @@ package feathers.controls
 	 * A toggleable control that exists in a set that requires a single,
 	 * exclusive toggled item.
 	 *
+	 * @see http://wiki.starling-framework.org/feathers/radio
 	 * @see feathers.core.ToggleGroup
 	 */
-	public class Radio extends Button
+	public class Radio extends Button implements IGroupedToggle
 	{
 		/**
 		 * If a <code>Radio</code> has not been added to a <code>ToggleGroup</code>,

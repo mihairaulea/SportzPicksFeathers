@@ -5,13 +5,19 @@ package view.screens
 	 * @author Mihai Raulea
 	 */
 	
+	import starling.display.Image;
+	 
+	import feathers.controls.ImageLoader;
 	import feathers.controls.Screen;
-	import feathers.display.Image;
+	import feathers.core.ITextRenderer;
+	import feathers.display.Scale3Image;
+	//import feathers.display.Image;
+	import flash.text.TextRenderer;
 	import starling.events.Event;
 	import starling.events.TouchEvent;
 	
 	import feathers.controls.Screen;
-	import feathers.controls.ScreenHeader;
+	//import feathers.controls.ScreenHeader;
 	import feathers.controls.Button;
 	import feathers.controls.text.TextFieldTextRenderer;
 	import feathers.system.DeviceCapabilities;
@@ -30,7 +36,9 @@ package view.screens
 		private static const helveticaNeue:Class;
 		
 		//assets
+		
 		private var logoImg:Image;
+		
 		private var textFormatHowConnect:TextFormat;
 		private var textFormatFacebookLabel:TextFormat;
 		private var textFormatEmailLabel:TextFormat;
@@ -38,6 +46,7 @@ package view.screens
 		private var facebookButton:Button = new Button();
 		private var emailButton:Button ;
 		private var shadow:Image;
+		
 		
 		public function WelcomeScreen() 
 		{
@@ -53,18 +62,22 @@ package view.screens
 		
 		override protected function initialize():void
 		{			
-			logoImg = new Image( Assets.getAssetsTexture("logo"));
+			logoImg = new Image(Assets.getAssetsTexture("logo"));
 			addChild(logoImg);			
 			
 			textFormatHowConnect = new TextFormat("HelveticaNeueLTCom-BdCn" , 16 , 0xFFFFFF, true);
 			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
+			textFormatFacebookLabel.align = "left";
 			textFormatEmailLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 12, 0x808080, true);
+			textFormatEmailLabel.align = "left";
 			
 			addChild(howConnectText);
 			howConnectText.textFormat = textFormatHowConnect;
 			howConnectText.embedFonts = true;
 			howConnectText.validate();
 			
+			
+			facebookButton.defaultSkin = new ImageLoader();
 			facebookButton.defaultSkin = new Image(Assets.getAssetsTexture("facebook_btn"));
 			facebookButton.downSkin = new Image(Assets.getAssetsTexture("facebook_btn_press"));
 			//facebookButton.label = "With facebook";
@@ -81,12 +94,14 @@ package view.screens
 						
 			shadow = new Image(Assets.getAssetsTexture("shadow"));
 			addChild(shadow);
+			
 		}
 		
 		
 		//override 
 		override protected function draw():void
-		{							
+		{			
+			
 			//logo
 			logoImg.x = this.actualWidth - logoImg.width >> 1;
 			
@@ -95,6 +110,7 @@ package view.screens
 			howConnectText.text = "How would you like to connect?";
 			
 			facebookButton.label = "With facebook";
+			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
 			facebookButton.y = 190;//howConnectText.y + howConnectText.height;
@@ -104,18 +120,41 @@ package view.screens
 
 			emailButton.x = this.actualWidth - emailButton.width >> 1;
 			emailButton.y = facebookButton.y + facebookButton.height;
+			emailButton.labelFactory = getEmailTextRenderer;
 			emailButton.label = "With your Email address";
 			
 			shadow.x = this.actualWidth - shadow.width >> 1;
-			shadow.y = emailButton.y + emailButton.height + 10;			
+			shadow.y = emailButton.y + emailButton.height + 10;		
+			
+		}
+		
+
+		private function getFacebookTextRenderer():ITextRenderer
+		{
+			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			
+			facebookLabel.textFormat = textFormatFacebookLabel;
+			facebookLabel.embedFonts = true;
+			
+			return facebookLabel;
+		}
+		
+		private function getEmailTextRenderer():ITextRenderer
+		{
+			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			
+			facebookLabel.textFormat = textFormatEmailLabel;
+			facebookLabel.embedFonts = true;
+			
+			return facebookLabel;
 		}
 		
 		private function triggerSignalOnButtonRelease(button:Button, event:String):void
 		{
-			button.onRelease.add(function(button:Button):void
+			button.addEventListener( Event.TRIGGERED,(function(e:Event):void
 			{
 				dispatchEvent(new Event(event));
-			});
+			}));
 
 		}
 		

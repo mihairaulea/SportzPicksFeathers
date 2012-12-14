@@ -27,9 +27,6 @@ package feathers.core
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
 
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
-
 	/**
 	 * Detects when its own properties have changed and dispatches a signal
 	 * to notify listeners.
@@ -39,11 +36,14 @@ package feathers.core
 	 * is like saying, "If this nested <code>PropertyProxy</code> doesn't exist
 	 * yet, create one. If it does, use the existing one."</p>
 	 */
-	public dynamic class PropertyProxy extends Proxy
+	public final dynamic class PropertyProxy extends Proxy
 	{
-		public static function fromObject(source:Object, onChangeListener:Function = null):PropertyProxy
+		/**
+		 * Creates a <code>PropertyProxy</code> from a regular old <code>Object</code>.
+		 */
+		public static function fromObject(source:Object, onChangeCallback:Function = null):PropertyProxy
 		{
-			const newValue:PropertyProxy = new PropertyProxy(onChangeListener);
+			const newValue:PropertyProxy = new PropertyProxy(onChangeCallback);
 			for(var propertyName:String in source)
 			{
 				newValue[propertyName] = source[propertyName];
@@ -54,13 +54,23 @@ package feathers.core
 		/**
 		 * Constructor.
 		 */
-		public function PropertyProxy(onChange:Function = null)
+		public function PropertyProxy(onChangeCallback:Function = null)
 		{
-			if(onChange != null)
+			if(onChangeCallback != null)
 			{
-				this._onChange.add(onChange);
+				this._onChangeCallbacks.push(onChangeCallback);
 			}
 		}
+
+		/**
+		 * @private
+		 */
+		private var _subProxyName:String;
+
+		/**
+		 * @private
+		 */
+		private var _onChangeCallbacks:Vector.<Function> = new <Function>[];
 
 		/**
 		 * @private
@@ -71,22 +81,6 @@ package feathers.core
 		 * @private
 		 */
 		private var _storage:Object = {};
-
-		/**
-		 * @private
-		 */
-		private var _onChange:Signal = new Signal(PropertyProxy, Object);
-
-		/**
-		 * Dispatched when a property changes.
-		 *
-		 * <p>Listeners are expected to have the following function signature:</p>
-		 * <pre>function(proxy:PropertyProxy, propertyName:String):void</pre>
-		 */
-		public function get onChange():ISignal
-		{
-			return this._onChange;
-		}
 
 		/**
 		 * @private
@@ -106,9 +100,11 @@ package feathers.core
 				const nameAsString:String = name is QName ? QName(name).localName : name.toString();
 				if(!this._storage.hasOwnProperty(nameAsString))
 				{
-					this._storage[nameAsString] = new PropertyProxy();
+					const subProxy:PropertyProxy = new PropertyProxy(subProxy_onChange);
+					subProxy._subProxyName = nameAsString;
+					this._storage[nameAsString] = subProxy;
 					this._names.push(nameAsString);
-					this._onChange.dispatch(this, nameAsString);
+					this.fireOnChangeCallback(nameAsString);
 				}
 				return this._storage[nameAsString];
 			}
@@ -125,7 +121,7 @@ package feathers.core
 			{
 				this._names.push(name);
 			}
-			this._onChange.dispatch(this, name);
+			this.fireOnChangeCallback(name);
 		}
 
 		/**
@@ -141,7 +137,7 @@ package feathers.core
 			const result:Boolean = delete this._storage[name];
 			if(result)
 			{
-				this._onChange.dispatch(this, name);
+				this.fireOnChangeCallback(name);
 			}
 			return result;
 		}
@@ -173,6 +169,47 @@ package feathers.core
 		{
 			const name:* = this._names[index - 1];
 			return this._storage[name];
+		}
+
+		/**
+		 * Adds a callback to react to property changes.
+		 */
+		public function addOnChangeCallback(callback:Function):void
+		{
+			this._onChangeCallbacks.push(callback);
+		}
+
+		/**
+		 * Removes a callback.
+		 */
+		public function removeOnChangeCallback(callback:Function):void
+		{
+			const index:int = this._onChangeCallbacks.indexOf(callback);
+			if(index >= 0)
+			{
+				this._onChangeCallbacks.splice(index, 1);
+			}
+		}
+
+		/**
+		 * @private
+		 */
+		private function fireOnChangeCallback(forName:String):void
+		{
+			const callbackCount:int = this._onChangeCallbacks.length;
+			for(var i:int = 0; i < callbackCount; i++)
+			{
+				var callback:Function = this._onChangeCallbacks[i] as Function;
+				callback(this, forName);
+			}
+		}
+
+		/**
+		 * @private
+		 */
+		private function subProxy_onChange(proxy:PropertyProxy, name:String):void
+		{
+			this.fireOnChangeCallback(proxy._subProxyName);
 		}
 	}
 }

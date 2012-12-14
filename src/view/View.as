@@ -51,7 +51,22 @@ package view
 			
 			) );
 			
+			
 			this.navigator.addScreen(EMAIL_SIGNUP_SCREEN, new ScreenNavigatorItem(new EmailSignupScreen(),
+			{
+				EmailValidated: LOBBY_SCREEN
+			}
+			
+			) );
+			
+			this.navigator.addScreen(LOBBY_SCREEN, new ScreenNavigatorItem(new LobbyScreen(),
+			{
+				onChallengerSelected: HEAD_TO_HEAD_SCREEN
+			}
+			
+			) );
+			
+			this.navigator.addScreen(HEAD_TO_HEAD_SCREEN, new ScreenNavigatorItem(new HeadToHeadScreen(),
 			{
 				onEmailValidated: LOBBY_SCREEN
 			}
@@ -60,9 +75,10 @@ package view
 			
 			this.navigator.showScreen(WELCOME_SCREEN);
 			
+			
 			this.transitionManager = new ScreenSlidingStackTransitionManager(navigator);
-			this.transitionManager.duration = 0.4;
-			this.transitionManager.ease = Cubic.easeOut;
+			//this.transitionManager.duration = 0.4;
+			//this.transitionManager.ease = Cubic.easeOut;
 		}		
 		
 	}

@@ -24,18 +24,20 @@
  */
 package feathers.motion.transitions
 {
-	import com.gskinner.motion.easing.Sine;
-
 	import feathers.controls.ScreenNavigator;
 	import feathers.controls.TabBar;
-	import feathers.motion.GTween;
 
+	import starling.animation.Transitions;
+	import starling.animation.Tween;
+	import starling.core.Starling;
 	import starling.display.DisplayObject;
+	import starling.events.Event;
 
 	/**
 	 * Slides new screens from the left or right depending on the old and new
 	 * selected index values of a TabBar control.
 	 *
+	 * @see feathers.controls.ScreenNavigator
 	 * @see feathers.controls.TabBar
 	 */
 	public class TabBarSlideTransitionManager
@@ -49,39 +51,90 @@ package feathers.motion.transitions
 			{
 				throw new ArgumentError("ScreenNavigator cannot be null.");
 			}
-			this._navigator = navigator;
-			this._tabBar = tabBar;
+			this.navigator = navigator;
+			this.tabBar = tabBar;
 			this._oldIndex = tabBar.selectedIndex;
-			this._tabBar.onChange.add(tabBar_onChange);
-			this._navigator.transition = this.onTransition;
+			this.tabBar.addEventListener(Event.CHANGE, tabBar_changeHandler);
+			this.navigator.transition = this.onTransition;
 		}
 
-		private var _navigator:ScreenNavigator;
-		private var _tabBar:TabBar;
-		private var _activeTransition:GTween;
-		private var _savedCompleteHandler:Function;
-
-		private var _oldScreen:DisplayObject;
-		private var _newScreen:DisplayObject;
-		private var _oldIndex:int;
-		private var _isFromRight:Boolean = true;
-		private var _isWaitingOnTabBarChange:Boolean = true;
-		private var _isWaitingOnTransitionChange:Boolean = true;
+		/**
+		 * The <code>ScreenNavigator</code> being managed.
+		 */
+		protected var navigator:ScreenNavigator;
 
 		/**
-		 * The duration of the transition.
+		 * The <code>TabBar</code> that controls the navigation.
 		 */
-		public var duration:Number = 0.25;
-
-		/**
-		 * The GTween easing function to use.
-		 */
-		public var ease:Function = Sine.easeOut;
+		protected var tabBar:TabBar;
 
 		/**
 		 * @private
 		 */
-		private function onTransition(oldScreen:DisplayObject, newScreen:DisplayObject, onComplete:Function):void
+		protected var _activeTransition:Tween;
+
+		/**
+		 * @private
+		 */
+		protected var _savedOtherTarget:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _savedCompleteHandler:Function;
+
+		/**
+		 * @private
+		 */
+		protected var _oldScreen:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _newScreen:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _oldIndex:int;
+
+		/**
+		 * @private
+		 */
+		protected var _isFromRight:Boolean = true;
+
+		/**
+		 * @private
+		 */
+		protected var _isWaitingOnTabBarChange:Boolean = true;
+
+		/**
+		 * @private
+		 */
+		protected var _isWaitingOnTransitionChange:Boolean = true;
+
+		/**
+		 * The duration of the transition, measured in seconds.
+		 */
+		public var duration:Number = 0.25;
+
+		/**
+		 * A delay before the transition starts, measured in seconds. This may
+		 * be required on low-end systems that will slow down for a short time
+		 * after heavy texture uploads.
+		 */
+		public var delay:Number = 0.1;
+
+		/**
+		 * The easing function to use.
+		 */
+		public var ease:Object = Transitions.EASE_OUT;
+
+		/**
+		 * The function passed to the <code>transition</code> property of the
+		 * <code>ScreenNavigator</code>.
+		 */
+		protected function onTransition(oldScreen:DisplayObject, newScreen:DisplayObject, onComplete:Function):void
 		{
 			this._oldScreen = oldScreen;
 			this._newScreen = newScreen;
@@ -100,11 +153,12 @@ package feathers.motion.transitions
 		/**
 		 * @private
 		 */
-		private function transitionNow():void
+		protected function transitionNow():void
 		{
 			if(this._activeTransition)
 			{
-				this._activeTransition.paused = true;
+				this._savedOtherTarget  = null;
+				Starling.juggler.remove(this._activeTransition);
 				this._activeTransition = null;
 			}
 
@@ -126,27 +180,24 @@ package feathers.motion.transitions
 			}
 
 			this._oldScreen.x = 0;
-			var activeTransition_onChange:Function;
+			var activeTransition_onUpdate:Function;
 			if(this._isFromRight)
 			{
-				this._newScreen.x = this._navigator.width;
-				activeTransition_onChange = this.activeTransitionFromRight_onChange;
+				this._newScreen.x = this.navigator.width;
+				activeTransition_onUpdate = this.activeTransitionFromRight_onUpdate;
 			}
 			else
 			{
-				this._newScreen.x = -this._navigator.width;
-				activeTransition_onChange = this.activeTransitionFromLeft_onChange;
+				this._newScreen.x = -this.navigator.width;
+				activeTransition_onUpdate = this.activeTransitionFromLeft_onUpdate;
 			}
-			this._activeTransition = new GTween(this._newScreen, this.duration,
-			{
-				x: 0
-			},
-			{
-				data: this._oldScreen,
-				ease: this.ease,
-				onChange: activeTransition_onChange,
-				onComplete: activeTransition_onComplete
-			});
+			this._savedOtherTarget = this._oldScreen;
+			this._activeTransition = new Tween(this._newScreen, this.duration, this.ease);
+			this._activeTransition.animate("x", 0);
+			this._activeTransition.delay = this.delay;
+			this._activeTransition.onUpdate = activeTransition_onUpdate;
+			this._activeTransition.onComplete = activeTransition_onComplete;
+			Starling.juggler.add(this._activeTransition);
 
 			this._oldScreen = null;
 			this._newScreen = null;
@@ -157,28 +208,33 @@ package feathers.motion.transitions
 		/**
 		 * @private
 		 */
-		private function activeTransitionFromRight_onChange(tween:GTween):void
+		protected function activeTransitionFromRight_onUpdate():void
 		{
-			var newScreen:DisplayObject = DisplayObject(tween.target);
-			var oldScreen:DisplayObject = DisplayObject(tween.data);
-			oldScreen.x = newScreen.x - this._navigator.width;
+			if(this._savedOtherTarget)
+			{
+				const newScreen:DisplayObject = DisplayObject(this._activeTransition.target);
+				this._savedOtherTarget.x = newScreen.x - this.navigator.width;
+			}
 		}
 
 		/**
 		 * @private
 		 */
-		private function activeTransitionFromLeft_onChange(tween:GTween):void
+		protected function activeTransitionFromLeft_onUpdate():void
 		{
-			var newScreen:DisplayObject = DisplayObject(tween.target);
-			var oldScreen:DisplayObject = DisplayObject(tween.data);
-			oldScreen.x = newScreen.x + this._navigator.width;
+			if(this._savedOtherTarget)
+			{
+				const newScreen:DisplayObject = DisplayObject(this._activeTransition.target);
+				this._savedOtherTarget.x = newScreen.x + this.navigator.width;
+			}
 		}
 
 		/**
 		 * @private
 		 */
-		private function activeTransition_onComplete(tween:GTween):void
+		protected function activeTransition_onComplete():void
 		{
+			this._savedOtherTarget = null;
 			this._activeTransition = null;
 			if(this._savedCompleteHandler != null)
 			{
@@ -189,9 +245,9 @@ package feathers.motion.transitions
 		/**
 		 * @private
 		 */
-		private function tabBar_onChange(tabBar:TabBar):void
+		protected function tabBar_changeHandler(event:Event):void
 		{
-			var newIndex:int = tabBar.selectedIndex;
+			var newIndex:int = this.tabBar.selectedIndex;
 			this._isFromRight = newIndex > this._oldIndex;
 			this._oldIndex = newIndex;
 

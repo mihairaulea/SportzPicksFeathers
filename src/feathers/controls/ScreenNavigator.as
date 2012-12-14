@@ -24,32 +24,88 @@
  */
 package feathers.controls
 {
+	import feathers.core.FeathersControl;
+	import feathers.events.FeathersEventType;
+
 	import flash.errors.IllegalOperationError;
 	import flash.geom.Rectangle;
-
-	import feathers.core.FeathersControl;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
+	import flash.utils.getDefinitionByName;
 
 	import starling.display.DisplayObject;
 	import starling.events.Event;
 	import starling.events.ResizeEvent;
 
 	/**
+	 * Dispatched when the active screen changes.
+	 *
+	 * @eventType starling.events.Event.CHANGE
+	 */
+	[Event(name="change",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the current screen is removed and there is no active
+	 * screen.
+	 *
+	 * @eventType feathers.events.FeathersEventType.CLEAR
+	 */
+	[Event(name="clear",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the transition between screens begins.
+	 *
+	 * @eventType feathers.events.FeathersEventType.TRANSITION_START
+	 */
+	[Event(name="transitionStart",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the transition between screens has completed.
+	 *
+	 * @eventType feathers.events.FeathersEventType.TRANSITION_COMPLETE
+	 */
+	[Event(name="transitionComplete",type="starling.events.Event")]
+
+	/**
 	 * A "view stack"-like container that supports navigation between screens
 	 * (any display object) through events.
 	 *
+	 * @see http://wiki.starling-framework.org/feathers/screen-navigator
+	 * @see http://wiki.starling-framework.org/feathers/transitions
 	 * @see feathers.controls.ScreenNavigatorItem
 	 * @see feathers.controls.Screen
 	 */
 	public class ScreenNavigator extends FeathersControl
 	{
 		/**
+		 * @private
+		 */
+		protected static var SIGNAL_TYPE:Class;
+
+		/**
+		 * The default transition function.
+		 */
+		protected static function defaultTransition(oldScreen:DisplayObject, newScreen:DisplayObject, completeHandler:Function):void
+		{
+			//in short, do nothing
+			completeHandler();
+		}
+
+		/**
 		 * Constructor.
 		 */
 		public function ScreenNavigator()
 		{
 			super();
+			if(!SIGNAL_TYPE)
+			{
+				try
+				{
+					SIGNAL_TYPE = Class(getDefinitionByName("org.osflash.signals.ISignal"));
+				}
+				catch(error:Error)
+				{
+					//signals not being used
+				}
+			}
 			this.addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 			this.addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
@@ -57,7 +113,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _activeScreenID:String;
+		protected var _activeScreenID:String;
 
 		/**
 		 * The string identifier for the currently active screen.
@@ -70,7 +126,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _activeScreen:DisplayObject;
+		protected var _activeScreen:DisplayObject;
 
 		/**
 		 * A reference to the currently active screen.
@@ -83,7 +139,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _clipContent:Boolean = false;
+		protected var _clipContent:Boolean = false;
 
 		/**
 		 * Determines if the navigator's content should be clipped to the width
@@ -113,48 +169,40 @@ package feathers.controls
 		 */
 		public var transition:Function = defaultTransition;
 
-		private var _screens:Object = {};
-		private var _screenEvents:Object = {};
-
 		/**
-		 * The identifier of the "default" screen.
-		 *
-		 * @see #showDefaultScreen()
+		 * @private
 		 */
-		public var defaultScreenID:String;
-
-		private var _transitionIsActive:Boolean = false;
-		private var _previousScreenInTransitionID:String;
-		private var _previousScreenInTransition:DisplayObject;
-		private var _nextScreenID:String = null;
-		private var _clearAfterTransition:Boolean = false;
+		protected var _screens:Object = {};
 
 		/**
 		 * @private
 		 */
-		private var _onChange:Signal = new Signal(ScreenNavigator);
-
-		/**
-		 * Dispatched when the active screen changes.
-		 */
-		public function get onChange():ISignal
-		{
-			return this._onChange;
-		}
+		protected var _screenEvents:Object = {};
 
 		/**
 		 * @private
 		 */
-		private var _onClear:Signal = new Signal(ScreenNavigator);
+		protected var _transitionIsActive:Boolean = false;
 
 		/**
-		 * Dispatched when the current screen is removed and there is no active
-		 * screen.
+		 * @private
 		 */
-		public function get onClear():ISignal
-		{
-			return this._onClear;
-		}
+		protected var _previousScreenInTransitionID:String;
+
+		/**
+		 * @private
+		 */
+		protected var _previousScreenInTransition:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _nextScreenID:String = null;
+
+		/**
+		 * @private
+		 */
+		protected var _clearAfterTransition:Boolean = false;
 
 		/**
 		 * Displays a screen and returns a reference to it. If a previous
@@ -189,13 +237,19 @@ package feathers.controls
 
 			const item:ScreenNavigatorItem = ScreenNavigatorItem(this._screens[id]);
 			this._activeScreen = item.getScreen();
+			if(this._activeScreen is IScreen)
+			{
+				const screen:IScreen = IScreen(this._activeScreen);
+				screen.screenID = id;
+				screen.owner = this;
+			}
 			this._activeScreenID = id;
 
 			const events:Object = item.events;
 			const savedScreenEvents:Object = {};
 			for(var eventName:String in events)
 			{
-				var signal:ISignal = this._activeScreen.hasOwnProperty(eventName) ? (this._activeScreen[eventName] as ISignal) : null;
+				var signal:Object = this._activeScreen.hasOwnProperty(eventName) ? (this._activeScreen[eventName] as SIGNAL_TYPE) : null;
 				var eventAction:Object = events[eventName];
 				if(eventAction is Function)
 				{
@@ -210,13 +264,14 @@ package feathers.controls
 				}
 				else if(eventAction is String)
 				{
-					var eventListener:Function = this.createScreenListener(eventAction as String);
 					if(signal)
 					{
+						var eventListener:Function = this.createScreenSignalListener(eventAction as String, signal);
 						signal.add(eventListener);
 					}
 					else
 					{
+						eventListener = this.createScreenEventListener(eventAction as String);
 						this._activeScreen.addEventListener(eventName, eventListener);
 					}
 					savedScreenEvents[eventName] = eventListener;
@@ -231,26 +286,20 @@ package feathers.controls
 
 			this.addChild(this._activeScreen);
 
+			this.invalidate(INVALIDATION_FLAG_SELECTED);
+			if(!VALIDATION_QUEUE.isValidating)
+			{
+				//force a COMPLETE validation of everything
+				//but only if we're not already doing that...
+				VALIDATION_QUEUE.advanceTime(0);
+			}
+
 			this._transitionIsActive = true;
+			this.dispatchEventWith(FeathersEventType.TRANSITION_START);
 			this.transition(this._previousScreenInTransition, this._activeScreen, transitionComplete);
 
-			this.invalidate(INVALIDATION_FLAG_SELECTED);
-			this._onChange.dispatch(this);
+			this.dispatchEventWith(Event.CHANGE);
 			return this._activeScreen;
-		}
-
-		/**
-		 * Shows the "default" screen.
-		 *
-		 * @see #defaultScreenID
-		 */
-		public function showDefaultScreen():DisplayObject
-		{
-			if(!this.defaultScreenID)
-			{
-				throw new IllegalOperationError("Cannot show default screen because the default screen ID has not been defined.");
-			}
-			return this.showScreen(this.defaultScreenID);
 		}
 
 		/**
@@ -267,13 +316,13 @@ package feathers.controls
 			}
 
 			this.clearScreenInternal(true);
-			this._onClear.dispatch(this);
+			this.dispatchEventWith(FeathersEventType.CLEAR);
 		}
 
 		/**
 		 * @private
 		 */
-		private function clearScreenInternal(displayTransition:Boolean):void
+		protected function clearScreenInternal(displayTransition:Boolean):void
 		{
 			if(!this._activeScreen)
 			{
@@ -286,7 +335,7 @@ package feathers.controls
 			const savedScreenEvents:Object = this._screenEvents[this._activeScreenID];
 			for(var eventName:String in events)
 			{
-				var signal:ISignal = this._activeScreen.hasOwnProperty(eventName) ? (this._activeScreen[eventName] as ISignal) : null;
+				var signal:Object = this._activeScreen.hasOwnProperty(eventName) ? (this._activeScreen[eventName] as SIGNAL_TYPE) : null;
 				var eventAction:Object = events[eventName];
 				if(eventAction is Function)
 				{
@@ -336,12 +385,6 @@ package feathers.controls
 				throw new IllegalOperationError("Screen with id '" + id + "' already defined. Cannot add two screens with the same id.");
 			}
 
-			if(!this.defaultScreenID)
-			{
-				//the first screen will set the default ID if it is not set already
-				this.defaultScreenID = id;
-			}
-
 			this._screens[id] = item;
 		}
 
@@ -360,16 +403,6 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		override public function dispose():void
-		{
-			this._onChange.removeAll();
-			this._onClear.removeAll();
-			super.dispose();
-		}
-
-		/**
-		 * @private
-		 */
 		override protected function draw():void
 		{
 			var sizeInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_SIZE);
@@ -380,10 +413,10 @@ package feathers.controls
 
 			if(sizeInvalid || selectionInvalid)
 			{
-				if(this.activeScreen)
+				if(this._activeScreen)
 				{
-					this.activeScreen.width = this.actualWidth;
-					this.activeScreen.height = this.actualHeight;
+					this._activeScreen.width = this.actualWidth;
+					this._activeScreen.height = this.actualHeight;
 				}
 			}
 
@@ -391,18 +424,18 @@ package feathers.controls
 			{
 				if(this._clipContent)
 				{
-					var scrollRect:Rectangle = this.scrollRect;
-					if(!scrollRect)
+					var clipRect:Rectangle = this.clipRect;
+					if(!clipRect)
 					{
-						scrollRect = new Rectangle();
+						clipRect = new Rectangle();
 					}
-					scrollRect.width = this.actualWidth;
-					scrollRect.height = this.actualHeight;
-					this.scrollRect = scrollRect;
+					clipRect.width = this.actualWidth;
+					clipRect.height = this.actualHeight;
+					this.clipRect = clipRect;
 				}
 				else
 				{
-					this.scrollRect = null;
+					this.clipRect = null;
 				}
 			}
 		}
@@ -436,25 +469,24 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private function defaultTransition(oldScreen:DisplayObject, newScreen:DisplayObject, completeHandler:Function):void
+		protected function transitionComplete():void
 		{
-			//in short, do nothing
-			completeHandler();
-		}
-
-		/**
-		 * @private
-		 */
-		private function transitionComplete():void
-		{
+			this._transitionIsActive = false;
+			this.dispatchEventWith(FeathersEventType.TRANSITION_COMPLETE);
 			if(this._previousScreenInTransition)
 			{
 				const item:ScreenNavigatorItem = this._screens[this._previousScreenInTransitionID];
-				this.removeChild(this._previousScreenInTransition, !(item.screen is DisplayObject));
+				const canBeDisposed:Boolean = !(item.screen is DisplayObject);
+				if(this._previousScreenInTransition is IScreen)
+				{
+					const screen:IScreen = IScreen(this._previousScreenInTransition);
+					screen.screenID = null;
+					screen.owner = null;
+				}
+				this.removeChild(this._previousScreenInTransition, canBeDisposed);
 				this._previousScreenInTransition = null;
 				this._previousScreenInTransitionID = null;
 			}
-			this._transitionIsActive = false;
 
 			if(this._clearAfterTransition)
 			{
@@ -472,15 +504,40 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private function createScreenListener(screenID:String):Function
+		protected function createScreenEventListener(screenID:String):Function
 		{
 			const self:ScreenNavigator = this;
-			const eventListener:Function = function(...rest:Array):void
+			const eventListener:Function = function(event:Event):void
 			{
 				self.showScreen(screenID);
 			}
 
 			return eventListener;
+		}
+
+		/**
+		 * @private
+		 */
+		protected function createScreenSignalListener(screenID:String, signal:Object):Function
+		{
+			const self:ScreenNavigator = this;
+			if(signal.valueClasses.length == 1)
+			{
+				//shortcut to avoid the allocation of the rest array
+				var signalListener:Function = function(arg0:Object):void
+				{
+					self.showScreen(screenID);
+				}
+			}
+			else
+			{
+				signalListener = function(...rest:Array):void
+				{
+					self.showScreen(screenID);
+				}
+			}
+
+			return signalListener;
 		}
 
 		/**

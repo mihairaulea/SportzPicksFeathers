@@ -24,7 +24,22 @@
  */
 package feathers.dragDrop
 {
-	import org.osflash.signals.ISignal;
+	import starling.events.Event;
+
+	/**
+	 * Dispatched when the drag and drop manager begins the drag.
+	 *
+	 * @eventType = feathers.events.DragDropEvent.DRAG_START
+	 */
+	[Event(name="dragStart",type="feathers.events.DragDropEvent")]
+
+	/**
+	 * Dispatched when the drop has been completed or when the drag has been
+	 * cancelled.
+	 *
+	 * @eventType = feathers.events.DragDropEvent.DRAG_COMPLETE
+	 */
+	[Event(name="dragComplete",type="feathers.events.DragDropEvent")]
 
 	/**
 	 * An object that can initiate drag actions with the drag and drop manager.
@@ -33,21 +48,7 @@ package feathers.dragDrop
 	 */
 	public interface IDragSource
 	{
-		/**
-		 * Dispatched when the drag and drop manager begins the drag.
-		 *
-		 * <p>A listener is expected to have the following function signature:</p>
-		 * <pre>function(source:IDragSource, data:DragData):void</pre>
-		 */
-		function get onDragStart():ISignal;
-
-		/**
-		 * Dispatched when the drop has been completed or when the drag has been
-		 * cancelled.
-		 *
-		 * <p>A listener is expected to have the following function signature:</p>
-		 * <pre>function(source:IDragSource, data:DragData, isDropped:Boolean):void</pre>
-		 */
-		function get onDragComplete():ISignal;
+		function dispatchEvent(event:Event):void;
+		function dispatchEventWith(type:String, bubbles:Boolean = false, data:Object = null):void;
 	}
 }

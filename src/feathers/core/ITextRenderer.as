@@ -28,8 +28,10 @@ package feathers.core
 
 	/**
 	 * Interface that handles common capabilities of rendering text.
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/text-renderers
 	 */
-	public interface ITextRenderer
+	public interface ITextRenderer extends IFeathersControl
 	{
 		/**
 		 * The text to render.

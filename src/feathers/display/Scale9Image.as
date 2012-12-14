@@ -24,16 +24,18 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 package feathers.display
 {
+	import feathers.textures.Scale9Textures;
+
 	import flash.errors.IllegalOperationError;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
-	import feathers.textures.Scale9Textures;
-
 	import starling.core.RenderSupport;
 	import starling.display.DisplayObject;
+	import starling.display.Image;
 	import starling.display.QuadBatch;
+	import starling.display.Sprite;
 	import starling.events.Event;
 	import starling.textures.TextureSmoothing;
 	import starling.utils.MatrixUtil;
@@ -46,9 +48,9 @@ package feathers.display
 	 */
 	public class Scale9Image extends Sprite
 	{
-		private static const helperMatrix:Matrix = new Matrix();
-		private static const helperPoint:Point = new Point();
-		private static var helperImage:starling.display.Image;
+		private static const HELPER_MATRIX:Matrix = new Matrix();
+		private static const HELPER_POINT:Point = new Point();
+		private static var helperImage:Image;
 		
 		/**
 		 * Constructor.
@@ -56,7 +58,7 @@ package feathers.display
 		public function Scale9Image(textures:Scale9Textures, textureScale:Number = 1)
 		{
 			super();
-			this._textures = textures;
+			this.textures = textures;
 			this._textureScale = textureScale;
 			this._hitArea = new Rectangle();
 			this.readjustSize();
@@ -77,6 +79,11 @@ package feathers.display
 		 * @private
 		 */
 		private var _layoutChanged:Boolean = true;
+		
+		/**
+		 * @private
+		 */
+		private var _frame:Rectangle;
 
 		/**
 		 * @private
@@ -105,6 +112,7 @@ package feathers.display
 				return;
 			}
 			this._textures = value;
+			this._frame = this._textures.texture.frame;
 			this._layoutChanged = true;
 			this._propertiesChanged = true;
 		}
@@ -249,11 +257,6 @@ package feathers.display
 		 */
 		public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
 		{
-			if(this.scrollRect)
-			{
-				return super.getBounds(targetSpace, resultRect);
-			}
-			
 			if(!resultRect)
 			{
 				resultRect = new Rectangle();
@@ -271,31 +274,31 @@ package feathers.display
 			}
 			else
 			{
-				this.getTransformationMatrix(targetSpace, helperMatrix);
+				this.getTransformationMatrix(targetSpace, HELPER_MATRIX);
 
-				MatrixUtil.transformCoords(helperMatrix, this._hitArea.x, this._hitArea.y, helperPoint);
-				minX = minX < helperPoint.x ? minX : helperPoint.x;
-				maxX = maxX > helperPoint.x ? maxX : helperPoint.x;
-				minY = minY < helperPoint.y ? minY : helperPoint.y;
-				maxY = maxY > helperPoint.y ? maxY : helperPoint.y;
+				MatrixUtil.transformCoords(HELPER_MATRIX, this._hitArea.x, this._hitArea.y, HELPER_POINT);
+				minX = minX < HELPER_POINT.x ? minX : HELPER_POINT.x;
+				maxX = maxX > HELPER_POINT.x ? maxX : HELPER_POINT.x;
+				minY = minY < HELPER_POINT.y ? minY : HELPER_POINT.y;
+				maxY = maxY > HELPER_POINT.y ? maxY : HELPER_POINT.y;
 
-				MatrixUtil.transformCoords(helperMatrix, this._hitArea.x, this._hitArea.y + this._hitArea.height, helperPoint);
-				minX = minX < helperPoint.x ? minX : helperPoint.x;
-				maxX = maxX > helperPoint.x ? maxX : helperPoint.x;
-				minY = minY < helperPoint.y ? minY : helperPoint.y;
-				maxY = maxY > helperPoint.y ? maxY : helperPoint.y;
+				MatrixUtil.transformCoords(HELPER_MATRIX, this._hitArea.x, this._hitArea.y + this._hitArea.height, HELPER_POINT);
+				minX = minX < HELPER_POINT.x ? minX : HELPER_POINT.x;
+				maxX = maxX > HELPER_POINT.x ? maxX : HELPER_POINT.x;
+				minY = minY < HELPER_POINT.y ? minY : HELPER_POINT.y;
+				maxY = maxY > HELPER_POINT.y ? maxY : HELPER_POINT.y;
 
-				MatrixUtil.transformCoords(helperMatrix, this._hitArea.x + this._hitArea.width, this._hitArea.y, helperPoint);
-				minX = minX < helperPoint.x ? minX : helperPoint.x;
-				maxX = maxX > helperPoint.x ? maxX : helperPoint.x;
-				minY = minY < helperPoint.y ? minY : helperPoint.y;
-				maxY = maxY > helperPoint.y ? maxY : helperPoint.y;
+				MatrixUtil.transformCoords(HELPER_MATRIX, this._hitArea.x + this._hitArea.width, this._hitArea.y, HELPER_POINT);
+				minX = minX < HELPER_POINT.x ? minX : HELPER_POINT.x;
+				maxX = maxX > HELPER_POINT.x ? maxX : HELPER_POINT.x;
+				minY = minY < HELPER_POINT.y ? minY : HELPER_POINT.y;
+				maxY = maxY > HELPER_POINT.y ? maxY : HELPER_POINT.y;
 
-				MatrixUtil.transformCoords(helperMatrix, this._hitArea.x + this._hitArea.width, this._hitArea.y + this._hitArea.height, helperPoint);
-				minX = minX < helperPoint.x ? minX : helperPoint.x;
-				maxX = maxX > helperPoint.x ? maxX : helperPoint.x;
-				minY = minY < helperPoint.y ? minY : helperPoint.y;
-				maxY = maxY > helperPoint.y ? maxY : helperPoint.y;
+				MatrixUtil.transformCoords(HELPER_MATRIX, this._hitArea.x + this._hitArea.width, this._hitArea.y + this._hitArea.height, HELPER_POINT);
+				minX = minX < HELPER_POINT.x ? minX : HELPER_POINT.x;
+				maxX = maxX > HELPER_POINT.x ? maxX : HELPER_POINT.x;
+				minY = minY < HELPER_POINT.y ? minY : HELPER_POINT.y;
+				maxY = maxY > HELPER_POINT.y ? maxY : HELPER_POINT.y;
 			}
 			
 			resultRect.x = minX;
@@ -343,9 +346,8 @@ package feathers.display
 		 */
 		public function readjustSize():void
 		{
-			const frame:Rectangle = this._textures.texture.frame;
-			this.width = frame.width * this._textureScale;
-			this.height = frame.height * this._textureScale;
+			this.width = this._frame.width * this._textureScale;
+			this.height = this._frame.height * this._textureScale;
 		}
 
 		/**
@@ -359,17 +361,16 @@ package feathers.display
 
 				if(!helperImage)
 				{
-					helperImage = new starling.display.Image(this._textures.topLeft);
+					helperImage = new Image(this._textures.topLeft);
 				}
 				helperImage.smoothing = this._smoothing;
 				helperImage.color = this._color;
 
-				const frame:Rectangle = this._textures.texture.frame;
 				const grid:Rectangle = this._textures.scale9Grid;
 				const scaledLeftWidth:Number = grid.x * this._textureScale;
 				const scaledTopHeight:Number = grid.y * this._textureScale;
-				const scaledRightWidth:Number = (frame.width - grid.x - grid.width) * this._textureScale;
-				const scaledBottomHeight:Number = (frame.height - grid.y - grid.height) * this._textureScale;
+				const scaledRightWidth:Number = (this._frame.width - grid.x - grid.width) * this._textureScale;
+				const scaledBottomHeight:Number = (this._frame.height - grid.y - grid.height) * this._textureScale;
 				const scaledCenterWidth:Number = this._width - scaledLeftWidth - scaledRightWidth;
 				const scaledMiddleHeight:Number = this._height - scaledTopHeight - scaledBottomHeight;
 

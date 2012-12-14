@@ -31,8 +31,6 @@ package feathers.controls
 	import feathers.core.PropertyProxy;
 	import feathers.data.ListCollection;
 	import feathers.system.DeviceCapabilities;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
 
 	import starling.core.Starling;
 	import starling.events.Event;
@@ -41,8 +39,17 @@ package feathers.controls
 	import starling.events.TouchPhase;
 
 	/**
+	 * Dispatched when the selected item changes.
+	 *
+	 * @eventType starling.events.Event.CHANGE
+	 */
+	[Event(name="change",type="starling.events.Event")]
+
+	/**
 	 * A combo-box like list control. Displayed as a button. The list appears
 	 * on tap as a full-screen overlay.
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/picker-list
 	 */
 	public class PickerList extends FeathersControl
 	{
@@ -56,6 +63,11 @@ package feathers.controls
 		 * list.
 		 */
 		public static const DEFAULT_CHILD_NAME_LIST:String = "feathers-picker-list-list";
+
+		/**
+		 * @private
+		 */
+		private static const HELPER_TOUCHES_VECTOR:Vector.<Touch> = new <Touch>[];
 
 		/**
 		 * Constructor.
@@ -75,18 +87,36 @@ package feathers.controls
 		 * The value added to the <code>nameList</code> of the pop-up list.
 		 */
 		protected var listName:String = DEFAULT_CHILD_NAME_LIST;
-		
-		private var _button:Button;
-		private var _list:List;
 
-		private var _buttonTouchPointID:int = -1;
-		private var _listTouchPointID:int = -1;
-		private var _hasBeenScrolled:Boolean = false;
+		/**
+		 * The button sub-component.
+		 */
+		protected var button:Button;
+
+		/**
+		 * The list sub-component.
+		 */
+		protected var list:List;
+
+		/**
+		 * @private
+		 */
+		protected var _buttonTouchPointID:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _listTouchPointID:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _hasBeenScrolled:Boolean = false;
 		
 		/**
 		 * @private
 		 */
-		private var _dataProvider:ListCollection;
+		protected var _dataProvider:ListCollection;
 		
 		/**
 		 * @copy List#dataProvider
@@ -120,7 +150,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _selectedIndex:int = -1;
+		protected var _selectedIndex:int = -1;
 		
 		/**
 		 * @copy List#selectedIndex
@@ -141,7 +171,7 @@ package feathers.controls
 			}
 			this._selectedIndex = value;
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
-			this._onChange.dispatch(this);
+			this.dispatchEventWith(Event.CHANGE);
 		}
 		
 		/**
@@ -173,7 +203,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _labelField:String = "label";
+		protected var _labelField:String = "label";
 		
 		/**
 		 * The field in the selected item that contains the label text to be
@@ -211,7 +241,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _labelFunction:Function;
+		protected var _labelFunction:Function;
 
 		/**
 		 * A function used to generate label text for the selected item
@@ -242,7 +272,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _popUpContentManager:IPopUpContentManager;
+		protected var _popUpContentManager:IPopUpContentManager;
 		
 		/**
 		 * A manager that handles the details of how to display the pop-up list.
@@ -278,7 +308,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _typicalItem:Object = null;
+		protected var _typicalItem:Object = null;
 		
 		/**
 		 * Used to auto-size the list. If the list's width or height is NaN, the
@@ -306,20 +336,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _onChange:Signal = new Signal(PickerList);
-		
-		/**
-		 * @copy List#onChange
-		 */
-		public function get onChange():ISignal
-		{
-			return this._onChange;
-		}
-		
-		/**
-		 * @private
-		 */
-		private var _buttonProperties:PropertyProxy;
+		protected var _buttonProperties:PropertyProxy;
 		
 		/**
 		 * A set of key/value pairs to be passed down to the picker's button
@@ -339,7 +356,7 @@ package feathers.controls
 		{
 			if(!this._buttonProperties)
 			{
-				this._buttonProperties = new PropertyProxy(buttonProperties_onChange);
+				this._buttonProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._buttonProperties;
 		}
@@ -368,12 +385,12 @@ package feathers.controls
 			}
 			if(this._buttonProperties)
 			{
-				this._buttonProperties.onChange.remove(buttonProperties_onChange);
+				this._buttonProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._buttonProperties = PropertyProxy(value);
 			if(this._buttonProperties)
 			{
-				this._buttonProperties.onChange.add(buttonProperties_onChange);
+				this._buttonProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -381,7 +398,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _listProperties:PropertyProxy;
+		protected var _listProperties:PropertyProxy;
 		
 		/**
 		 * A set of key/value pairs to be passed down to the picker's pop-up
@@ -401,7 +418,7 @@ package feathers.controls
 		{
 			if(!this._listProperties)
 			{
-				this._listProperties = new PropertyProxy(listProperties_onChange);
+				this._listProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._listProperties;
 		}
@@ -430,12 +447,12 @@ package feathers.controls
 			}
 			if(this._listProperties)
 			{
-				this._listProperties.onChange.remove(listProperties_onChange);
+				this._listProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._listProperties = PropertyProxy(value);
 			if(this._listProperties)
 			{
-				this._listProperties.onChange.add(listProperties_onChange);
+				this._listProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -472,8 +489,7 @@ package feathers.controls
 		override public function dispose():void
 		{
 			this.closePopUpList();
-			this._onChange.removeAll();
-			this._list.dispose();
+			this.list.dispose();
 			super.dispose();
 		}
 		
@@ -482,22 +498,22 @@ package feathers.controls
 		 */
 		override protected function initialize():void
 		{
-			if(!this._button)
+			if(!this.button)
 			{
-				this._button = new Button();
-				this._button.nameList.add(this.buttonName);
-				this._button.onRelease.add(button_onRelease);
-				this._button.addEventListener(TouchEvent.TOUCH, button_touchHandler);
-				this.addChild(this._button);
+				this.button = new Button();
+				this.button.nameList.add(this.buttonName);
+				this.button.addEventListener(Event.TRIGGERED, button_triggeredHandler);
+				this.button.addEventListener(TouchEvent.TOUCH, button_touchHandler);
+				this.addChild(this.button);
 			}
 			
-			if(!this._list)
+			if(!this.list)
 			{
-				this._list = new List();
-				this._list.nameList.add(this.listName);
-				this._list.onScroll.add(list_onScroll);
-				this._list.onChange.add(list_onChange);
-				this._list.addEventListener(TouchEvent.TOUCH, list_touchHandler);
+				this.list = new List();
+				this.list.nameList.add(this.listName);
+				this.list.addEventListener(Event.SCROLL, list_scrollHandler);
+				this.list.addEventListener(Event.CHANGE, list_changeHandler);
+				this.list.addEventListener(TouchEvent.TOUCH, list_touchHandler);
 			}
 
 			if(!this._popUpContentManager)
@@ -533,11 +549,11 @@ package feathers.controls
 				//contain width or height changes.
 				if(isNaN(this.explicitWidth))
 				{
-					this._button.width = NaN;
+					this.button.width = NaN;
 				}
 				if(isNaN(this.explicitHeight))
 				{
-					this._button.height = NaN;
+					this.button.height = NaN;
 				}
 			}
 
@@ -551,25 +567,25 @@ package feathers.controls
 			
 			if(dataInvalid)
 			{
-				this._list.dataProvider = this._dataProvider;
+				this.list.dataProvider = this._dataProvider;
 				this._hasBeenScrolled = false;
 			}
 			
 			if(stateInvalid)
 			{
-				this._button.isEnabled = this.isEnabled;
+				this.button.isEnabled = this.isEnabled;
 			}
 
 			if(selectionInvalid)
 			{
 				this.refreshButtonLabel();
-				this._list.selectedIndex = this._selectedIndex;
+				this.list.selectedIndex = this._selectedIndex;
 			}
 
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
 
-			this._button.width = this.actualWidth;
-			this._button.height = this.actualHeight;
+			this.button.width = this.actualWidth;
+			this.button.height = this.actualHeight;
 		}
 
 		/**
@@ -584,24 +600,24 @@ package feathers.controls
 				return false;
 			}
 
-			this._button.width = NaN;
-			this._button.height = NaN;
+			this.button.width = NaN;
+			this.button.height = NaN;
 			if(this._typicalItem)
 			{
 				if(isNaN(this._typicalItemWidth) || isNaN(this._typicalItemHeight))
 				{
-					this._button.label = this.itemToLabel(this._typicalItem);
-					this._button.validate();
-					this._typicalItemWidth = this._button.width;
-					this._typicalItemHeight = this._button.height;
+					this.button.label = this.itemToLabel(this._typicalItem);
+					this.button.validate();
+					this._typicalItemWidth = this.button.width;
+					this._typicalItemHeight = this.button.height;
 					this.refreshButtonLabel();
 				}
 			}
 			else
 			{
-				this._button.validate();
-				this._typicalItemWidth = this._button.width;
-				this._typicalItemHeight = this._button.height;
+				this.button.validate();
+				this._typicalItemWidth = this.button.width;
+				this._typicalItemHeight = this.button.height;
 			}
 
 			var newWidth:Number = this.explicitWidth;
@@ -624,11 +640,11 @@ package feathers.controls
 		{
 			if(this._selectedIndex >= 0)
 			{
-				this._button.label = this.itemToLabel(this.selectedItem);
+				this.button.label = this.itemToLabel(this.selectedItem);
 			}
 			else
 			{
-				this._button.label = "";
+				this.button.label = "";
 			}
 		}
 		
@@ -639,10 +655,10 @@ package feathers.controls
 		{
 			for(var propertyName:String in this._buttonProperties)
 			{
-				if(this._button.hasOwnProperty(propertyName))
+				if(this.button.hasOwnProperty(propertyName))
 				{
 					var propertyValue:Object = this._buttonProperties[propertyName];
-					this._button[propertyName] = propertyValue;
+					this.button[propertyName] = propertyValue;
 				}
 			}
 		}
@@ -654,10 +670,10 @@ package feathers.controls
 		{
 			for(var propertyName:String in this._listProperties)
 			{
-				if(this._list.hasOwnProperty(propertyName))
+				if(this.list.hasOwnProperty(propertyName))
 				{
 					var propertyValue:Object = this._listProperties[propertyName];
-					this._list[propertyName] = propertyValue;
+					this.list[propertyName] = propertyValue;
 				}
 			}
 		}
@@ -667,22 +683,14 @@ package feathers.controls
 		 */
 		protected function closePopUpList():void
 		{
-			this._list.validate();
+			this.list.validate();
 			this._popUpContentManager.close();
 		}
 
 		/**
 		 * @private
 		 */
-		protected function buttonProperties_onChange(proxy:PropertyProxy, name:Object):void
-		{
-			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected function listProperties_onChange(proxy:PropertyProxy, name:Object):void
+		protected function childProperties_onChange(proxy:PropertyProxy, name:String):void
 		{
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -690,11 +698,16 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function button_onRelease(button:Button):void
+		protected function button_triggeredHandler(event:Event):void
 		{
-			this._popUpContentManager.open(this._list, this);
-			this._list.scrollToDisplayIndex(this._selectedIndex);
-			this._list.validate();
+			if(this.list.stage)
+			{
+				this.closePopUpList();
+				return;
+			}
+			this._popUpContentManager.open(this.list, this);
+			this.list.scrollToDisplayIndex(this._selectedIndex);
+			this.list.validate();
 
 			this._hasBeenScrolled = false;
 		}
@@ -702,15 +715,15 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function list_onChange(list:List):void
+		protected function list_changeHandler(event:Event):void
 		{
-			this.selectedIndex = this._list.selectedIndex;
+			this.selectedIndex = this.list.selectedIndex;
 		}
 		
 		/**
 		 * @private
 		 */
-		protected function list_onScroll(list:List):void
+		protected function list_scrollHandler(event:Event):void
 		{
 			if(this._listTouchPointID >= 0)
 			{
@@ -732,7 +745,12 @@ package feathers.controls
 		 */
 		protected function button_touchHandler(event:TouchEvent):void
 		{
-			const touches:Vector.<Touch> = event.getTouches(this._button);
+			if(!this._isEnabled)
+			{
+				this._buttonTouchPointID = -1;
+				return;
+			}
+			const touches:Vector.<Touch> = event.getTouches(this.button, null, HELPER_TOUCHES_VECTOR);
 			if(touches.length == 0)
 			{
 				return;
@@ -750,12 +768,12 @@ package feathers.controls
 				}
 				if(!touch)
 				{
+					HELPER_TOUCHES_VECTOR.length = 0;
 					return;
 				}
 				if(touch.phase == TouchPhase.ENDED)
 				{
 					this._buttonTouchPointID = -1;
-					return;
 				}
 			}
 			else
@@ -765,10 +783,11 @@ package feathers.controls
 					if(touch.phase == TouchPhase.BEGAN)
 					{
 						this._buttonTouchPointID = touch.id;
-						return;
+						break;
 					}
 				}
 			}
+			HELPER_TOUCHES_VECTOR.length = 0;
 		}
 		
 		/**
@@ -776,9 +795,15 @@ package feathers.controls
 		 */
 		protected function list_touchHandler(event:TouchEvent):void
 		{
-			const touches:Vector.<Touch> = event.getTouches(this._list);
+			if(!this._isEnabled)
+			{
+				this._listTouchPointID = -1;
+				return;
+			}
+			const touches:Vector.<Touch> = event.getTouches(this.list, null, HELPER_TOUCHES_VECTOR);
 			if(touches.length == 0)
 			{
+				HELPER_TOUCHES_VECTOR.length = 0;
 				return;
 			}
 			if(this._listTouchPointID >= 0)
@@ -794,6 +819,7 @@ package feathers.controls
 				}
 				if(!touch)
 				{
+					HELPER_TOUCHES_VECTOR.length = 0;
 					return;
 				}
 				if(touch.phase == TouchPhase.ENDED)
@@ -813,9 +839,11 @@ package feathers.controls
 					{
 						this._listTouchPointID = touch.id;
 						this._hasBeenScrolled = false;
+						break;
 					}
 				}
 			}
+			HELPER_TOUCHES_VECTOR.length = 0;
 		}
 	}
 }

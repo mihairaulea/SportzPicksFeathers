@@ -26,16 +26,42 @@ package feathers.controls
 {
 	import feathers.controls.supportClasses.LayoutViewPort;
 	import feathers.core.FeathersControl;
+	import feathers.core.IFeathersControl;
 	import feathers.core.PropertyProxy;
+	import feathers.events.FeathersEventType;
 	import feathers.layout.ILayout;
 	import feathers.layout.IVirtualLayout;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
 
 	import starling.display.DisplayObject;
+	import starling.events.Event;
 
 	/**
-	 * A layout container that supports scrolling.
+	 * Dispatched when the container is scrolled.
+	 *
+	 * @eventType starling.events.Event.SCROLL
+	 */
+	[Event(name="change",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the container is scrolled.
+	 *
+	 * @eventType starling.events.Event.SCROLL
+	 */
+	[Event(name="scroll",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the container finishes scrolling in either direction after
+	 * being thrown.
+	 *
+	 * @eventType feathers.events.FeathersEventType.SCROLL_COMPLETE
+	 */
+	[Event(name="scrollComplete",type="starling.events.Event")]
+
+	[DefaultProperty("mxmlContent")]
+	/**
+	 * A generic container that supports layout and scrolling.
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/scroll-container
 	 */
 	public class ScrollContainer extends FeathersControl
 	{
@@ -43,6 +69,11 @@ package feathers.controls
 		 * The default value added to the <code>nameList</code> of the scroller.
 		 */
 		public static const DEFAULT_CHILD_NAME_SCROLLER:String = "feathers-scroll-container-scroller";
+
+		/**
+		 * @private
+		 */
+		protected static const INVALIDATION_FLAG_MXML_CONTENT:String = "mxmlContent";
 
 		/**
 		 * Constructor.
@@ -70,7 +101,22 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _layout:ILayout;
+		protected var _scrollToHorizontalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _scrollToVerticalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _scrollToIndexDuration:Number;
+
+		/**
+		 * @private
+		 */
+		protected var _layout:ILayout;
 
 		/**
 		 * Controls the way that the container's children are positioned and
@@ -97,10 +143,10 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _horizontalScrollPosition:Number = 0;
+		protected var _horizontalScrollPosition:Number = 0;
 
 		/**
-		 * The number of pixels the list has been scrolled horizontally (on
+		 * The number of pixels the container has been scrolled horizontally (on
 		 * the x-axis).
 		 */
 		public function get horizontalScrollPosition():Number
@@ -119,13 +165,13 @@ package feathers.controls
 			}
 			this._horizontalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
 		 * @private
 		 */
-		private var _maxHorizontalScrollPosition:Number = 0;
+		protected var _maxHorizontalScrollPosition:Number = 0;
 
 		/**
 		 * The maximum number of pixels the container may be scrolled horizontally
@@ -144,10 +190,24 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _verticalScrollPosition:Number = 0;
+		protected var _horizontalPageIndex:int = 0;
 
 		/**
-		 * The number of pixels the list has been scrolled vertically (on
+		 * The index of the horizontal page, if snapping is enabled. If snapping
+		 * is disabled, the index will always be <code>0</code>.
+		 */
+		public function get horizontalPageIndex():int
+		{
+			return this._horizontalPageIndex;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _verticalScrollPosition:Number = 0;
+
+		/**
+		 * The number of pixels the container has been scrolled vertically (on
 		 * the y-axis).
 		 */
 		public function get verticalScrollPosition():Number
@@ -166,13 +226,13 @@ package feathers.controls
 			}
 			this._verticalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
 		 * @private
 		 */
-		private var _maxVerticalScrollPosition:Number = 0;
+		protected var _maxVerticalScrollPosition:Number = 0;
 
 		/**
 		 * The maximum number of pixels the container may be scrolled vertically
@@ -191,7 +251,140 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _scrollerProperties:PropertyProxy;
+		protected var _verticalPageIndex:int = 0;
+
+		/**
+		 * The index of the vertical page, if snapping is enabled. If snapping
+		 * is disabled, the index will always be <code>0</code>.
+		 *
+		 * @default 0
+		 */
+		public function get verticalPageIndex():int
+		{
+			return this._verticalPageIndex;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _mxmlContentIsReady:Boolean = false;
+
+		/**
+		 * @private
+		 */
+		protected var _mxmlContent:Array;
+
+		[ArrayElementType("feathers.core.IFeathersControl")]
+		/**
+		 * @private
+		 */
+		public function get mxmlContent():Array
+		{
+			return this._mxmlContent;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set mxmlContent(value:Array):void
+		{
+			if(this._mxmlContent == value)
+			{
+				return;
+			}
+			if(this._mxmlContent && this._mxmlContentIsReady)
+			{
+				for each(var child:IFeathersControl in this._mxmlContent)
+				{
+					this.removeChild(DisplayObject(child), true);
+				}
+			}
+			this._mxmlContent = value;
+			this._mxmlContentIsReady = false;
+			this.invalidate(INVALIDATION_FLAG_MXML_CONTENT);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var currentBackgroundSkin:DisplayObject;
+
+		/**
+		 * @private
+		 */
+		protected var _backgroundSkin:DisplayObject;
+
+		/**
+		 * A display object displayed behind the item renderers.
+		 */
+		public function get backgroundSkin():DisplayObject
+		{
+			return this._backgroundSkin;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set backgroundSkin(value:DisplayObject):void
+		{
+			if(this._backgroundSkin == value)
+			{
+				return;
+			}
+
+			if(this._backgroundSkin && this._backgroundSkin != this._backgroundDisabledSkin)
+			{
+				this.removeChild(this._backgroundSkin);
+			}
+			this._backgroundSkin = value;
+			if(this._backgroundSkin && this._backgroundSkin.parent != this)
+			{
+				this._backgroundSkin.visible = false;
+				super.addChildAt(this._backgroundSkin, 0);
+			}
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _backgroundDisabledSkin:DisplayObject;
+
+		/**
+		 * A background to display when the list is disabled.
+		 */
+		public function get backgroundDisabledSkin():DisplayObject
+		{
+			return this._backgroundDisabledSkin;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set backgroundDisabledSkin(value:DisplayObject):void
+		{
+			if(this._backgroundDisabledSkin == value)
+			{
+				return;
+			}
+
+			if(this._backgroundDisabledSkin && this._backgroundDisabledSkin != this._backgroundSkin)
+			{
+				this.removeChild(this._backgroundDisabledSkin);
+			}
+			this._backgroundDisabledSkin = value;
+			if(this._backgroundDisabledSkin && this._backgroundDisabledSkin.parent != this)
+			{
+				this._backgroundDisabledSkin.visible = false;
+				super.addChildAt(this._backgroundDisabledSkin, 0);
+			}
+			this.invalidate(INVALIDATION_FLAG_STYLES);
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _scrollerProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to the container's
@@ -211,7 +404,7 @@ package feathers.controls
 		{
 			if(!this._scrollerProperties)
 			{
-				this._scrollerProperties = new PropertyProxy(scrollerProperties_onChange);
+				this._scrollerProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._scrollerProperties;
 		}
@@ -240,27 +433,14 @@ package feathers.controls
 			}
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.remove(scrollerProperties_onChange);
+				this._scrollerProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._scrollerProperties = PropertyProxy(value);
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.add(scrollerProperties_onChange);
+				this._scrollerProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected var _onScroll:Signal = new Signal(ScrollContainer);
-
-		/**
-		 * Dispatched when the container scrolls.
-		 */
-		public function get onScroll():ISignal
-		{
-			return this._onScroll;
 		}
 
 		/**
@@ -274,9 +454,25 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function get $numChildren():int
+		{
+			return super.numChildren;
+		}
+
+		/**
+		 * @private
+		 */
 		override public function getChildByName(name:String):DisplayObject
 		{
 			return this.viewPort.getChildByName(name);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $getChildByName(name:String):DisplayObject
+		{
+			return super.getChildByName(name);
 		}
 
 		/**
@@ -290,9 +486,46 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function $getChildAt(index:int):DisplayObject
+		{
+			return super.getChildAt(index);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $addChild(child:DisplayObject):DisplayObject
+		{
+			return super.addChildAt(child, super.numChildren);
+		}
+
+		/**
+		 * @private
+		 */
 		override public function addChildAt(child:DisplayObject, index:int):DisplayObject
 		{
 			return this.viewPort.addChildAt(child, index);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $addChildAt(child:DisplayObject, index:int):DisplayObject
+		{
+			return super.addChildAt(child, index);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $removeChild(child:DisplayObject, dispose:Boolean = false):DisplayObject
+		{
+			const childIndex:int = this.$getChildIndex(child);
+			if(childIndex >= 0)
+			{
+				super.removeChildAt(childIndex, dispose);
+			}
+			return child;
 		}
 
 		/**
@@ -306,9 +539,25 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function $removeChildAt(index:int):DisplayObject
+		{
+			return super.removeChildAt(index);
+		}
+
+		/**
+		 * @private
+		 */
 		override public function getChildIndex(child:DisplayObject):int
 		{
 			return this.viewPort.getChildIndex(child);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $getChildIndex(child:DisplayObject):int
+		{
+			return super.getChildIndex(child);
 		}
 
 		/**
@@ -322,6 +571,29 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function $setChildIndex(child:DisplayObject, index:int):void
+		{
+			this.$removeChild(child);
+			this.$addChildAt(child, index);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function $swapChildren(child1:DisplayObject, child2:DisplayObject):void
+		{
+			const index1:int = this.$getChildIndex(child1);
+			const index2:int = this.$getChildIndex(child2);
+			if (index1 < 0 || index2 < 0)
+			{
+				throw new ArgumentError("Not a child of this container");
+			}
+			this.$swapChildrenAt(index1, index2);
+		}
+
+		/**
+		 * @private
+		 */
 		override public function swapChildrenAt(index1:int, index2:int):void
 		{
 			this.viewPort.swapChildrenAt(index1, index2);
@@ -330,18 +602,22 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		override public function sortChildren(compareFunction:Function):void
+		protected function $swapChildrenAt(index1:int, index2:int):void
 		{
-			this.viewPort.sortChildren(compareFunction);
+			const child1:DisplayObject = this.$getChildAt(index1);
+			const child2:DisplayObject = this.$getChildAt(index2);
+			this.$removeChild(child1);
+			this.$removeChild(child2);
+			this.$addChildAt(child2, index1);
+			this.$addChildAt(child1, index2);
 		}
 
 		/**
 		 * @private
 		 */
-		override public function dispose():void
+		override public function sortChildren(compareFunction:Function):void
 		{
-			this._onScroll.removeAll();
-			super.dispose();
+			this.viewPort.sortChildren(compareFunction);
 		}
 
 		/**
@@ -361,6 +637,24 @@ package feathers.controls
 		}
 
 		/**
+		 * Scrolls the container to a specific page, horizontally and vertically.
+		 * If <code>horizontalPageIndex</code> or <code>verticalPageIndex</code>
+		 * is <code>-1</code>, it will be ignored
+		 */
+		public function scrollToPageIndex(horizontalPageIndex:int, verticalPageIndex:int, animationDuration:Number = 0):void
+		{
+			if(this._scrollToHorizontalPageIndex == horizontalPageIndex &&
+				this._scrollToVerticalPageIndex == verticalPageIndex)
+			{
+				return;
+			}
+			this._scrollToHorizontalPageIndex = horizontalPageIndex;
+			this._scrollToVerticalPageIndex = verticalPageIndex;
+			this._scrollToIndexDuration = animationDuration;
+			this.invalidate(INVALIDATION_FLAG_SCROLL);
+		}
+
+		/**
 		 * @private
 		 */
 		override protected function initialize():void
@@ -370,9 +664,14 @@ package feathers.controls
 				this.scroller = new Scroller();
 				this.scroller.viewPort = this.viewPort;
 				this.scroller.nameList.add(this.scrollerName);
-				this.scroller.onScroll.add(scroller_onScroll);
-				super.addChildAt(this.scroller, 0);
+				this.scroller.addEventListener(Event.SCROLL, scroller_scrollHandler);
+				this.scroller.addEventListener(FeathersEventType.SCROLL_COMPLETE, scroller_scrollCompleteHandler);
+				//addChild() calls addChildAt(), so this is a workaround to
+				//bypass our overridden addChildAt()
+				super.addChildAt(this.scroller, super.numChildren);
 			}
+
+			this.refreshMXMLContent();
 		}
 
 		/**
@@ -384,6 +683,13 @@ package feathers.controls
 			const dataInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_DATA);
 			const scrollInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_SCROLL);
 			const stylesInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_STYLES);
+			const stateInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_STATE);
+			const mxmlContentInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_MXML_CONTENT);
+
+			if(mxmlContentInvalid)
+			{
+				this.refreshMXMLContent();
+			}
 
 			if(dataInvalid)
 			{
@@ -394,9 +700,19 @@ package feathers.controls
 				this.viewPort.layout = this._layout;
 			}
 
+			if(sizeInvalid || stylesInvalid || stateInvalid)
+			{
+				this.refreshBackgroundSkin();
+			}
+
 			if(stylesInvalid)
 			{
 				this.refreshScrollerStyles();
+			}
+
+			if(stateInvalid)
+			{
+				this.scroller.isEnabled = this._isEnabled;
 			}
 
 			if(scrollInvalid)
@@ -431,11 +747,24 @@ package feathers.controls
 
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
 
+			if(sizeInvalid || stylesInvalid || stateInvalid)
+			{
+				if(this.currentBackgroundSkin)
+				{
+					this.currentBackgroundSkin.width = this.actualWidth;
+					this.currentBackgroundSkin.height = this.actualHeight;
+				}
+			}
+
 			this.scroller.validate();
 			this._maxHorizontalScrollPosition = this.scroller.maxHorizontalScrollPosition;
 			this._maxVerticalScrollPosition = this.scroller.maxVerticalScrollPosition;
 			this._horizontalScrollPosition = this.scroller.horizontalScrollPosition;
 			this._verticalScrollPosition = this.scroller.verticalScrollPosition;
+			this._horizontalPageIndex = this.scroller.horizontalPageIndex;
+			this._verticalPageIndex = this.scroller.verticalPageIndex;
+
+			this.scroll();
 		}
 
 		/**
@@ -467,6 +796,30 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function refreshBackgroundSkin():void
+		{
+			this.currentBackgroundSkin = this._backgroundSkin;
+			if(!this._isEnabled && this._backgroundDisabledSkin)
+			{
+				if(this._backgroundSkin)
+				{
+					this._backgroundSkin.visible = false;
+				}
+				this.currentBackgroundSkin = this._backgroundDisabledSkin;
+			}
+			else if(this._backgroundDisabledSkin)
+			{
+				this._backgroundDisabledSkin.visible = false;
+			}
+			if(this.currentBackgroundSkin)
+			{
+				this.currentBackgroundSkin.visible = true;
+			}
+		}
+
+		/**
+		 * @private
+		 */
 		protected function refreshScrollerStyles():void
 		{
 			for(var propertyName:String in this._scrollerProperties)
@@ -482,7 +835,38 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scrollerProperties_onChange(proxy:PropertyProxy, name:Object):void
+		protected function refreshMXMLContent():void
+		{
+			if(!this._mxmlContent || this._mxmlContentIsReady)
+			{
+				return;
+			}
+			const childCount:int = this._mxmlContent.length;
+			for(var i:int = 0; i < childCount; i++)
+			{
+				var child:DisplayObject = DisplayObject(this._mxmlContent[i]);
+				this.addChild(child);
+			}
+			this._mxmlContentIsReady = true;
+		}
+
+		/**
+		 * @private
+		 */
+		protected function scroll():void
+		{
+			if(this._scrollToHorizontalPageIndex >= 0 || this._scrollToVerticalPageIndex >= 0)
+			{
+				this.scroller.throwToPage(this._scrollToHorizontalPageIndex, this._scrollToVerticalPageIndex, this._scrollToIndexDuration);
+				this._scrollToHorizontalPageIndex = -1;
+				this._scrollToVerticalPageIndex = -1;
+			}
+		}
+
+		/**
+		 * @private
+		 */
+		protected function childProperties_onChange(proxy:PropertyProxy, name:String):void
 		{
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -490,13 +874,24 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scroller_onScroll(scroller:Scroller):void
+		protected function scroller_scrollCompleteHandler(event:Event):void
+		{
+			this.dispatchEventWith(FeathersEventType.SCROLL_COMPLETE);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function scroller_scrollHandler(event:Event):void
 		{
 			this._horizontalScrollPosition = this.scroller.horizontalScrollPosition;
 			this._verticalScrollPosition = this.scroller.verticalScrollPosition;
 			this._maxHorizontalScrollPosition = this.scroller.maxHorizontalScrollPosition;
 			this._maxVerticalScrollPosition = this.scroller.maxVerticalScrollPosition;
-			this._onScroll.dispatch(this);
+			this._horizontalPageIndex = this.scroller.horizontalPageIndex;
+			this._verticalPageIndex = this.scroller.verticalPageIndex;
+			this.invalidate(INVALIDATION_FLAG_SCROLL);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 	}
 }

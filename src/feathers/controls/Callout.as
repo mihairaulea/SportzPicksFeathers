@@ -24,15 +24,12 @@
  */
 package feathers.controls
 {
+	import feathers.core.FeathersControl;
+	import feathers.core.PopUpManager;
+
 	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
 	import flash.ui.Keyboard;
-
-	import feathers.display.ScrollRectManager;
-	import feathers.core.FeathersControl;
-	import feathers.core.PopUpManager;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
 
 	import starling.core.Starling;
 	import starling.display.DisplayObject;
@@ -43,8 +40,17 @@ package feathers.controls
 	import starling.events.TouchPhase;
 
 	/**
+	 * Dispatched when the callout is closed.
+	 *
+	 * @eventType starling.events.Event.CLOSE
+	 */
+	[Event(name="close",type="starling.events.Event")]
+
+	/**
 	 * A pop-up container that points at (or calls out) a specific region of
 	 * the application (typically a specific control that triggered it).
+	 *
+	 * @see http://wiki.starling-framework.org/feathers/callout
 	 */
 	public class Callout extends FeathersControl
 	{
@@ -101,6 +107,11 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		private static const HELPER_TOUCHES_VECTOR:Vector.<Touch> = new <Touch>[];
+
+		/**
+		 * @private
+		 */
 		protected static const DIRECTION_TO_FUNCTION:Object = {};
 		DIRECTION_TO_FUNCTION[DIRECTION_ANY] = positionCalloutAny;
 		DIRECTION_TO_FUNCTION[DIRECTION_UP] = positionCalloutAbove;
@@ -108,6 +119,9 @@ package feathers.controls
 		DIRECTION_TO_FUNCTION[DIRECTION_LEFT] = positionCalloutLeftSide;
 		DIRECTION_TO_FUNCTION[DIRECTION_RIGHT] = positionCalloutRightSide;
 
+		/**
+		 * @private
+		 */
 		protected static const callouts:Vector.<Callout> = new <Callout>[];
 
 		/**
@@ -178,19 +192,19 @@ package feathers.controls
 			{
 				factory = calloutFactory != null ? calloutFactory : defaultCalloutFactory;
 			}
-			const callout:Callout = factory();
+			const callout:Callout = Callout(factory());
 			callout.content = content;
 			callout._isPopUp = true;
 			const overlayFactory:Function = calloutOverlayFactory != null ? calloutOverlayFactory : PopUpManager.defaultOverlayFactory;
 			PopUpManager.addPopUp(callout, isModal, false, overlayFactory);
 
-			var globalBounds:Rectangle = ScrollRectManager.getBounds(origin, Starling.current.stage);
+			var globalBounds:Rectangle = origin.getBounds(Starling.current.stage);
 			positionCalloutByDirection(callout, globalBounds, direction);
 			callouts.push(callout);
 
 			function enterFrameHandler(event:EnterFrameEvent):void
 			{
-				ScrollRectManager.getBounds(origin, Starling.current.stage, helperRect);
+				origin.getBounds(Starling.current.stage, helperRect);
 				if(globalBounds.equals(helperRect))
 				{
 					return;
@@ -202,16 +216,21 @@ package feathers.controls
 			}
 			function origin_removedFromStageHandler(event:Event):void
 			{
-				callout.close();
+				callout.close(true);
 			}
-			function callout_onClose(callout:Callout):void
+			function callout_closeHandler(event:Event):void
 			{
 				origin.removeEventListener(Event.REMOVED_FROM_STAGE, origin_removedFromStageHandler);
 				Starling.current.stage.removeEventListener(EnterFrameEvent.ENTER_FRAME, enterFrameHandler);
-				callout.onClose.remove(callout_onClose);
+				callout.removeEventListener(Event.CLOSE, callout_closeHandler);
+				const index:int = callouts.indexOf(callout)
+				if(index >= 0)
+				{
+					callouts.splice(index, 1);
+				}
 			}
 			callout.addEventListener(EnterFrameEvent.ENTER_FRAME, enterFrameHandler);
-			callout.onClose.add(callout_onClose);
+			callout.addEventListener(Event.CLOSE, callout_closeHandler);
 			origin.addEventListener(Event.REMOVED_FROM_STAGE, origin_removedFromStageHandler);
 
 			return callout;
@@ -219,11 +238,17 @@ package feathers.controls
 
 		/**
 		 * The default factory that creates callouts when <code>Callout.show()</code>
-		 * is called.
+		 * is called. To use a different factory, you need to set
+		 * <code>Callout.calloutFactory</code> to a <code>Function</code>
+		 * instance.
 		 */
 		public static function defaultCalloutFactory():Callout
 		{
-			return new Callout();
+			const callout:Callout = new Callout();
+			callout.closeOnTouchBeganOutside = true;
+			callout.closeOnTouchEndedOutside = true;
+			callout.closeOnKeys = new <uint>[Keyboard.BACK, Keyboard.ESCAPE];
+			return callout;
 		}
 
 		/**
@@ -364,7 +389,27 @@ package feathers.controls
 		 */
 		public function Callout()
 		{
+			this.addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 		}
+
+		/**
+		 * Determines if the callout is automatically closed if a touch in the
+		 * <code>TouchPhase.BEGAN</code> phase happens outside of the callout's
+		 * bounds.
+		 */
+		public var closeOnTouchBeganOutside:Boolean = false;
+
+		/**
+		 * Determines if the callout is automatically closed if a touch in the
+		 * <code>TouchPhase.ENDED</code> phase happens outside of the callout's
+		 * bounds.
+		 */
+		public var closeOnTouchEndedOutside:Boolean = false;
+
+		/**
+		 * The callout will be closed if any of these keys are pressed.
+		 */
+		public var closeOnKeys:Vector.<uint>;
 
 		/**
 		 * @private
@@ -374,7 +419,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _touchPointID:int = -1;
+		protected var _isReadyToClose:Boolean = false;
 
 		/**
 		 * @private
@@ -537,8 +582,9 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _arrowPosition:String = ARROW_POSITION_TOP;
+		protected var _arrowPosition:String = ARROW_POSITION_TOP;
 
+		[Inspectable(type="String",enumeration="top,right,bottom,left")]
 		/**
 		 * The position of the callout's arrow relative to the background. Do
 		 * not confuse this with the direction that the callout opens when using
@@ -575,7 +621,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _backgroundSkin:DisplayObject;
+		protected var _backgroundSkin:DisplayObject;
 
 		/**
 		 * The primary background to display.
@@ -617,7 +663,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _bottomArrowSkin:DisplayObject;
+		protected var _bottomArrowSkin:DisplayObject;
 
 		/**
 		 * The arrow skin to display on the bottom edge of the callout. This
@@ -663,7 +709,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _topArrowSkin:DisplayObject;
+		protected var _topArrowSkin:DisplayObject;
 
 		/**
 		 * The arrow skin to display on the top edge of the callout. This arrow
@@ -709,7 +755,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _leftArrowSkin:DisplayObject;
+		protected var _leftArrowSkin:DisplayObject;
 
 		/**
 		 * The arrow skin to display on the left edge of the callout. This arrow
@@ -755,7 +801,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _rightArrowSkin:DisplayObject;
+		protected var _rightArrowSkin:DisplayObject;
 
 		/**
 		 * The arrow skin to display on the right edge of the callout. This
@@ -801,7 +847,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _topArrowGap:Number = 0;
+		protected var _topArrowGap:Number = 0;
 
 		/**
 		 * The space, in pixels, between the top arrow skin and the background
@@ -829,7 +875,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _bottomArrowGap:Number = 0;
+		protected var _bottomArrowGap:Number = 0;
 
 		/**
 		 * The space, in pixels, between the bottom arrow skin and the
@@ -857,7 +903,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _rightArrowGap:Number = 0;
+		protected var _rightArrowGap:Number = 0;
 
 		/**
 		 * The space, in pixels, between the right arrow skin and the background
@@ -885,7 +931,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _leftArrowGap:Number = 0;
+		protected var _leftArrowGap:Number = 0;
 
 		/**
 		 * The space, in pixels, between the right arrow skin and the background
@@ -941,45 +987,20 @@ package feathers.controls
 		}
 
 		/**
-		 * @private
-		 */
-		protected var _onClose:Signal = new Signal(Callout);
-
-		/**
-		 * Dispatched when the callout is closed.
-		 */
-		public function get onClose():ISignal
-		{
-			return this._onClose;
-		}
-
-		/**
 		 * Closes the callout.
 		 */
-		public function close():void
+		public function close(dispose:Boolean = false):void
 		{
 			if(!this.parent)
 			{
 				return;
 			}
-			if(this._isPopUp)
+			this.removeFromParent();
+			this.dispatchEventWith(Event.CLOSE);
+			if(dispose)
 			{
-				PopUpManager.removePopUp(this);
+				this.dispose();
 			}
-			else
-			{
-				this.removeFromParent();
-			}
-			this._onClose.dispatch(this);
-		}
-
-		/**
-		 * @private
-		 */
-		override public function dispose():void
-		{
-			this._onClose.removeAll();
-			super.dispose();
 		}
 
 		/**
@@ -1206,9 +1227,20 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function addedToStageHandler(event:Event):void
+		{
+			//to avoid touch events bubbling up to the callout and causing it to
+			//close immediately, we wait one frame before allowing it to close
+			//based on touches.
+			this._isReadyToClose = false;
+			this.addEventListener(EnterFrameEvent.ENTER_FRAME, enterFrameHandler);
+		}
+
+		/**
+		 * @private
+		 */
 		protected function removedFromStageHandler(event:Event):void
 		{
-			this._touchPointID = -1;
 			this.stage.removeEventListener(TouchEvent.TOUCH, stage_touchHandler);
 			Starling.current.nativeStage.removeEventListener(KeyboardEvent.KEY_DOWN, stage_keyDownHandler);
 		}
@@ -1216,51 +1248,37 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected function enterFrameHandler(event:Event):void
+		{
+			this.removeEventListener(EnterFrameEvent.ENTER_FRAME, enterFrameHandler);
+			this._isReadyToClose = true;
+		}
+
+		/**
+		 * @private
+		 */
 		protected function stage_touchHandler(event:TouchEvent):void
 		{
-			if(event.interactsWith(this))
+			if(!this._isReadyToClose || (!this.closeOnTouchEndedOutside && !this.closeOnTouchBeganOutside) ||
+				this.contains(DisplayObject(event.target)))
 			{
 				return;
 			}
 
-			const touches:Vector.<Touch> = event.getTouches(this.stage);
-			if(touches.length == 0)
+			const touches:Vector.<Touch> = event.getTouches(this.stage, null, HELPER_TOUCHES_VECTOR);
+			const touchCount:int = touches.length;
+			for(var i:int = 0; i < touchCount; i++)
 			{
-				return;
-			}
-			if(this._touchPointID >= 0)
-			{
-				var touch:Touch;
-				for each(var currentTouch:Touch in touches)
+				var touch:Touch = touches[i];
+				var phase:String = touch.phase;
+				if((this.closeOnTouchBeganOutside && phase == TouchPhase.BEGAN) ||
+					(this.closeOnTouchEndedOutside && phase == TouchPhase.ENDED))
 				{
-					if(currentTouch.id == this._touchPointID)
-					{
-						touch = currentTouch;
-						break;
-					}
-				}
-				if(!touch)
-				{
-					return;
-				}
-				if(touch.phase == TouchPhase.ENDED)
-				{
-					this._touchPointID = -1;
-					this.close();
-					return;
+					this.close(this._isPopUp);
+					break;
 				}
 			}
-			else
-			{
-				for each(touch in touches)
-				{
-					if(touch.phase == TouchPhase.BEGAN)
-					{
-						this._touchPointID = touch.id;
-						return;
-					}
-				}
-			}
+			HELPER_TOUCHES_VECTOR.length = 0;
 		}
 
 		/**
@@ -1268,7 +1286,7 @@ package feathers.controls
 		 */
 		protected function stage_keyDownHandler(event:KeyboardEvent):void
 		{
-			if(event.keyCode != Keyboard.BACK && event.keyCode != Keyboard.ESCAPE)
+			if(!this.closeOnKeys || this.closeOnKeys.indexOf(event.keyCode) < 0)
 			{
 				return;
 			}
@@ -1276,7 +1294,7 @@ package feathers.controls
 			event.preventDefault();
 			//don't let other event handlers handle the event
 			event.stopImmediatePropagation();
-			this.close();
+			this.close(this._isPopUp);
 		}
 	}
 }

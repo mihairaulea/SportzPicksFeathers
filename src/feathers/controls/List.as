@@ -24,20 +24,64 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 package feathers.controls
 {
-	import flash.geom.Point;
-
 	import feathers.controls.renderers.DefaultListItemRenderer;
 	import feathers.controls.supportClasses.ListDataViewPort;
 	import feathers.core.FeathersControl;
 	import feathers.core.PropertyProxy;
 	import feathers.data.ListCollection;
+	import feathers.events.CollectionEventType;
+	import feathers.events.FeathersEventType;
 	import feathers.layout.ILayout;
 	import feathers.layout.VerticalLayout;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
+
+	import flash.geom.Point;
 
 	import starling.display.DisplayObject;
+	import starling.events.Event;
 
+	/**
+	 * Dispatched when the selected item changes.
+	 *
+	 * @eventType starling.events.Event.CHANGE
+	 */
+	[Event(name="change",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the list is scrolled.
+	 *
+	 * @eventType starling.events.Event.SCROLL
+	 */
+	[Event(name="scroll",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when the list finishes scrolling in either direction after
+	 * being thrown.
+	 *
+	 * @eventType feathers.events.FeathersEventType.SCROLL_COMPLETE
+	 */
+	[Event(name="scrollComplete",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when an item renderer is added to the list. When the layout is
+	 * virtualized, item renderers may not exist for every item in the data
+	 * provider. This event can be used to track which items currently have
+	 * renderers.
+	 *
+	 * @eventType feathers.events.FeathersEventType.RENDERER_ADD
+	 */
+	[Event(name="rendererAdd",type="starling.events.Event")]
+
+	/**
+	 * Dispatched when an item renderer is removed from the list. When the layout is
+	 * virtualized, item renderers may not exist for every item in the data
+	 * provider. This event can be used to track which items currently have
+	 * renderers.
+	 *
+	 * @eventType feathers.events.FeathersEventType.RENDERER_REMOVE
+	 */
+	[Event(name="rendererRemove",type="starling.events.Event")]
+
+	[DefaultProperty("dataProvider")]
 	/**
 	 * Displays a one-dimensional list of items. Supports scrolling, custom
 	 * item renderers, and custom layouts.
@@ -48,6 +92,7 @@ package feathers.controls
 	 * renderer for every single item. This allows for optimal performance with
 	 * very large data providers.</p>
 	 *
+	 * @see http://wiki.starling-framework.org/feathers/list
 	 * @see GroupedList
 	 */
 	public class List extends FeathersControl
@@ -55,7 +100,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private static const helperPoint:Point = new Point();
+		private static const HELPER_POINT:Point = new Point();
 
 		/**
 		 * The default value added to the <code>nameList</code> of the scroller.
@@ -76,8 +121,7 @@ package feathers.controls
 		protected var scrollerName:String = DEFAULT_CHILD_NAME_SCROLLER;
 
 		/**
-		 * @private
-		 * The Scroller instance.
+		 * The list's scroller sub-component.
 		 */
 		protected var scroller:Scroller;
 
@@ -95,12 +139,22 @@ package feathers.controls
 		/**
 		 * @private
 		 */
+		protected var _scrollToHorizontalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
+		protected var _scrollToVerticalPageIndex:int = -1;
+
+		/**
+		 * @private
+		 */
 		protected var _scrollToIndexDuration:Number;
 
 		/**
 		 * @private
 		 */
-		private var _layout:ILayout;
+		protected var _layout:ILayout;
 
 		/**
 		 * The layout algorithm used to position and, optionally, size the
@@ -153,7 +207,7 @@ package feathers.controls
 			}
 			this._horizontalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
 		}
 
 		/**
@@ -217,21 +271,7 @@ package feathers.controls
 			}
 			this._verticalScrollPosition = value;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
-		}
-
-		/**
-		 * @private
-		 */
-		protected var _verticalPageIndex:int = 0;
-
-		/**
-		 * The index of the vertical page, if snapping is enabled. If snapping
-		 * is disabled, the index will always be <code>0</code>.
-		 */
-		public function get verticalPageIndex():int
-		{
-			return this._verticalPageIndex;
+			this.dispatchEventWith(Event.SCROLL);
 		}
 		
 		/**
@@ -247,10 +287,28 @@ package feathers.controls
 		 * than the maximum due to elastic edges. However, once the user stops
 		 * interacting with the list, it will automatically animate back to the
 		 * maximum (or minimum, if below 0).
+		 * 
+		 * @default 0
 		 */
 		public function get maxVerticalScrollPosition():Number
 		{
 			return this._maxVerticalScrollPosition;
+		}
+
+		/**
+		 * @private
+		 */
+		protected var _verticalPageIndex:int = 0;
+
+		/**
+		 * The index of the vertical page, if snapping is enabled. If snapping
+		 * is disabled, the index will always be <code>0</code>.
+		 *
+		 * @default 0
+		 */
+		public function get verticalPageIndex():int
+		{
+			return this._verticalPageIndex;
 		}
 		
 		/**
@@ -277,12 +335,12 @@ package feathers.controls
 			}
 			if(this._dataProvider)
 			{
-				this._dataProvider.onReset.remove(dataProvider_onReset);
+				this._dataProvider.removeEventListener(CollectionEventType.RESET, dataProvider_resetHandler);
 			}
 			this._dataProvider = value;
 			if(this._dataProvider)
 			{
-				this._dataProvider.onReset.add(dataProvider_onReset);
+				this._dataProvider.addEventListener(CollectionEventType.RESET, dataProvider_resetHandler);
 			}
 
 			//reset the scroll position because this is a drastic change and
@@ -296,10 +354,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _isSelectable:Boolean = true;
+		protected var _isSelectable:Boolean = true;
 		
 		/**
 		 * Determines if an item in the list may be selected.
+		 * 
+		 * @default true
 		 */
 		public function get isSelectable():Boolean
 		{
@@ -326,7 +386,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _selectedIndex:int = -1;
+		protected var _selectedIndex:int = -1;
 		
 		/**
 		 * The index of the currently selected item. Returns -1 if no item is
@@ -348,7 +408,7 @@ package feathers.controls
 			}
 			this._selectedIndex = value;
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
-			this._onChange.dispatch(this);
+			this.dispatchEventWith(Event.CHANGE);
 		}
 		
 		/**
@@ -375,33 +435,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _onChange:Signal = new Signal(List);
-		
-		/**
-		 * Dispatched when the selected item changes.
-		 */
-		public function get onChange():ISignal
-		{
-			return this._onChange;
-		}
-		
-		/**
-		 * @private
-		 */
-		protected var _onScroll:Signal = new Signal(List);
-		
-		/**
-		 * Dispatched when the list is scrolled.
-		 */
-		public function get onScroll():ISignal
-		{
-			return this._onScroll;
-		}
-		
-		/**
-		 * @private
-		 */
-		private var _scrollerProperties:PropertyProxy;
+		protected var _scrollerProperties:PropertyProxy;
 		
 		/**
 		 * A set of key/value pairs to be passed down to the list's scroller
@@ -421,7 +455,7 @@ package feathers.controls
 		{
 			if(!this._scrollerProperties)
 			{
-				this._scrollerProperties = new PropertyProxy(scrollerProperties_onChange);
+				this._scrollerProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._scrollerProperties;
 		}
@@ -441,12 +475,12 @@ package feathers.controls
 			}
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.remove(scrollerProperties_onChange);
+				this._scrollerProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._scrollerProperties = PropertyProxy(value);
 			if(this._scrollerProperties)
 			{
-				this._scrollerProperties.onChange.add(scrollerProperties_onChange);
+				this._scrollerProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -454,7 +488,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererProperties:PropertyProxy;
+		protected var _itemRendererProperties:PropertyProxy;
 
 		/**
 		 * A set of key/value pairs to be passed down to all of the list's item
@@ -470,13 +504,14 @@ package feathers.controls
 		 * you can use the following syntax:</p>
 		 * <pre>list.scrollerProperties.&#64;verticalScrollBarProperties.&#64;thumbProperties.defaultSkin = new Image(texture);</pre>
 		 *
+		 * @see feathers.controls.renderers.IListItemRenderer
 		 * @see #itemRendererFactory
 		 */
 		public function get itemRendererProperties():Object
 		{
 			if(!this._itemRendererProperties)
 			{
-				this._itemRendererProperties = new PropertyProxy(itemRendererProperties_onChange);
+				this._itemRendererProperties = new PropertyProxy(childProperties_onChange);
 			}
 			return this._itemRendererProperties;
 		}
@@ -505,12 +540,12 @@ package feathers.controls
 			}
 			if(this._itemRendererProperties)
 			{
-				this._itemRendererProperties.onChange.remove(itemRendererProperties_onChange);
+				this._itemRendererProperties.removeOnChangeCallback(childProperties_onChange);
 			}
 			this._itemRendererProperties = PropertyProxy(value);
 			if(this._itemRendererProperties)
 			{
-				this._itemRendererProperties.onChange.add(itemRendererProperties_onChange);
+				this._itemRendererProperties.addOnChangeCallback(childProperties_onChange);
 			}
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -523,10 +558,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _backgroundSkin:DisplayObject;
+		protected var _backgroundSkin:DisplayObject;
 		
 		/**
 		 * A display object displayed behind the item renderers.
+		 * 
+		 * @default null
 		 */
 		public function get backgroundSkin():DisplayObject
 		{
@@ -559,10 +596,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _backgroundDisabledSkin:DisplayObject;
+		protected var _backgroundDisabledSkin:DisplayObject;
 		
 		/**
 		 * A background to display when the list is disabled.
+		 * 
+		 * @default null
 		 */
 		public function get backgroundDisabledSkin():DisplayObject
 		{
@@ -703,11 +742,12 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererType:Class = DefaultListItemRenderer;
+		protected var _itemRendererType:Class = DefaultListItemRenderer;
 		
 		/**
 		 * The class used to instantiate item renderers.
 		 *
+		 * @see feathers.controls.renderer.IListItemRenderer
 		 * @see #itemRendererFactory
 		 */
 		public function get itemRendererType():Class
@@ -732,7 +772,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _itemRendererFactory:Function;
+		protected var _itemRendererFactory:Function;
 		
 		/**
 		 * A function called that is expected to return a new item renderer. Has
@@ -744,7 +784,8 @@ package feathers.controls
 		 * <p>The function is expected to have the following signature:</p>
 		 *
 		 * <pre>function():IListItemRenderer</pre>
-		 * 
+		 *
+		 * @see feathers.controls.renderers.IListItemRenderer
 		 * @see #itemRendererType
 		 */
 		public function get itemRendererFactory():Function
@@ -769,7 +810,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		private var _typicalItem:Object = null;
+		protected var _typicalItem:Object = null;
 		
 		/**
 		 * Used to auto-size the list. If the list's width or height is NaN, the
@@ -827,6 +868,9 @@ package feathers.controls
 		 * Scrolls the list so that the specified item is visible. If
 		 * <code>animationDuration</code> is greater than zero, the scroll will
 		 * animate. The duration is in seconds.
+		 * 
+		 * @param index The integer index of an item from the data provider.
+		 * @param animationDuration The length of time, in seconds, of the animation. May be zero to scroll instantly.
 		 */
 		public function scrollToDisplayIndex(index:int, animationDuration:Number = 0):void
 		{
@@ -834,19 +878,30 @@ package feathers.controls
 			{
 				return;
 			}
+			this._scrollToHorizontalPageIndex = -1;
+			this._scrollToVerticalPageIndex = -1;
 			this._scrollToIndex = index;
 			this._scrollToIndexDuration = animationDuration;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
 		}
-		
+
 		/**
-		 * @private
+		 * Scrolls the list to a specific page, horizontally and vertically. If
+		 * <code>horizontalPageIndex</code> or <code>verticalPageIndex</code> is
+		 * -1, it will be ignored
 		 */
-		override public function dispose():void
+		public function scrollToPageIndex(horizontalPageIndex:int, verticalPageIndex:int, animationDuration:Number = 0):void
 		{
-			this._onChange.removeAll();
-			this._onScroll.removeAll();
-			super.dispose();
+			if(this._scrollToHorizontalPageIndex == horizontalPageIndex &&
+				this._scrollToVerticalPageIndex == verticalPageIndex)
+			{
+				return;
+			}
+			this._scrollToHorizontalPageIndex = horizontalPageIndex;
+			this._scrollToVerticalPageIndex = verticalPageIndex;
+			this._scrollToIndex = -1;
+			this._scrollToIndexDuration = animationDuration;
+			this.invalidate(INVALIDATION_FLAG_SCROLL);
 		}
 		
 		/**
@@ -876,7 +931,8 @@ package feathers.controls
 				this.scroller.nameList.add(this.scrollerName);
 				this.scroller.verticalScrollPolicy = Scroller.SCROLL_POLICY_AUTO;
 				this.scroller.horizontalScrollPolicy = Scroller.SCROLL_POLICY_AUTO;
-				this.scroller.onScroll.add(scroller_onScroll);
+				this.scroller.addEventListener(Event.SCROLL, scroller_scrollHandler);
+				this.scroller.addEventListener(FeathersEventType.SCROLL_COMPLETE, scroller_scrollCompleteHandler);
 				this.addChild(this.scroller);
 			}
 			
@@ -884,7 +940,7 @@ package feathers.controls
 			{
 				this.dataViewPort = new ListDataViewPort();
 				this.dataViewPort.owner = this;
-				this.dataViewPort.onChange.add(dataViewPort_onChange);
+				this.dataViewPort.addEventListener(Event.CHANGE, dataViewPort_changeHandler);
 				this.scroller.viewPort = this.dataViewPort;
 			}
 
@@ -922,7 +978,6 @@ package feathers.controls
 				this.refreshBackgroundSkin();
 			}
 
-			this.dataViewPort.isEnabled = this._isEnabled;
 			this.dataViewPort.isSelectable = this._isSelectable;
 			this.dataViewPort.selectedIndex = this._selectedIndex;
 			this.dataViewPort.dataProvider = this._dataProvider;
@@ -965,10 +1020,13 @@ package feathers.controls
 
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
 
-			if((sizeInvalid || stylesInvalid) && this.currentBackgroundSkin)
+			if(sizeInvalid || stylesInvalid || stateInvalid)
 			{
-				this.currentBackgroundSkin.width = this.actualWidth;
-				this.currentBackgroundSkin.height = this.actualHeight;
+				if(this.currentBackgroundSkin)
+				{
+					this.currentBackgroundSkin.width = this.actualWidth;
+					this.currentBackgroundSkin.height = this.actualHeight;
+				}
 			}
 
 			this.scroller.validate();
@@ -979,30 +1037,7 @@ package feathers.controls
 			this._horizontalPageIndex = this.scroller.horizontalPageIndex;
 			this._verticalPageIndex = this.scroller.verticalPageIndex;
 
-			if(this._scrollToIndex >= 0)
-			{
-				const item:Object = this._dataProvider.getItemAt(this._scrollToIndex);
-				if(item is Object)
-				{
-					this.dataViewPort.getScrollPositionForIndex(this._scrollToIndex, helperPoint);
-
-					if(this._scrollToIndexDuration > 0)
-					{
-						this.scroller.throwTo(Math.max(0, Math.min(helperPoint.x, this._maxHorizontalScrollPosition)),
-							Math.max(0, Math.min(helperPoint.y, this._maxVerticalScrollPosition)), this._scrollToIndexDuration);
-					}
-					else
-					{
-						this.horizontalScrollPosition = Math.max(0, Math.min(helperPoint.x, this._maxHorizontalScrollPosition));
-						this.verticalScrollPosition = Math.max(0, Math.min(helperPoint.y, this._maxVerticalScrollPosition));
-					}
-				}
-				this._scrollToIndex = -1;
-			}
-			if(this._dataProvider && this._dataProvider.length > 0)
-			{
-				this.scroller.horizontalScrollStep = this.scroller.verticalScrollStep = this.dataViewPort.typicalItemHeight;
-			}
+			this.scroll();
 		}
 
 		/**
@@ -1074,7 +1109,40 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scrollerProperties_onChange(proxy:PropertyProxy, name:Object):void
+		protected function scroll():void
+		{
+			if(this._scrollToHorizontalPageIndex >= 0 || this._scrollToVerticalPageIndex >= 0)
+			{
+				this.scroller.throwToPage(this._scrollToHorizontalPageIndex, this._scrollToVerticalPageIndex, this._scrollToIndexDuration);
+				this._scrollToHorizontalPageIndex = -1;
+				this._scrollToVerticalPageIndex = -1;
+			}
+			else if(this._scrollToIndex >= 0)
+			{
+				const item:Object = this._dataProvider.getItemAt(this._scrollToIndex);
+				if(item is Object)
+				{
+					this.dataViewPort.getScrollPositionForIndex(this._scrollToIndex, HELPER_POINT);
+
+					if(this._scrollToIndexDuration > 0)
+					{
+						this.scroller.throwTo(Math.max(0, Math.min(HELPER_POINT.x, this._maxHorizontalScrollPosition)),
+							Math.max(0, Math.min(HELPER_POINT.y, this._maxVerticalScrollPosition)), this._scrollToIndexDuration);
+					}
+					else
+					{
+						this.horizontalScrollPosition = Math.max(0, Math.min(HELPER_POINT.x, this._maxHorizontalScrollPosition));
+						this.verticalScrollPosition = Math.max(0, Math.min(HELPER_POINT.y, this._maxVerticalScrollPosition));
+					}
+				}
+				this._scrollToIndex = -1;
+			}
+		}
+
+		/**
+		 * @private
+		 */
+		protected function childProperties_onChange(proxy:PropertyProxy, name:String):void
 		{
 			this.invalidate(INVALIDATION_FLAG_STYLES);
 		}
@@ -1082,15 +1150,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function itemRendererProperties_onChange(proxy:PropertyProxy, name:Object):void
-		{
-			this.invalidate(INVALIDATION_FLAG_STYLES);
-		}
-
-		/**
-		 * @private
-		 */
-		protected function dataProvider_onReset(collection:ListCollection):void
+		protected function dataProvider_resetHandler(event:Event):void
 		{
 			this.horizontalScrollPosition = 0;
 			this.verticalScrollPosition = 0;
@@ -1099,7 +1159,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected function scroller_onScroll(scroller:Scroller):void
+		protected function scroller_scrollHandler(event:Event):void
 		{
 			this._maxHorizontalScrollPosition = this.scroller.maxHorizontalScrollPosition;
 			this._maxVerticalScrollPosition = this.scroller.maxVerticalScrollPosition;
@@ -1108,13 +1168,21 @@ package feathers.controls
 			this._horizontalScrollPosition = this.scroller.horizontalScrollPosition;
 			this._verticalScrollPosition = this.scroller.verticalScrollPosition;
 			this.invalidate(INVALIDATION_FLAG_SCROLL);
-			this._onScroll.dispatch(this);
+			this.dispatchEventWith(Event.SCROLL);
+		}
+
+		/**
+		 * @private
+		 */
+		protected function scroller_scrollCompleteHandler(event:Event):void
+		{
+			this.dispatchEventWith(FeathersEventType.SCROLL_COMPLETE);
 		}
 		
 		/**
 		 * @private
 		 */
-		protected function dataViewPort_onChange(dataViewPort:ListDataViewPort):void
+		protected function dataViewPort_changeHandler(event:Event):void
 		{
 			this.selectedIndex = this.dataViewPort.selectedIndex;
 		}
