@@ -10,9 +10,11 @@ package view
 	import feathers.controls.ScreenNavigatorItem;
 	import feathers.motion.transitions.ScreenSlidingStackTransitionManager;
 	import feathers.themes.SportzPicksTheme;
+	import starling.core.Starling;
 	import starling.display.Sprite;
 	import starling.events.Event;
 	import view.screens.*;
+	import view.util.Assets;
 	import view.util.ContentManipulator;
 	import com.gskinner.motion.easing.Cubic;
 	import view.util.ContentRequester;
@@ -37,6 +39,7 @@ package view
 		
 		private function onAddedToStage(e:Event):void
 		{
+			Assets.contentScaleFactor = Starling.current.contentScaleFactor;
 			var theme:SportzPicksTheme = new SportzPicksTheme(stage);
 			this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			

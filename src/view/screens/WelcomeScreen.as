@@ -28,6 +28,7 @@ package view.screens
 	import org.osflash.signals.Signal;
 			
 	import view.util.Assets;
+	import view.util.DeviceConstants;
 	 
 	public class WelcomeScreen extends Screen
 	{
@@ -62,16 +63,23 @@ package view.screens
 		
 		override protected function initialize():void
 		{			
-			logoImg = new Image(Assets.getAssetsTexture("logo"));
-			addChild(logoImg);			
+			trace(DeviceConstants.SCALE + " scale from welcome screen");
 			
-			textFormatHowConnect = new TextFormat("HelveticaNeueLTCom-BdCn" , 16 , 0xFFFFFF, true);
+			logoImg = new Image(Assets.getAssetsTexture("logo"));
+			addChild(logoImg);
+			trace(logoImg.width + " logo image width");
+			trace(DeviceCapabilities.dpi + " this is device dpi");
+			//logoImg.y = 
+			
+			textFormatHowConnect = new TextFormat("HelveticaNeueLTCom-BdCn" , 16  , 0xFFFFFF, true);
 			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
 			textFormatFacebookLabel.align = "left";
 			textFormatEmailLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 12, 0x808080, true);
 			textFormatEmailLabel.align = "left";
 			
 			addChild(howConnectText);
+			howConnectText.width = 240;
+			howConnectText.height = 32;
 			howConnectText.textFormat = textFormatHowConnect;
 			howConnectText.embedFonts = true;
 			howConnectText.validate();
@@ -103,17 +111,18 @@ package view.screens
 		{			
 			
 			//logo
-			logoImg.x = this.actualWidth - logoImg.width >> 1;
+			logoImg.x = (this.actualWidth - logoImg.width >> 1) - 22.5;
+			logoImg.y = 55;
 			
 			howConnectText.x = logoImg.x;
-			howConnectText.y = logoImg.height + logoImg.y + 80;
+			howConnectText.y = logoImg.height + logoImg.y + 30;
 			howConnectText.text = "How would you like to connect?";
 			
-			facebookButton.label = "With facebook";
+			facebookButton.label = "With Facebook";
 			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
-			facebookButton.y = 190;//howConnectText.y + howConnectText.height;
+			facebookButton.y = howConnectText.y + howConnectText.height;
 			
 			// "With your email address",);
 			addChild(emailButton);

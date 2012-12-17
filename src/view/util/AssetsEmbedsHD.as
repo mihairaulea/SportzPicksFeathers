@@ -7,10 +7,10 @@ package view.util
 	public class AssetsEmbedsHD 
 	{
 		
-		[Embed(source = "../../assets/assetsLD.png")]
+		[Embed(source = "../../assets/assetsHD.png")]
 		public static const AtlasTextureAssets:Class;
 		
-		[Embed(source = "../../assets/assetsLD.xml", mimeType = "application/octet-stream")]
+		[Embed(source = "../../assets/assetsHD.xml", mimeType = "application/octet-stream")]
 		public static const AtlasXmlAssets:Class;
 		
 		public function AssetsEmbedsHD() 

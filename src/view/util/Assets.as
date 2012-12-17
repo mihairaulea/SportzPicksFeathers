@@ -118,7 +118,9 @@ package view.util
 		
         private static function create(name:String):Object
         {
+			
             var textureClass:Class = sContentScaleFactor == 1 ? AssetsEmbedsSD : AssetsEmbedsHD;
+			trace(textureClass+" texture class i am getting");
             return new textureClass[name];
         }
         

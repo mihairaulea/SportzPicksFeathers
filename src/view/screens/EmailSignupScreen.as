@@ -5,7 +5,7 @@ package view.screens
 	import feathers.controls.text.*;
 	import feathers.core.ITextEditor;
 	import flash.text.TextRenderer;
-	import starling.events.Event;
+	import starling.events.*;
 	import starling.display.Image;
 	
 	import feathers.controls.Screen;
@@ -99,7 +99,7 @@ package view.screens
 			facebookButton = new Button();
 			facebookButton.defaultSkin = new Image(Assets.getAssetsTexture("facebook_btn"));
 			facebookButton.downSkin = new Image(Assets.getAssetsTexture("facebook_btn_press"));
-			facebookButton.label = "With facebook";
+			facebookButton.label = "With Facebook";
 			addChild(facebookButton);
 			facebookButton.validate();
 			
@@ -179,11 +179,13 @@ package view.screens
 			
 			emailInput.x = backgroundPanel.x + 10;
 			emailInput.y = emailAddressTitle.y + emailAddressTitle.height + 20;
+			emailInput.addEventListener("focusIn", focusFormHandler);
 			emailInput.text = "Type your Email Address here";
 			
 			emailErrorFeedback.x = emailAddressTitle.x;
 			emailErrorFeedback.y = emailInput.y + 28;
-			emailErrorFeedback.text = "Please enter a valid email address.";
+			emailErrorFeedback.text = "Please enter a valid email address";
+			emailErrorFeedback.visible = false;
 			
 			usernameTitle.x = backgroundPanel.x + 20;
 			usernameTitle.y = emailErrorFeedback.y + emailErrorFeedback.height + 10;
@@ -191,10 +193,12 @@ package view.screens
 			usernameInput.x = backgroundPanel.x + 10;
 			usernameInput.y = usernameTitle.y + usernameTitle.height+10 ;
 			usernameInput.text = "Type your username here(optional)";
+			usernameInput.addEventListener("focusIn", focusFormHandler);
 			
 			usernameErrorFeedback.x = usernameTitle.x;
 			usernameErrorFeedback.y = usernameInput.y + 28;
 			usernameErrorFeedback.text = "Sorry, this username is already taken try again";
+			usernameErrorFeedback.visible = false;
 			
 			addChild(goBtn);
 			
@@ -206,13 +210,39 @@ package view.screens
 			goBtn.y = usernameErrorFeedback.y + 20;
 		}
 		
+		private function focusFormHandler(e:Event):void
+		{
+			TextInput(e.target).text = "";
+		}
+		
 		private function triggerSignalOnButtonRelease(button:Button, event:String):void
 		{
 			button.addEventListener( Event.TRIGGERED,(function(e:Event):void
 			{
-				dispatchEvent(new Event(event));
+				if( checkForm() ) dispatchEvent(new Event(event));
 			}));
 
+		}
+		
+		private function checkForm():Boolean
+		{			
+			trace(emailInput.text + " email input text");
+			trace(check(emailInput.text));
+			if ( check( emailInput.text ) == false )
+			{
+				emailErrorFeedback.visible = true;
+				return false;
+			}
+			else emailErrorFeedback.visible = false;
+			
+			if ( usernameInput.text == "" )
+			{
+				usernameErrorFeedback.visible = true;
+				return false;
+			}
+			else usernameErrorFeedback.visible = false;
+			
+			return true;			
 		}
 		
 		private function getFacebookTextRenderer():ITextRenderer
@@ -243,6 +273,20 @@ package view.screens
 			label.embedFonts = true;
 			
 			return label;
+		}
+		
+		private function check ( mail:String ):Boolean
+		{
+          var emailExpression:RegExp = /^[\w.-]+@\w[\w.-]+\.[\w.-]*[a-z][a-z]$/i;
+
+          if( mail.match(emailExpression) == null )
+          {
+               return false;
+          }
+          else
+          {
+               return true;
+          }
 		}
 		
 	}

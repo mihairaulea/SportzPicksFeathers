@@ -152,7 +152,7 @@ package feathers.themes
 
 		protected var scale:Number = 1;
 
-		protected var primaryBackground:TiledImage;
+		protected var primaryBackground:Image;//TiledImage;
 
 		protected var headerTextFormat:TextFormat;
 
@@ -248,12 +248,12 @@ package feathers.themes
 
 		protected function initializeRoot():void
 		{
-			this.primaryBackground = new TiledImage(this.primaryBackgroundTexture);
+			this.primaryBackground = new Image(this.primaryBackgroundTexture);//TiledImage
 			this.primaryBackground.width = root.stage.stageWidth;
 			this.primaryBackground.height = root.stage.stageHeight;
 			this.root.addChildAt(this.primaryBackground, 0);
 			this.root.stage.addEventListener(ResizeEvent.RESIZE, stage_resizeHandler);
-			this.root.addEventListener(Event.REMOVED_FROM_STAGE, root_removedFromStageHandler);
+			this.root.addEventListener(Event.REMOVED_FROM_STAGE, root_removedFromStageHandler);	
 		}
 
 		protected function initialize():void
