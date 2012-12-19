@@ -11,7 +11,7 @@ package view.screens
 	import starling.display.Image;
 	import flash.text.TextField;
 	import flash.text.TextRenderer;
-	import starling.events.Event;
+	import starling.events.*;
 	
 	import feathers.controls.Screen;
 	import feathers.controls.Button;
@@ -39,8 +39,9 @@ package view.screens
 		
 		private var logoBackground:Image;
 		private var navBarShadow:Image;
-		private var headToHeadText:TextFieldTextRenderer;
-		private var backBtn:Button;
+		private var headToHeadTextTitle:TextFieldTextRenderer;
+		private var backBtn:Button;		
+		private var coinsDisplayAndBtn:Button;
 		
 		private var headToHeadBackground:Image;
 		private var myProfilePic:Image;
@@ -64,6 +65,8 @@ package view.screens
 		private var myNameTextFormat:TextFormat;
 		private var opponentNameTextFormat:TextFormat;
 		
+		private var weeklyText:TextFieldTextRenderer;
+		private var headToHeadText:TextFieldTextRenderer;
 		//onChallengerSelected
 		
 		public function HeadToHeadScreen() 
@@ -86,13 +89,13 @@ package view.screens
 			backBtn.downSkin = new Image( Assets.getAssetsTexture("back_arrow_press") );
 			addChild(backBtn);
 			
-			headToHeadText = new TextFieldTextRenderer();
-			addChild(headToHeadText);
-			headToHeadText.text = "Head to Head";
-			headToHeadText.textFormat = textFormatTitle;
-			headToHeadText.embedFonts = true;
-			headToHeadText.validate();
-			
+			headToHeadTextTitle = new TextFieldTextRenderer();
+			addChild(headToHeadTextTitle);
+			headToHeadTextTitle.text = "Head to Head";
+			headToHeadTextTitle.textFormat = textFormatTitle;
+			headToHeadTextTitle.embedFonts = true;
+			headToHeadTextTitle.validate();
+					
 			headToHeadBackground = new Image( Assets.getAssetsTexture("h2h_bg") );
 			addChild(headToHeadBackground);
 			vsImage = new Image( Assets.getAssetsTexture("vs") );
@@ -122,6 +125,21 @@ package view.screens
 			opponentPointsTextField = new TextFieldTextRenderer();
 			opponentPointsTextField.width = 50;
 			
+			weeklyText = new TextFieldTextRenderer();
+			addChild(weeklyText);
+			weeklyText.text = "WEEKLY";
+			weeklyText.textFormat = opponentNameTextFormat;
+			weeklyText.embedFonts = true;
+			weeklyText.wordWrap = true;
+			weeklyText.width = 100;
+						
+			headToHeadText = new TextFieldTextRenderer();
+			addChild(headToHeadText);
+			headToHeadText.text = "HEAD TO HEAD";
+			headToHeadText.textFormat = opponentNameTextFormat;
+			headToHeadText.embedFonts = true;
+			headToHeadText.wordWrap = true;						
+			
 			startNewGameButton = new Button();
 			startNewGameButton.defaultSkin = new Image( Assets.getAssetsTexture("start_btn") );
 			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
@@ -132,18 +150,29 @@ package view.screens
 			mathcesList = new List();
 			mathcesList.itemRendererType = CustomHeadToHeadRenderer;
 			addChild(mathcesList);
+			
+			
+			coinsDisplayAndBtn = new Button();
+			coinsDisplayAndBtn.defaultSkin = new Image(Assets.getAssetsTexture("coins_hud"));
+			coinsDisplayAndBtn.downSkin    = new Image(Assets.getAssetsTexture("coins_hud_press"));
+			coinsDisplayAndBtn.label = "XXXXX";
+			coinsDisplayAndBtn.labelOffsetY = 7;
+			coinsDisplayAndBtn.labelFactory = getCoinsTextRenderer;
+			addChild(coinsDisplayAndBtn);
+			coinsDisplayAndBtn.y = -4;
+			coinsDisplayAndBtn.x = headToHeadBackground.width - coinsDisplayAndBtn.defaultSkin.width;
 		}
 		
 		override protected function draw():void
 		{
-			headToHeadText.x = (logoBackground.width - headToHeadText.width)/2;
-			headToHeadText.y = 10;
+			headToHeadTextTitle.x = (logoBackground.width - headToHeadTextTitle.width)/2;
+			headToHeadTextTitle.y = 10;
 			backBtn.x = logoBackground.x + 5;
 			backBtn.y = logoBackground.y + 2.5;
+			backBtn.addEventListener(Event.TRIGGERED, backTriggeredHandler);
 			
 			headToHeadBackground.y = logoBackground.y + logoBackground.height;
 			vsImage.x = headToHeadBackground.width - vsImage.width >> 1;
-			vsImage.y = headToHeadBackground.y + (headToHeadBackground.height - vsImage.height) / 2;
 			
 			myProfilePic.height = headToHeadBackground.height * 0.56;
 			myProfilePic.scaleX = myProfilePic.scaleY;
@@ -154,6 +183,8 @@ package view.screens
 			opponentProfilePic.scaleX = opponentProfilePic.scaleY;
 			opponentProfilePic.x = headToHeadBackground.width - opponentProfilePic.width - 15;
 			opponentProfilePic.y = myProfilePic.y;//headToHeadBackground.y + headToHeadBackground.height - opponentProfilePic.height - 5; 
+						
+			vsImage.y = myProfilePic.y;
 			
 			myName.x = myProfilePic.x;
 			myName.y = headToHeadBackground.y + 5;
@@ -165,6 +196,12 @@ package view.screens
 			opponentName.text = "YYYYYY";
 			
 			scoreStrip.y = headToHeadBackground.y + headToHeadBackground.height;
+			
+			weeklyText.y = scoreStrip.y;
+			weeklyText.x = 80;//scoreStrip.width - weeklyText.width >> 1;
+			
+			headToHeadText.y = scoreStrip.y +13;
+			headToHeadText.x = 124;
 			
 			myPointsTextField.x = myProfilePic.x + 6;
 			myPointsTextField.y = scoreStrip.y + 5;
@@ -185,7 +222,7 @@ package view.screens
 			
 			mathcesList.y = startNewGameButton.y + startNewGameButton.defaultSkin.height;
 			mathcesList.width = this.actualWidth;
-			mathcesList.height = this.actualHeight - (logoBackground.height + headToHeadBackground.height + vsImage.height + startNewGameButton.height);
+			mathcesList.height = this.actualHeight - (logoBackground.height + headToHeadBackground.height + vsImage.height + startNewGameButton.defaultSkin.height);
 			
 			
 			var groceryList:ListCollection = new ListCollection(
@@ -198,23 +235,14 @@ package view.screens
 				{ label: "Chicken"},
 				{ label: "Bread"},
 				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
-				{ label: "Bread"},
-				{ label: "Chicken"},
 			]);
 			
 			mathcesList.dataProvider = groceryList;
+		}
+		
+		private function backTriggeredHandler(e:Event)
+		{
+			dispatchEvent(new starling.events.Event("onBack"));
 		}
 		
 		private function getGoBtnTextRenderer():ITextRenderer
@@ -222,6 +250,18 @@ package view.screens
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
 			goLabel.textFormat = textFormatGoBtn;
+			goLabel.embedFonts = true;
+			
+			return goLabel;
+		}
+		
+		private function getCoinsTextRenderer():ITextRenderer
+		{
+			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			
+			goLabel.textFormat = textFormatGoBtn;
+			goLabel.textFormat.size = 15;
+			goLabel.textFormat.font = "HelveticaNeueCondensed";
 			goLabel.embedFonts = true;
 			
 			return goLabel;

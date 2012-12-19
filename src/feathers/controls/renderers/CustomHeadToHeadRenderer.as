@@ -1,14 +1,18 @@
 package feathers.controls.renderers
 {
+	
+	import feathers.controls.Button;
 	import feathers.controls.Label;
 	import feathers.controls.List;
 	import feathers.controls.renderers.IListItemRenderer;
+	import feathers.controls.text.TextFieldTextEditor;
 	import feathers.controls.text.TextFieldTextRenderer;
 	import feathers.core.FeathersControl;
 	import flash.text.TextFormat;
 	import starling.display.Image;
+	import flash.geom.Point;
  
-	import starling.events.Event;
+	import starling.events.*;
 	
 	import view.util.Assets;
  
@@ -16,37 +20,92 @@ package feathers.controls.renderers
 	{
 		public function CustomHeadToHeadRenderer()
 		{
-			
+			this.addEventListener(TouchEvent.TOUCH, touchHandler);
+			this.addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
  
 		protected var backgroundItemRenderer:Image;
 		protected var itemLabel:Label;
 		
-		
-		private var namesTextFormat:TextFormat;
-		private var pointsTextFormat:TextFormat;
-		private var acceptedChallengesTextFormat:TextFormat;
-		private var completedChallengesTextFormat:TextFormat;
-		
-		protected var opponentProfilePic:Image;
-		
-		protected var opponentName:TextFieldTextRenderer;
-		protected var opponentPoints:TextFieldTextRenderer;
-		
-		protected var me:TextFieldTextRenderer;
-		protected var mePoints:TextFieldTextRenderer;
-		
-		protected var completedChallengesImage:Image;
-		protected var completedChallengesNumber:TextFieldTextRenderer;
-		
-		protected var acceptedChallengesImage:Image;
-		protected var acceptedChallengesNumber:TextFieldTextRenderer;
+		// custom assets
+		private var sizeDayText:int = 12;
+		private var dayText:TextFieldTextRenderer;
+		private var hourText:TextFieldTextRenderer;
+		private var sportImage:Image;
+		private var team1Text:TextFieldTextRenderer;
+		private var team2Text:TextFieldTextRenderer;
+		// to check
+		private var acceptButton:Button;
+		private var resultsButton:Button;
+		private var inPlayButton:Button;
+		private var waitingButton:Button;
 		
 		protected var _index:int = -1;
- 
+		
+		protected var touchPointID:int = -1;
+		private static const HELPER_POINT:Point = new Point();
+		
 		[Embed(source = "../../../assets/fonts/HelveticaNeueLTCom-Cn.ttf",embedAsCFF="false", fontName="HelveticaNeueLT", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue:Class;
 		
+		[Embed(source="../../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf",embedAsCFF="false", fontName="HelveticaNeueBold", advancedAntiAliasing="true", mimeType = "application/x-font")]
+		private static const helveticaBold:Class;
+		
+		protected function touchHandler(event:TouchEvent):void
+		{
+				const touches:Vector.<Touch> = event.getTouches(this);
+				if(touches.length == 0)
+				{
+				//hover has ended
+				return;
+				}
+				if(this.touchPointID >= 0)
+				{
+				var touch:Touch;
+				for each(var currentTouch:Touch in touches)
+				{
+					if(currentTouch.id == this.touchPointID)
+					{
+					touch = currentTouch;
+					break;
+					}
+				}
+				if(!touch)
+				{
+					return;
+				}
+				if(touch.phase == TouchPhase.ENDED)
+				{
+				this.touchPointID = -1;
+ 
+				touch.getLocation(this, HELPER_POINT);
+				//check if the touch is still over the target
+				//also, only change it if we're not selected. we're not a toggle.
+				if(this.hitTest(HELPER_POINT, true) != null && !this._isSelected)
+				{
+					this.isSelected = true;
+				}
+				return;
+				}
+			}
+			else
+			{
+				for each(touch in touches)
+				{
+					if(touch.phase == TouchPhase.BEGAN)
+					{
+						this.touchPointID = touch.id;
+						return;
+					}
+				}
+			}
+		}
+	
+		protected function removedFromStageHandler(event:Event):void
+		{
+			this.touchPointID = -1;
+		}
+
 		public function get index():int
 		{
 			return this._index;
@@ -96,6 +155,7 @@ package feathers.controls.renderers
 			this.invalidate(INVALIDATION_FLAG_DATA);
 		}
  
+		
 		protected var _isSelected:Boolean;
  
 		public function get isSelected():Boolean
@@ -113,6 +173,7 @@ package feathers.controls.renderers
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
 			this.dispatchEventWith(Event.CHANGE);
 		}
+		
  
 		override protected function initialize():void
 		{
@@ -129,82 +190,109 @@ package feathers.controls.renderers
 				this.width = backgroundItemRenderer.width;
 				this.height = backgroundItemRenderer.height;
 			}
-			// should be dynamic
-			if (!this.opponentProfilePic)
+			if (!this.dayText)
 			{
-				opponentProfilePic = new Image( Assets.getAssetsTexture("profilePic") );
-				this.addChild(opponentProfilePic);
+				this.dayText = new TextFieldTextRenderer();
+				addChild(this.dayText);
+				dayText.text = "Today";
+				dayText.height = 20;
+				this.dayText.textFormat = new TextFormat("HelveticaNeueLT", sizeDayText, 0x000000); 
+				this.dayText.embedFonts = true;
+				dayText.x = 6;
+				dayText.y = backgroundItemRenderer.height/2 - 18;
 			}
-			if (!this.opponentName)
+			if (!this.hourText)
 			{
-				this.opponentName = new TextFieldTextRenderer();
-				opponentName.textFormat = namesTextFormat;
-				opponentName.embedFonts = true;
-				opponentName.text = "Opponent Name";
-				opponentName.x = opponentProfilePic.x + opponentProfilePic.width + 10;
-				opponentName.y = 10;
-				
-				this.addChild(opponentName);
+				this.hourText = new TextFieldTextRenderer();
+				addChild(this.hourText);
+				hourText.text = "16:00";
+				hourText.x = dayText.x;
+				hourText.y = dayText.y + 20;
+				//this.hourText.textFormat = ;
+				//this.hourText.embedFonts = true;
 			}
-			if (!this.me)
+			if (!this.sportImage)
 			{
-				this.me = new TextFieldTextRenderer();
-				me.textFormat = namesTextFormat;
-				me.embedFonts = true;
-				me.text = "Me";
-				me.x = opponentProfilePic.x + 2.5 * opponentProfilePic.width + 10;
-				me.y = 10;
-				
-				this.addChild(me);
+				this.sportImage = new Image(Assets.getAssetsTexture("h2h_soccer_icon"));
+				addChild(sportImage);
+				sportImage.x = this.backgroundItemRenderer.width/6;
+				sportImage.y = this.backgroundItemRenderer.height - this.sportImage.height >> 1;
 			}
-			if (!this.opponentPoints)
+			if (!this.team1Text)
 			{
-				this.opponentPoints = new TextFieldTextRenderer();
-				opponentPoints.textFormat = pointsTextFormat;
-				opponentPoints.embedFonts = true;
-				opponentPoints.text = "999";
-				opponentPoints.x = opponentName.x;
-				opponentPoints.y = opponentPoints.y + 30;
-				
-				this.addChild(opponentPoints);
+				this.team1Text = new TextFieldTextRenderer();
+				addChild(this.team1Text);
+				team1Text.x = this.backgroundItemRenderer.width / 3;
+				team1Text.y = this.dayText.y;
+				team1Text.text = "Norwich City";
 			}
-			if (!this.mePoints)
+			if (!this.team2Text)
 			{
-				this.mePoints = new TextFieldTextRenderer();
-				mePoints.textFormat = pointsTextFormat;
-				mePoints.embedFonts = true;
-				mePoints.text = "999";
-				mePoints.x = me.x;
-				mePoints.y = opponentPoints.y;
-				
-				this.addChild(mePoints);
+				this.team2Text = new TextFieldTextRenderer();
+				addChild(this.team2Text);
+				team2Text.x = this.backgroundItemRenderer.width / 3;
+				team2Text.y = this.hourText.y;
+				team2Text.text = "Norwich City";
 			}
-			if (!this.completedChallengesImage)
+			if (!this.acceptButton)
 			{
-				completedChallengesImage = new Image(Assets.getAssetsTexture("cup_on"));
-				completedChallengesImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
-				completedChallengesImage.y = mePoints.y + 10;
-				
-				this.addChild(completedChallengesImage);
+				this.acceptButton = new Button();
+				acceptButton.defaultSkin = new Image(Assets.getAssetsTexture("accept_btn"));
+				acceptButton.downSkin = new Image(Assets.getAssetsTexture("accept_btn_press"));
+				acceptButton.label = "Accept";
+				acceptButton.labelOffsetX = 9;
+				//addChild(acceptButton);
+				acceptButton.x = backgroundItemRenderer.width / 1.5;
+				acceptButton.y = backgroundItemRenderer.height - acceptButton.defaultSkin.height >> 1;
 			}
-			if (!this.acceptedChallengesImage)
+			if (!this.resultsButton)
 			{
-				acceptedChallengesImage = new Image(Assets.getAssetsTexture("new_on"));
-				acceptedChallengesImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
-				acceptedChallengesImage.y = me.y + 10;
-				
-				this.addChild(acceptedChallengesImage);	
+				this.resultsButton = new Button();
+				resultsButton.defaultSkin = new Image(Assets.getAssetsTexture("results_btn"));
+				resultsButton.downSkin = new Image(Assets.getAssetsTexture("results_btn_press"));
+				resultsButton.label = "Results";
+				resultsButton.labelOffsetX = 9;
+				addChild(resultsButton);
+				resultsButton.x = backgroundItemRenderer.width / 1.5;
+				resultsButton.y = backgroundItemRenderer.height - resultsButton.defaultSkin.height >> 1;
+			}
+			if (!this.inPlayButton)
+			{
+				this.inPlayButton = new Button();
+				inPlayButton.defaultSkin = new Image(Assets.getAssetsTexture("in_play_icon"));
+				inPlayButton.downSkin = new Image(Assets.getAssetsTexture("in_play_icon"));
+				inPlayButton.label = "In-Play";
+				inPlayButton.labelOffsetX = 9;
+				//addChild(inPlayButton);
+				inPlayButton.x = backgroundItemRenderer.width / 1.5;
+				inPlayButton.y = backgroundItemRenderer.height - inPlayButton.defaultSkin.height >> 1;
+			}
+			if (!this.waitingButton)
+			{
+				this.waitingButton = new Button();
+				waitingButton.defaultSkin = new Image(Assets.getAssetsTexture("waiting_icon"));
+				waitingButton.downSkin = new Image(Assets.getAssetsTexture("waiting_icon"));
+				waitingButton.label = "Waiting";
+				waitingButton.labelOffsetX = 9;
+				//addChild(waitingButton);
+				waitingButton.x = backgroundItemRenderer.width / 1.5;
+				waitingButton.y = backgroundItemRenderer.height - waitingButton.defaultSkin.height >> 1;
 			}
 		}
 		
+		
 		private function initTextFormats():void
 		{
+			/*
 			namesTextFormat  = new TextFormat("HelveticaNeueLT", 12, 0x4D4D4D);
 			pointsTextFormat = new TextFormat("HelveticaNeueLT", 30, 0x4D4D4D);
-			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueLT", 8, 0x5D9B05);
-			completedChallengesTextFormat = new TextFormat("HelveticaNeueLT", 8, 0x4D4D4D);
+			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x5D9B05);
+			completedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x4D4D4D);
+			newChallengeTextFormat = new TextFormat("HelveticaNeueLT", 12, 0x478804);
+			*/
 		}
- 
+		
+		
 		override protected function draw():void
 		{
 			const dataInvalid:Boolean = this.isInvalid(INVALIDATION_FLAG_DATA);
@@ -215,7 +303,7 @@ package feathers.controls.renderers
 			{
 				this.commitData();
 			}
- 
+						
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
  
 			if(dataInvalid || sizeInvalid)
@@ -224,6 +312,7 @@ package feathers.controls.renderers
 			}
 		}
  
+		
 		protected function autoSizeIfNeeded():Boolean
 		{
 			const needsWidth:Boolean = isNaN(this.explicitWidth);
@@ -247,16 +336,17 @@ package feathers.controls.renderers
 			}
 			return this.setSizeInternal(newWidth, newHeight, false);
 		}
- 
+		
+		
 		protected function commitData():void
 		{
 			if(this._data)
 			{
-				this.itemLabel.text = this._data.toString();
+				//this.itemLabel.text = this._data.toString();
 			}
 			else
 			{
-				this.itemLabel.text = "";
+				//this.itemLabel.text = "";
 			}
 		}
  

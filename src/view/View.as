@@ -71,13 +71,13 @@ package view
 			
 			this.navigator.addScreen(HEAD_TO_HEAD_SCREEN, new ScreenNavigatorItem(new HeadToHeadScreen(),
 			{
-				onEmailValidated: LOBBY_SCREEN
-			}
-			
-			) );
+				onBack: LOBBY_SCREEN
+			}			
+			)
+			);
 			
 			this.navigator.showScreen(WELCOME_SCREEN);
-			
+			//this.navigator.showScreen(HEAD_TO_HEAD_SCREEN);
 			
 			this.transitionManager = new ScreenSlidingStackTransitionManager(navigator);
 			//this.transitionManager.duration = 0.4;

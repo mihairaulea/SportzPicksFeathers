@@ -137,7 +137,12 @@ package view.screens
 			
 		}
 		
-
+		override protected function screen_removedFromStageHandler(event:Event):void
+		{
+			super.screen_removedFromStageHandler(event);
+			trace("screen removed from stage handler");
+		}
+		
 		private function getFacebookTextRenderer():ITextRenderer
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
@@ -162,7 +167,7 @@ package view.screens
 		{
 			button.addEventListener( Event.TRIGGERED,(function(e:Event):void
 			{
-				dispatchEvent(new Event(event));
+				dispatchEvent(new starling.events.Event(event));
 			}));
 
 		}

@@ -1,5 +1,6 @@
 package feathers.controls.renderers
 {
+	
 	import feathers.controls.Label;
 	import feathers.controls.List;
 	import feathers.controls.renderers.IListItemRenderer;
@@ -7,8 +8,9 @@ package feathers.controls.renderers
 	import feathers.core.FeathersControl;
 	import flash.text.TextFormat;
 	import starling.display.Image;
+	import flash.geom.Point;
  
-	import starling.events.Event;
+	import starling.events.*;
 	
 	import view.util.Assets;
  
@@ -16,7 +18,8 @@ package feathers.controls.renderers
 	{
 		public function CustomLobbyItemRenderer()
 		{
-			
+			this.addEventListener(TouchEvent.TOUCH, touchHandler);
+			this.addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
  
 		protected var backgroundItemRenderer:Image;
@@ -37,16 +40,82 @@ package feathers.controls.renderers
 		protected var mePoints:TextFieldTextRenderer;
 		
 		protected var completedChallengesImage:Image;
+		protected var completedChallengesOffImage:Image;
 		protected var completedChallengesNumber:TextFieldTextRenderer;
 		
 		protected var acceptedChallengesImage:Image;
+		protected var acceptedChallengesOffImage:Image;
 		protected var acceptedChallengesNumber:TextFieldTextRenderer;
 		
+		protected var newChallengeText:TextFieldTextRenderer;
+		protected var newChallengeTextFormat:TextFormat;
+		
 		protected var _index:int = -1;
- 
+		
+		protected var touchPointID:int = -1;
+		private static const HELPER_POINT:Point = new Point();
+		
 		[Embed(source = "../../../assets/fonts/HelveticaNeueLTCom-Cn.ttf",embedAsCFF="false", fontName="HelveticaNeueLT", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue:Class;
 		
+		[Embed(source="../../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf",embedAsCFF="false", fontName="HelveticaNeueBold", advancedAntiAliasing="true", mimeType = "application/x-font")]
+		private static const helveticaBold:Class;
+		
+		protected function touchHandler(event:TouchEvent):void
+		{
+				const touches:Vector.<Touch> = event.getTouches(this);
+				if(touches.length == 0)
+				{
+				//hover has ended
+				return;
+				}
+				if(this.touchPointID >= 0)
+				{
+				var touch:Touch;
+				for each(var currentTouch:Touch in touches)
+				{
+					if(currentTouch.id == this.touchPointID)
+					{
+					touch = currentTouch;
+					break;
+					}
+				}
+				if(!touch)
+				{
+					return;
+				}
+				if(touch.phase == TouchPhase.ENDED)
+				{
+				this.touchPointID = -1;
+ 
+				touch.getLocation(this, HELPER_POINT);
+				//check if the touch is still over the target
+				//also, only change it if we're not selected. we're not a toggle.
+				if(this.hitTest(HELPER_POINT, true) != null && !this._isSelected)
+				{
+					this.isSelected = true;
+				}
+				return;
+				}
+			}
+			else
+			{
+				for each(touch in touches)
+				{
+					if(touch.phase == TouchPhase.BEGAN)
+					{
+						this.touchPointID = touch.id;
+						return;
+					}
+				}
+			}
+		}
+	
+		protected function removedFromStageHandler(event:Event):void
+		{
+			this.touchPointID = -1;
+		}
+
 		public function get index():int
 		{
 			return this._index;
@@ -96,6 +165,7 @@ package feathers.controls.renderers
 			this.invalidate(INVALIDATION_FLAG_DATA);
 		}
  
+		
 		protected var _isSelected:Boolean;
  
 		public function get isSelected():Boolean
@@ -113,6 +183,7 @@ package feathers.controls.renderers
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
 			this.dispatchEventWith(Event.CHANGE);
 		}
+		
  
 		override protected function initialize():void
 		{
@@ -187,6 +258,17 @@ package feathers.controls.renderers
 				
 				this.addChild(completedChallengesImage);
 			}
+			if (!this.completedChallengesNumber)
+			{
+				completedChallengesNumber = new TextFieldTextRenderer();
+				completedChallengesNumber.x = completedChallengesImage.x + 20;
+				completedChallengesNumber.y = completedChallengesImage.y + 1;
+				completedChallengesNumber.textFormat = completedChallengesTextFormat;
+				completedChallengesNumber.embedFonts = true;
+				completedChallengesNumber.text = "9+";
+				
+				this.addChild(completedChallengesNumber);
+			}
 			if (!this.acceptedChallengesImage)
 			{
 				acceptedChallengesImage = new Image(Assets.getAssetsTexture("new_on"));
@@ -195,14 +277,57 @@ package feathers.controls.renderers
 				
 				this.addChild(acceptedChallengesImage);	
 			}
+			if (!this.acceptedChallengesOffImage)
+			{
+				acceptedChallengesOffImage = new Image(Assets.getAssetsTexture("new_off"));
+				acceptedChallengesOffImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
+				acceptedChallengesOffImage.y = me.y + 10;
+				
+				this.addChild(acceptedChallengesOffImage);	
+			}
+			if (!this.acceptedChallengesNumber)
+			{
+				acceptedChallengesNumber = new TextFieldTextRenderer();
+				acceptedChallengesNumber.x = acceptedChallengesImage.x + 20;
+				acceptedChallengesNumber.y = acceptedChallengesImage.y + 1;
+				acceptedChallengesNumber.textFormat = acceptedChallengesTextFormat;
+				acceptedChallengesNumber.embedFonts = true;
+				acceptedChallengesNumber.text = "9+";
+				
+				this.addChild(acceptedChallengesNumber);
+			}
+			if (!this.acceptedChallengesNumber)
+			{
+				acceptedChallengesNumber = new TextFieldTextRenderer();
+				acceptedChallengesNumber.x = acceptedChallengesImage.x + 20;
+				acceptedChallengesNumber.y = acceptedChallengesImage.y + 1;
+				acceptedChallengesNumber.textFormat = acceptedChallengesTextFormat;
+				acceptedChallengesNumber.embedFonts = true;
+				acceptedChallengesNumber.text = "9+";
+				
+				this.addChild(acceptedChallengesNumber);
+			}
+			
+			if (!this.newChallengeText)
+			{
+				newChallengeText = new TextFieldTextRenderer();
+				newChallengeText.text = "New Challenge";
+				newChallengeText.x = opponentName.x;
+				newChallengeText.y = opponentName.y + 30;
+				newChallengeText.textFormat = newChallengeTextFormat;
+				newChallengeText.embedFonts = true;
+				this.addChild(newChallengeText);
+				newChallengeText.visible = false;
+			}
 		}
 		
 		private function initTextFormats():void
 		{
 			namesTextFormat  = new TextFormat("HelveticaNeueLT", 12, 0x4D4D4D);
 			pointsTextFormat = new TextFormat("HelveticaNeueLT", 30, 0x4D4D4D);
-			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueLT", 8, 0x5D9B05);
-			completedChallengesTextFormat = new TextFormat("HelveticaNeueLT", 8, 0x4D4D4D);
+			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x5D9B05);
+			completedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x4D4D4D);
+			newChallengeTextFormat = new TextFormat("HelveticaNeueLT", 12, 0x478804);
 		}
  
 		override protected function draw():void
@@ -215,7 +340,7 @@ package feathers.controls.renderers
 			{
 				this.commitData();
 			}
- 
+						
 			sizeInvalid = this.autoSizeIfNeeded() || sizeInvalid;
  
 			if(dataInvalid || sizeInvalid)
@@ -224,6 +349,7 @@ package feathers.controls.renderers
 			}
 		}
  
+		
 		protected function autoSizeIfNeeded():Boolean
 		{
 			const needsWidth:Boolean = isNaN(this.explicitWidth);
@@ -247,16 +373,26 @@ package feathers.controls.renderers
 			}
 			return this.setSizeInternal(newWidth, newHeight, false);
 		}
- 
+		
+		
 		protected function commitData():void
 		{
 			if(this._data)
 			{
-				this.itemLabel.text = this._data.toString();
+				if(_data.CountOfNew == 0)
+				{
+					this.completedChallengesNumber.text = _data.CountOfResults;
+					this.acceptedChallengesNumber.text = _data.CountOfPending;
+					this.opponentName.text = _data.OpponentName;
+					this.opponentPoints.text = _data.OpponentScore;
+					this.mePoints.text = _data.PlayerScore;
+					this.me.text = "Me";
+				}
+				//this.itemLabel.text = this._data.toString();
 			}
 			else
 			{
-				this.itemLabel.text = "";
+				//this.itemLabel.text = "";
 			}
 		}
  

@@ -11,8 +11,8 @@ package model
 		public var CountOfNew:int;
 		public var CountOfPending:int;
 		public var CountOfWaiting:int;
-		public var OpponentId:int;
-		public var OpponentName:int;
+		public var OpponentId:String;
+		public var OpponentName:String;
 		public var OpponentScore:int;
 		public var PlayerScore:int;
 		

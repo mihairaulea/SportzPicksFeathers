@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:85bf13d60616b8ba1ebf8701f589d1aa$ -->
+<!-- $TexturePacker:SmartUpdate:269d9af086c5a8c416cea046789d88bd$ -->
 <TextureAtlas imagePath="assetsLD.png">
     <SubTexture name="accept_btn" x="914" y="158" width="90" height="50"/>
     <SubTexture name="accept_btn_press" x="914" y="106" width="90" height="50"/>
-    <SubTexture name="add_coins" x="941" y="309" width="25" height="25"/>
-    <SubTexture name="add_coins_press" x="914" y="309" width="25" height="25"/>
-    <SubTexture name="back_arrow" x="934" y="336" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="back_arrow_press" x="914" y="336" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="add_coins" x="941" y="389" width="25" height="25"/>
+    <SubTexture name="add_coins_press" x="914" y="389" width="25" height="25"/>
+    <SubTexture name="back_arrow" x="1001" y="272" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="back_arrow_press" x="1001" y="246" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
     <SubTexture name="black_bg" x="2" y="484" width="320" height="480"/>
-    <SubTexture name="coin" x="993" y="325" width="23" height="23"/>
-    <SubTexture name="coins_bg" x="914" y="210" width="85" height="27"/>
+    <SubTexture name="coin" x="993" y="399" width="23" height="23"/>
+    <SubTexture name="coins_bg" x="914" y="290" width="85" height="27"/>
+    <SubTexture name="coins_hud" x="914" y="250" width="85" height="38" frameX="0" frameY="-2" frameWidth="85" frameHeight="40"/>
+    <SubTexture name="coins_hud_press" x="914" y="210" width="85" height="38" frameX="0" frameY="-2" frameWidth="85" frameHeight="40"/>
     <SubTexture name="cup_off" x="1006" y="42" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
     <SubTexture name="cup_on" x="1006" y="24" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
     <SubTexture name="email_btn" x="626" y="788" width="300" height="47"/>
@@ -24,19 +26,19 @@
     <SubTexture name="green_bg" x="2" y="2" width="320" height="480"/>
     <SubTexture name="h2h_bg" x="592" y="383" width="320" height="69"/>
     <SubTexture name="h2h_list_bg" x="592" y="311" width="320" height="70"/>
-    <SubTexture name="h2h_soccer_icon" x="968" y="325" width="23" height="23" frameX="-5" frameY="-3" frameWidth="31" frameHeight="27"/>
-    <SubTexture name="in_play_icon" x="954" y="350" width="18" height="20" frameX="-1" frameY="0" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="h2h_soccer_icon" x="968" y="399" width="23" height="23" frameX="-5" frameY="-3" frameWidth="31" frameHeight="27"/>
+    <SubTexture name="in_play_icon" x="1001" y="298" width="18" height="20" frameX="-12" frameY="-13" frameWidth="90" frameHeight="50"/>
     <SubTexture name="lobby_list_bg" x="592" y="238" width="320" height="71"/>
     <SubTexture name="logo" x="324" y="2" width="210" height="83" frameX="-2" frameY="0" frameWidth="218" frameHeight="87"/>
     <SubTexture name="logo_small" x="898" y="658" width="112" height="30" frameX="0" frameY="-7" frameWidth="112" frameHeight="44"/>
-    <SubTexture name="menu_icon" x="984" y="301" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="menu_icon_press" x="984" y="277" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="menu_icon" x="984" y="375" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="menu_icon_press" x="984" y="351" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
     <SubTexture name="nav_bar" x="592" y="580" width="320" height="44"/>
     <SubTexture name="nav_bar_shadow" x="626" y="709" width="320" height="6"/>
     <SubTexture name="new_off" x="1001" y="228" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
     <SubTexture name="new_on" x="1001" y="210" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
     <SubTexture name="panel_bottom" x="324" y="658" width="300" height="201"/>
-    <SubTexture name="profilePic" x="914" y="239" width="68" height="68"/>
+    <SubTexture name="profilePic" x="914" y="319" width="68" height="68"/>
     <SubTexture name="results_btn" x="914" y="54" width="90" height="50"/>
     <SubTexture name="results_btn_press" x="914" y="2" width="90" height="50"/>
     <SubTexture name="score_strip" x="592" y="626" width="320" height="30"/>
@@ -46,6 +48,6 @@
     <SubTexture name="start_btn_press" x="592" y="454" width="320" height="61"/>
     <SubTexture name="timer_bg" x="592" y="133" width="320" height="103"/>
     <SubTexture name="under_shadow" x="592" y="1013" width="320" height="6"/>
-    <SubTexture name="vs" x="984" y="246" width="32" height="29"/>
-    <SubTexture name="waiting_icon" x="1006" y="2" width="16" height="20" frameX="-2" frameY="0" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="vs" x="984" y="320" width="32" height="29"/>
+    <SubTexture name="waiting_icon" x="1006" y="2" width="16" height="20" frameX="-13" frameY="-13" frameWidth="90" frameHeight="50"/>
 </TextureAtlas>

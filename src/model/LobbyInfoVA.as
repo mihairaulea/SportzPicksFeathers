@@ -11,6 +11,7 @@ package model
 		public var DaysLeft:int;
 		public var HoursLeft:int;
 		public var MinutesLeft:int;
+		public var SecondsLeft:int;
 		public var PointsTotal:int;
 		
 		public var LobbyPageItems:Vector.<Challenge> = new Vector.<Challenge>();
@@ -26,6 +27,7 @@ package model
 			DaysLeft = 0;
 			HoursLeft = 0;
 			MinutesLeft = 0;
+			SecondsLeft = 0;
 			PointsTotal = 0;
 			
 			LobbyPageItems.splice(0, LobbyPageItems.length);
