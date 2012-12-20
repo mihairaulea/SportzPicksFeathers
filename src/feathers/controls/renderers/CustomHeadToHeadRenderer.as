@@ -11,6 +11,7 @@ package feathers.controls.renderers
 	import flash.text.TextFormat;
 	import starling.display.Image;
 	import flash.geom.Point;
+	import view.util.FontFactory;
  
 	import starling.events.*;
 	
@@ -47,7 +48,7 @@ package feathers.controls.renderers
 		
 		[Embed(source = "../../../assets/fonts/HelveticaNeueLTCom-Cn.ttf",embedAsCFF="false", fontName="HelveticaNeueLT", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue:Class;
-		
+				
 		[Embed(source="../../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf",embedAsCFF="false", fontName="HelveticaNeueBold", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaBold:Class;
 		
@@ -196,10 +197,10 @@ package feathers.controls.renderers
 				addChild(this.dayText);
 				dayText.text = "Today";
 				dayText.height = 20;
-				this.dayText.textFormat = new TextFormat("HelveticaNeueLT", sizeDayText, 0x000000); 
+				this.dayText.textFormat = FontFactory.getTextFormat(1, 14, 0x808080);
 				this.dayText.embedFonts = true;
 				dayText.x = 6;
-				dayText.y = backgroundItemRenderer.height/2 - 18;
+				dayText.y = backgroundItemRenderer.height/2 - 19;
 			}
 			if (!this.hourText)
 			{
@@ -208,8 +209,8 @@ package feathers.controls.renderers
 				hourText.text = "16:00";
 				hourText.x = dayText.x;
 				hourText.y = dayText.y + 20;
-				//this.hourText.textFormat = ;
-				//this.hourText.embedFonts = true;
+				this.hourText.textFormat = FontFactory.getTextFormat(1, 14, 0x808080);
+				this.hourText.embedFonts = true;
 			}
 			if (!this.sportImage)
 			{
@@ -224,6 +225,8 @@ package feathers.controls.renderers
 				addChild(this.team1Text);
 				team1Text.x = this.backgroundItemRenderer.width / 3;
 				team1Text.y = this.dayText.y;
+				team1Text.textFormat = FontFactory.getTextFormat(0, 14, 0x808080);
+				team1Text.embedFonts = true;
 				team1Text.text = "Norwich City";
 			}
 			if (!this.team2Text)
@@ -232,6 +235,8 @@ package feathers.controls.renderers
 				addChild(this.team2Text);
 				team2Text.x = this.backgroundItemRenderer.width / 3;
 				team2Text.y = this.hourText.y;
+				team2Text.textFormat = FontFactory.getTextFormat(0, 14, 0x808080);
+				team2Text.embedFonts = true;
 				team2Text.text = "Norwich City";
 			}
 			if (!this.acceptButton)
@@ -239,8 +244,9 @@ package feathers.controls.renderers
 				this.acceptButton = new Button();
 				acceptButton.defaultSkin = new Image(Assets.getAssetsTexture("accept_btn"));
 				acceptButton.downSkin = new Image(Assets.getAssetsTexture("accept_btn_press"));
-				acceptButton.label = "Accept";
+				acceptButton.labelFactory = getLabelRenderer;
 				acceptButton.labelOffsetX = 9;
+				acceptButton.label = "Accept";
 				//addChild(acceptButton);
 				acceptButton.x = backgroundItemRenderer.width / 1.5;
 				acceptButton.y = backgroundItemRenderer.height - acceptButton.defaultSkin.height >> 1;
@@ -250,6 +256,7 @@ package feathers.controls.renderers
 				this.resultsButton = new Button();
 				resultsButton.defaultSkin = new Image(Assets.getAssetsTexture("results_btn"));
 				resultsButton.downSkin = new Image(Assets.getAssetsTexture("results_btn_press"));
+				resultsButton.labelFactory = getLabelRenderer;
 				resultsButton.label = "Results";
 				resultsButton.labelOffsetX = 9;
 				addChild(resultsButton);
@@ -280,6 +287,13 @@ package feathers.controls.renderers
 			}
 		}
 		
+		private function getLabelRenderer():TextFieldTextRenderer
+		{ 
+			var t:TextFieldTextRenderer = new TextFieldTextRenderer(); 
+			t.textFormat = FontFactory.getTextFormat(2, 14, 0xFFFFFF); 
+			t.embedFonts = true; 
+			return t;
+		}
 		
 		private function initTextFormats():void
 		{

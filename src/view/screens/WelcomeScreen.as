@@ -73,9 +73,7 @@ package view.screens
 			
 			textFormatHowConnect = new TextFormat("HelveticaNeueLTCom-BdCn" , 16  , 0xFFFFFF, true);
 			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
-			textFormatFacebookLabel.align = "left";
 			textFormatEmailLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 12, 0x808080, true);
-			textFormatEmailLabel.align = "left";
 			
 			addChild(howConnectText);
 			howConnectText.width = 240;
@@ -108,11 +106,10 @@ package view.screens
 		
 		//override 
 		override protected function draw():void
-		{			
-			
+		{						
 			//logo
 			logoImg.x = (this.actualWidth - logoImg.width >> 1) - 22.5;
-			logoImg.y = 55;
+			logoImg.y = 74;
 			
 			howConnectText.x = logoImg.x;
 			howConnectText.y = logoImg.height + logoImg.y + 30;
@@ -122,7 +119,8 @@ package view.screens
 			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
-			facebookButton.y = howConnectText.y + howConnectText.height;
+			facebookButton.y = howConnectText.y + 34;
+			facebookButton.labelOffsetX = -8;
 			
 			// "With your email address",);
 			addChild(emailButton);
@@ -131,10 +129,10 @@ package view.screens
 			emailButton.y = facebookButton.y + facebookButton.height;
 			emailButton.labelFactory = getEmailTextRenderer;
 			emailButton.label = "With your Email address";
+			emailButton.labelOffsetX = -8;
 			
 			shadow.x = this.actualWidth - shadow.width >> 1;
-			shadow.y = emailButton.y + emailButton.height + 10;		
-			
+			shadow.y = emailButton.y + emailButton.height + 10;					
 		}
 		
 		override protected function screen_removedFromStageHandler(event:Event):void
@@ -146,8 +144,9 @@ package view.screens
 		private function getFacebookTextRenderer():ITextRenderer
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
-			
+			facebookLabel.width = 140;
 			facebookLabel.textFormat = textFormatFacebookLabel;
+			facebookLabel.textFormat.align = "left";
 			facebookLabel.embedFonts = true;
 			
 			return facebookLabel;
@@ -156,8 +155,9 @@ package view.screens
 		private function getEmailTextRenderer():ITextRenderer
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
-			
+			facebookLabel.width = 140;			
 			facebookLabel.textFormat = textFormatEmailLabel;
+			facebookLabel.textFormat.align = "left";
 			facebookLabel.embedFonts = true;
 			
 			return facebookLabel;

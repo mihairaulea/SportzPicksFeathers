@@ -9,6 +9,7 @@ package feathers.controls.renderers
 	import flash.text.TextFormat;
 	import starling.display.Image;
 	import flash.geom.Point;
+	import view.util.FontFactory;
  
 	import starling.events.*;
 	
@@ -233,6 +234,7 @@ package feathers.controls.renderers
 				this.opponentPoints = new TextFieldTextRenderer();
 				opponentPoints.textFormat = pointsTextFormat;
 				opponentPoints.embedFonts = true;
+				opponentPoints.width = 50;
 				opponentPoints.text = "999";
 				opponentPoints.x = opponentName.x;
 				opponentPoints.y = opponentPoints.y + 30;
@@ -243,6 +245,7 @@ package feathers.controls.renderers
 			{
 				this.mePoints = new TextFieldTextRenderer();
 				mePoints.textFormat = pointsTextFormat;
+				mePoints.width = 50;
 				mePoints.embedFonts = true;
 				mePoints.text = "999";
 				mePoints.x = me.x;
@@ -319,6 +322,13 @@ package feathers.controls.renderers
 				this.addChild(newChallengeText);
 				newChallengeText.visible = false;
 			}
+			
+			var textPoints:TextFieldTextRenderer = new TextFieldTextRenderer();
+			addChild(textPoints);
+			textPoints.text = ":";
+			textPoints.x = opponentPoints.x + opponentPoints.width;
+			textPoints.y = opponentPoints.y - 2;
+			textPoints.textFormat = FontFactory.getTextFormat(2, 28, 0xA1A1A1);
 		}
 		
 		private function initTextFormats():void

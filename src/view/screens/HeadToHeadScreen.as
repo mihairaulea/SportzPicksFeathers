@@ -33,7 +33,6 @@ package view.screens
 		
 		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeueBold:Class;
-		
 		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-Cn.ttf", embedAsCFF="false", fontName="HelveticaNeueLT", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue:Class;
 		

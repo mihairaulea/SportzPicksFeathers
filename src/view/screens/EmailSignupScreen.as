@@ -31,6 +31,8 @@ package view.screens
 		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue:Class;
 		
+		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-MdCn.ttf", embedAsCFF="false", fontName="HelveticaNeue", advancedAntiAliasing="true", mimeType = "application/x-font")]
+		private static const helvetica:Class;
 		//assets
 		private var smallLogo:Image;
 		private var logoBackground:Image;
@@ -79,11 +81,10 @@ package view.screens
 			addChild(navBarShadow);
 			
 			textFormatCreateYourAccount = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0xFFFFFF);
-			textFormatTitleField = new TextFormat("HelveticaNeueLTCom", 14, 0x4D4D4D);
+			textFormatTitleField = new TextFormat("HelveticaNeue", 14, 0x4D4D4D);
 			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
-			textFormatFacebookLabel.align = "left";
 			textFormatInputField = new TextFormat("HelveticaNeueLTCom-BdCn", 15, 0xB3B3B3, true);
-			textFormatError = new TextFormat("HelveticaNeueLTCom-BdCn", 9, 0x890B0B);
+			textFormatError = new TextFormat("HelveticaNeueLTCom-BdCn", 11, 0x890B0B);
 			textFormatGoBtn = new TextFormat("HelveticaNeueLTCom-BdCn", 18, 0xFFFFFF);
 			
 			createYourAccount = new TextFieldTextRenderer();
@@ -103,12 +104,6 @@ package view.screens
 			addChild(facebookButton);
 			facebookButton.validate();
 			
-			emailAddressTitle = new TextFieldTextRenderer();
-			emailAddressTitle.text = "Email address*";
-			emailAddressTitle.textFormat = textFormatTitleField;
-			emailAddressTitle.embedFonts = true;
-			addChild(emailAddressTitle);
-			
 			emailInput = new feathers.controls.TextInput();
 			var inputBackImage:Image = new Image(Assets.getAssetsTexture("form_field"));
 			inputBackImage.pivotX = 5;
@@ -124,14 +119,7 @@ package view.screens
 			emailErrorFeedback.textFormat = textFormatError;
 			emailErrorFeedback.embedFonts = true;
 			addChild(emailErrorFeedback);
-			
-			usernameTitle = new TextFieldTextRenderer();
-			usernameTitle.text = "Username";
-			usernameTitle.textFormat = textFormatTitleField;
-			usernameTitle.embedFonts = true;
-			addChild(usernameTitle);
-			usernameTitle.validate();
-			
+						
 			usernameInput = new TextInput();
 			var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
 			inputBackImage2.pivotX = 5;
@@ -154,6 +142,19 @@ package view.screens
 			goBtn.labelFactory = getGoBtnTextRenderer;
 			goBtn.validate();
 			
+			emailAddressTitle = new TextFieldTextRenderer();
+			emailAddressTitle.text = "Email address*";
+			emailAddressTitle.textFormat = textFormatTitleField;
+			emailAddressTitle.embedFonts = true;
+			addChild(emailAddressTitle);
+			
+			usernameTitle = new TextFieldTextRenderer();
+			usernameTitle.text = "Username";
+			usernameTitle.textFormat = textFormatTitleField;
+			usernameTitle.embedFonts = true;
+			addChild(usernameTitle);
+			usernameTitle.validate();
+			
 			triggerSignalOnButtonRelease(goBtn, EVENTS[0]);
 		}
 		
@@ -174,40 +175,36 @@ package view.screens
 			backgroundPanel.x = facebookButton.x;
 			backgroundPanel.y = facebookButton.y + facebookButton.height;
 			
-			emailAddressTitle.x = backgroundPanel.x + 20;
-			emailAddressTitle.y = facebookButton.y + facebookButton.height + 10;
+			emailAddressTitle.x = backgroundPanel.x + 25;
+			emailAddressTitle.y = facebookButton.y + facebookButton.height + 14;
 			
-			emailInput.x = backgroundPanel.x + 10;
-			emailInput.y = emailAddressTitle.y + emailAddressTitle.height + 20;
+			emailInput.x = backgroundPanel.x + 20;
+			emailInput.y = emailAddressTitle.y + 25;
 			emailInput.addEventListener("focusIn", focusFormHandler);
 			emailInput.text = "Type your Email Address here";
 			
 			emailErrorFeedback.x = emailAddressTitle.x;
-			emailErrorFeedback.y = emailInput.y + 28;
+			emailErrorFeedback.y = emailInput.y + 24;
 			emailErrorFeedback.text = "Please enter a valid email address";
 			emailErrorFeedback.visible = false;
 			
-			usernameTitle.x = backgroundPanel.x + 20;
-			usernameTitle.y = emailErrorFeedback.y + emailErrorFeedback.height + 10;
+			usernameTitle.x = emailAddressTitle.x;
+			usernameTitle.y = emailInput.y + 38;;
 			
-			usernameInput.x = backgroundPanel.x + 10;
-			usernameInput.y = usernameTitle.y + usernameTitle.height+10 ;
+			usernameInput.x = emailInput.x;
+			usernameInput.y = usernameTitle.y + 25;
 			usernameInput.text = "Type your username here(optional)";
 			usernameInput.addEventListener("focusIn", focusFormHandler);
 			
 			usernameErrorFeedback.x = usernameTitle.x;
-			usernameErrorFeedback.y = usernameInput.y + 28;
+			usernameErrorFeedback.y = usernameInput.y + 24;
 			usernameErrorFeedback.text = "Sorry, this username is already taken try again";
 			usernameErrorFeedback.visible = false;
 			
 			addChild(goBtn);
 			
-			trace(backgroundPanel.width);
-			trace(goBtn.width);
-			trace((backgroundPanel.width - goBtn.width) / 2);
-			
 			goBtn.x = backgroundPanel.x + ( (backgroundPanel.width - goBtn.defaultSkin.width) / 2 );
-			goBtn.y = usernameErrorFeedback.y + 20;
+			goBtn.y = usernameErrorFeedback.y + 22;
 		}
 		
 		private function focusFormHandler(e:Event):void
