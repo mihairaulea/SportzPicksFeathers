@@ -307,7 +307,7 @@ package feathers.controls
 		/**
 		 * @private
 		 */
-		protected var _trackLayoutMode:String = TRACK_LAYOUT_MODE_SINGLE;
+		protected var _trackLayoutMode:String = TRACK_LAYOUT_MODE_ON_OFF;
 
 		[Inspectable(type="String",enumeration="single,onOff")]
 		/**

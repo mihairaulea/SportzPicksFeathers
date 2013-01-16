@@ -12,7 +12,7 @@ package view.util
 		
 		[Embed(source = "../../assets/assetsHD.xml", mimeType = "application/octet-stream")]
 		public static const AtlasXmlAssets:Class;
-		
+				
 		public function AssetsEmbedsHD() 
 		{
 			

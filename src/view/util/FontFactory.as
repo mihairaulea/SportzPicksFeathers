@@ -7,6 +7,9 @@ package view.util
 	 */
 	public class FontFactory 
 	{
+			
+		[Embed(source="../../assets/fonts/HELVETICA NEUE CONDENSED BOLD.TTF",embedAsCFF="false", fontName="helvetica", advancedAntiAliasing="true", mimeType = "application/x-font")]		
+		private static const helvetica:Class;
 		
 		[Embed(source = "../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf",embedAsCFF="false", fontName="HNBdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue1:Class;
@@ -23,7 +26,7 @@ package view.util
 		[Embed(source = "../../assets/fonts/DS-DIGIB.TTF",embedAsCFF="false", fontName="DSDIG", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue5:Class;
 				
-		private static var fontNames:Array = ["HNBdCn","HNMdCn","HNHvCn","HNCn","DSDIG"];
+		private static var fontNames:Array = ["helvetica","HNBdCn","HNMdCn","HNHvCn","HNCn","DSDIG"];
 		
 		public function FontFactory() 
 		{
@@ -32,7 +35,7 @@ package view.util
 		
 		public static function getTextFormat( fontId:int, fontSize:int, fontColor:int):TextFormat
 		{
-			return new TextFormat(fontNames[fontId], fontSize, fontSize);
+			return new TextFormat(fontNames[fontId], fontSize, fontColor);
 		}
 		
 	}

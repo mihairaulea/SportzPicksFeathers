@@ -24,10 +24,16 @@ package view
 	{
 		
 		private static const WELCOME_SCREEN:String = "welcomeScreen";
-		private static const FACEBOOK_SINGUP_SCREEN:String = "facebookSingupScreen";
 		private static const EMAIL_SIGNUP_SCREEN:String = "emailSignupScreen";
 		private static const HEAD_TO_HEAD_SCREEN:String = "headToHeadScreen";
 		private static const LOBBY_SCREEN:String = "lobbyScreen";
+		
+		private static const EMAIL_OPPONENT_SCREEN:String = "emailOpponentScreen";
+		private static const FACEBOOK_FRIENDS_SCREEN:String = "facebookFriendsScreen";
+		private static const NEW_GAME_SCREEN:String = "newGameScreen";
+		private static const POPULAR_EVENTS_SCREEN:String = "popularEventsScreen";
+		private static const SELECT_EVENT_SCREEN:String = "selectEventScreen";
+		private static const SELECT_SPORT_SCREEN:String = "selectSportScreen";
 		
 		private var navigator:ScreenNavigator;
 		private var transitionManager:ScreenSlidingStackTransitionManager;
@@ -40,15 +46,14 @@ package view
 		private function onAddedToStage(e:Event):void
 		{
 			Assets.contentScaleFactor = Starling.current.contentScaleFactor;
-			var theme:SportzPicksTheme = new SportzPicksTheme(stage);
+			//var theme:SportzPicksTheme = new SportzPicksTheme(stage);
 			this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
 			this.navigator = new ScreenNavigator();
 			this.addChild(navigator);
-			
+						
 			this.navigator.addScreen(WELCOME_SCREEN, new ScreenNavigatorItem(new WelcomeScreen(),
 			{
-				onFacebook: FACEBOOK_SINGUP_SCREEN,
 				onEmail   : EMAIL_SIGNUP_SCREEN
 			}
 			
@@ -76,8 +81,59 @@ package view
 			)
 			);
 			
-			//this.navigator.showScreen(WELCOME_SCREEN);
-			this.navigator.showScreen(LOBBY_SCREEN);
+			this.navigator.addScreen(EMAIL_OPPONENT_SCREEN, new ScreenNavigatorItem(new EmailOpponentScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.addScreen(FACEBOOK_FRIENDS_SCREEN, new ScreenNavigatorItem(new FacebookFriendsScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.addScreen(NEW_GAME_SCREEN, new ScreenNavigatorItem(new NewGameScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.addScreen(POPULAR_EVENTS_SCREEN, new ScreenNavigatorItem(new PopularEventsScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.addScreen(SELECT_EVENT_SCREEN, new ScreenNavigatorItem(new SelectEventScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.addScreen(SELECT_SPORT_SCREEN, new ScreenNavigatorItem(new SelectSportScreen(),
+			{
+				onBack: LOBBY_SCREEN
+			}
+			)
+			);
+			
+			this.navigator.showScreen(WELCOME_SCREEN);
+			//this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
+			//this.navigator.showScreen(LOBBY_SCREEN);
+			//this.navigator.showScreen(HEAD_TO_HEAD_SCREEN);
+			// batch 2
+			//this.navigator.showScreen(EMAIL_OPPONENT_SCREEN);
+			//this.navigator.showScreen(FACEBOOK_FRIENDS_SCREEN);
+			//this.navigator.showScreen(NEW_GAME_SCREEN);
+			//this.navigator.showScreen(POPULAR_EVENTS_SCREEN);
+			//this.navigator.showScreen(SELECT_EVENT_SCREEN);
+			//this.navigator.showScreen(SELECT_SPORT_SCREEN);
 			
 			this.transitionManager = new ScreenSlidingStackTransitionManager(navigator);
 			//this.transitionManager.duration = 0.4;

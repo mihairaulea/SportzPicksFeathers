@@ -26,15 +26,10 @@ package view.screens
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 			
-	import view.util.Assets; 
+	import view.util.*; 
 	 
 	public class HeadToHeadScreen extends Screen
 	{
-		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeueBold:Class;
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-Cn.ttf", embedAsCFF="false", fontName="HelveticaNeueLT", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeue:Class;
 		
 		private var logoBackground:Image;
 		private var navBarShadow:Image;
@@ -75,11 +70,6 @@ package view.screens
 		
 		override protected function initialize():void
 		{
-			textFormatGoBtn = new TextFormat("HelveticaNeueLTCom-BdCn", 18, 0xFFFFFF);
-			textFormatTitle = new TextFormat("HelveticaNeueLT", 20, 0xFFFFFF);
-			myNameTextFormat = new TextFormat("HelveticaNeueLT", 12, 0xE6E6E6);
-			opponentNameTextFormat = new TextFormat("HelveticaNeueLT", 12, 0xE6E6E6); 
-			opponentNameTextFormat.align = "right";
 			
 			logoBackground = new Image( Assets.getAssetsTexture("nav_bar") );
 			addChild(logoBackground);
@@ -91,7 +81,7 @@ package view.screens
 			headToHeadTextTitle = new TextFieldTextRenderer();
 			addChild(headToHeadTextTitle);
 			headToHeadTextTitle.text = "Head to Head";
-			headToHeadTextTitle.textFormat = textFormatTitle;
+			headToHeadTextTitle.textFormat = FontFactory.getTextFormat(0,18,0xFFFFFF);
 			headToHeadTextTitle.embedFonts = true;
 			headToHeadTextTitle.validate();
 					
@@ -104,13 +94,14 @@ package view.screens
 			opponentProfilePic = new Image(Assets.getAssetsTexture("profilePic"));
 			addChild(opponentProfilePic);
 			myName = new TextFieldTextRenderer();
-			myName.textFormat = myNameTextFormat;
+			myName.textFormat = FontFactory.getTextFormat(0,13,0xE6E6E6);
 			myName.embedFonts = true;
 			myName.maxWidth = 100;
 			addChild(myName);
 			myName.validate();
 			opponentName = new TextFieldTextRenderer();
-			opponentName.textFormat = opponentNameTextFormat;
+			opponentName.textFormat = FontFactory.getTextFormat(0,13,0xE6E6E6);
+			opponentName.textFormat.align = "right";
 			opponentName.width = 100;
 			opponentName.embedFonts = true;
 			addChild(opponentName);
@@ -127,15 +118,16 @@ package view.screens
 			weeklyText = new TextFieldTextRenderer();
 			addChild(weeklyText);
 			weeklyText.text = "WEEKLY";
-			weeklyText.textFormat = opponentNameTextFormat;
+			weeklyText.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			weeklyText.textFormat.align = "center";
 			weeklyText.embedFonts = true;
 			weeklyText.wordWrap = true;
-			weeklyText.width = 100;
 						
 			headToHeadText = new TextFieldTextRenderer();
 			addChild(headToHeadText);
 			headToHeadText.text = "HEAD TO HEAD";
-			headToHeadText.textFormat = opponentNameTextFormat;
+			headToHeadText.textFormat = FontFactory.getTextFormat(2,14,0xE6E6E6);;
+			headToHeadText.textFormat.align = "center";
 			headToHeadText.embedFonts = true;
 			headToHeadText.wordWrap = true;						
 			
@@ -144,6 +136,7 @@ package view.screens
 			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
 			addChild(startNewGameButton);
 			startNewGameButton.label = "Start a new game";
+			startNewGameButton.labelOffsetX = -14;
 			startNewGameButton.labelFactory = getGoBtnTextRenderer;
 			
 			mathcesList = new List();
@@ -154,7 +147,7 @@ package view.screens
 			coinsDisplayAndBtn = new Button();
 			coinsDisplayAndBtn.defaultSkin = new Image(Assets.getAssetsTexture("coins_hud"));
 			coinsDisplayAndBtn.downSkin    = new Image(Assets.getAssetsTexture("coins_hud_press"));
-			coinsDisplayAndBtn.label = "XXXXX";
+			coinsDisplayAndBtn.label = "XXXX";
 			coinsDisplayAndBtn.labelOffsetY = 7;
 			coinsDisplayAndBtn.labelFactory = getCoinsTextRenderer;
 			addChild(coinsDisplayAndBtn);
@@ -196,11 +189,11 @@ package view.screens
 			
 			scoreStrip.y = headToHeadBackground.y + headToHeadBackground.height;
 			
-			weeklyText.y = scoreStrip.y;
-			weeklyText.x = 80;//scoreStrip.width - weeklyText.width >> 1;
+			weeklyText.y = scoreStrip.y;		
+			weeklyText.width = stage.stageWidth;
 			
-			headToHeadText.y = scoreStrip.y +13;
-			headToHeadText.x = 124;
+			headToHeadText.y = 123;
+			headToHeadText.width = stage.stageWidth;
 			
 			myPointsTextField.x = myProfilePic.x + 6;
 			myPointsTextField.y = scoreStrip.y + 5;
@@ -248,7 +241,7 @@ package view.screens
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			goLabel.textFormat = textFormatGoBtn;
+			goLabel.textFormat = FontFactory.getTextFormat(0,20,0xFFFFFF);
 			goLabel.embedFonts = true;
 			
 			return goLabel;
@@ -258,11 +251,8 @@ package view.screens
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			goLabel.textFormat = textFormatGoBtn;
-			goLabel.textFormat.size = 15;
-			goLabel.textFormat.font = "HelveticaNeueCondensed";
+			goLabel.textFormat = FontFactory.getTextFormat(0, 15, 0xFFFFFF);
 			goLabel.embedFonts = true;
-			
 			return goLabel;
 		}
 		

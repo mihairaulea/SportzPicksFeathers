@@ -314,7 +314,7 @@ package feathers.themes
 				atlasBitmapData.dispose();
 			}
 			
-			this.primaryBackgroundTexture = Assets.getAssetsTexture("green_bg");
+			this.primaryBackgroundTexture = Assets.getAssetsTexture("green_bg",2);
 		
 			const backgroundSkinTexture:Texture = this.atlas.getTexture("background-skin");
 			const backgroundDownSkinTexture:Texture = this.atlas.getTexture("background-down-skin");

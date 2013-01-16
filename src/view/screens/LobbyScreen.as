@@ -14,6 +14,7 @@ package view.screens
 	import flash.text.TextRenderer;
 	import starling.events.Event;
 	import flash.events.Event;
+	import view.util.FontFactory;
 	
 	import feathers.controls.Screen;
 	import feathers.controls.Button;
@@ -37,18 +38,6 @@ package view.screens
 	public class LobbyScreen extends Screen
 	{
 		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeue:Class;
-		
-		[Embed(source = "../../assets/fonts/HelveticaNeueLTCom-Cn.ttf", embedAsCFF="false", fontName="HelveticaNeueCondensed", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeueCondensed:Class;
-		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-MdCn.ttf", embedAsCFF="false", fontName="HelveticaMedium", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeueMed:Class;		
-		
-		[Embed(source="../../assets/fonts/DS-DIGIB.TTF", embedAsCFF="false", fontName="DigitalBold", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const dsDigitalBold:Class;
-		
 		private var smallLogo:Image;
 		private var logoBackground:Image;
 		private var navBarShadow:Image;
@@ -58,10 +47,6 @@ package view.screens
 		private var coinsTextFormat:TextFormat;
 		
 		private var timerBackground:Image;
-		private var timerInfoTextFormat:TextFormat;
-		private var actualTimerTextFormat:TextFormat;
-		private var textFormatGoBtn:TextFormat;
-		private var timerAdditionalInfoTextFormat:TextFormat;
 		
 		private var tournamentEndsInTextField:TextFieldTextRenderer;
 		private var daysTextField:TextFieldTextRenderer;
@@ -93,11 +78,7 @@ package view.screens
 		}
 		
 		override protected function initialize():void
-		{
-			textFormatGoBtn = new TextFormat("HelveticaNeueLTCom-BdCn", 18, 0xFFFFFF);
-			timerInfoTextFormat = new TextFormat("DigitalBold", 44, 0xE24B37);
-			timerAdditionalInfoTextFormat = new TextFormat("HelveticaMedium", 11, 0x8f8d8d);
-			
+		{			
 			logoBackground = new Image( Assets.getAssetsTexture("nav_bar") );
 			addChild(logoBackground);
 					
@@ -122,57 +103,53 @@ package view.screens
 			addChild(timerBackground);
 			
 			tournamentEndsInTextField = new TextFieldTextRenderer();
-			tournamentEndsInTextField.textFormat = timerAdditionalInfoTextFormat;
+			tournamentEndsInTextField.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
 			tournamentEndsInTextField.embedFonts = true;
 			addChild(tournamentEndsInTextField);
 			tournamentEndsInTextField.text = "TOURNAMENT ENDS IN:";
 			
 			days = new TextFieldTextRenderer();
-			days.textFormat = timerAdditionalInfoTextFormat;
-			days.textFormat.size = 10;
+			days.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
 			days.embedFonts = true;
 			addChild(days);
 			days.text = "DAYS";
 			
 			hours = new TextFieldTextRenderer();
-			hours.textFormat = timerAdditionalInfoTextFormat;
-			hours.textFormat.size = 10;
+			hours.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
 			hours.embedFonts = true;
 			addChild(hours);
 			hours.text = "HOURS";
 			
 			mins = new TextFieldTextRenderer();
-			mins.textFormat = timerAdditionalInfoTextFormat;
-			mins.textFormat.size = 10;
+			mins.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
 			mins.embedFonts = true;
 			addChild(mins);
 			mins.text = "MINS";
 			
 			secs = new TextFieldTextRenderer();
-			secs.textFormat = timerAdditionalInfoTextFormat;
-			secs.textFormat.size = 10;
+			secs.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
 			secs.embedFonts = true;
 			addChild(secs);
 			secs.text = "SECS";
 			
 			daysTextField = new TextFieldTextRenderer();
-			daysTextField.textFormat = timerInfoTextFormat;
+			daysTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
 			daysTextField.embedFonts = true;
 			addChild(daysTextField);
 			
 			
 			hoursTextField = new TextFieldTextRenderer();
-			hoursTextField.textFormat = timerInfoTextFormat;
+			hoursTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
 			hoursTextField.embedFonts = true;
 			addChild(hoursTextField);
 			
 			minsTextField = new TextFieldTextRenderer();
-			minsTextField.textFormat = timerInfoTextFormat;
+			minsTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
 			minsTextField.embedFonts = true;
 			addChild(minsTextField);
 			
 			secsTextField = new TextFieldTextRenderer();
-			secsTextField.textFormat = timerInfoTextFormat;
+			secsTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
 			secsTextField.embedFonts = true;
 			addChild(secsTextField);
 			
@@ -183,7 +160,7 @@ package view.screens
 			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
 			addChild(startNewGameButton);
 			startNewGameButton.label = "Start a new game";
-			startNewGameButton.labelOffsetX = -40;
+			startNewGameButton.labelOffsetX = -14;
 			startNewGameButton.labelFactory = getGoBtnTextRenderer;
 			
 			challengesList = new List();
@@ -241,7 +218,15 @@ package view.screens
 			challengesList.addEventListener(starling.events.Event.CHANGE, listChangedHandler);
 			// dummy data!!!
 			//{isNewChallenge:"false" ,playerPicture:"", playerName:"", playerPoints:"", myPoints:"", noTicks:"",noCups:""}		
-			dataRetrieval.requestLobbyData( AppState.MY_USER_ID );
+			challengesList.dataProvider = new ListCollection(
+			[
+				{ text: "Milk" },
+				{ text: "Eggs"},
+				{ text: "Bread"},
+				{ text: "Chicken"},
+			]);
+			
+			//dataRetrieval.requestLobbyData( AppState.MY_USER_ID );
 		}
 				
 		private function lobbyDataReceivedHandler(e : flash.events.Event)
@@ -265,7 +250,7 @@ package view.screens
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			goLabel.textFormat = textFormatGoBtn;
+			goLabel.textFormat = FontFactory.getTextFormat(0, 20,0xFFFFFF);
 			goLabel.embedFonts = true;
 			
 			return goLabel;
@@ -275,9 +260,7 @@ package view.screens
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			goLabel.textFormat = textFormatGoBtn;
-			goLabel.textFormat.size = 15;
-			goLabel.textFormat.font = "HelveticaNeueCondensed";
+			goLabel.textFormat = FontFactory.getTextFormat(0, 15, 0xFFFFFF);
 			goLabel.embedFonts = true;
 			
 			return goLabel;

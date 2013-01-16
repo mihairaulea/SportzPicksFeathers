@@ -21,43 +21,17 @@ package view.util
 	{
 		
 		private static var sContentScaleFactor:int = 1;
-        private static var sTextures:Dictionary = new Dictionary();
-        private static var sSounds:Dictionary = new Dictionary();
-		private static var sParticles:Dictionary;
-        private static var sTextureAtlasAssets:TextureAtlas;
-		private static var sTextureAtlasLevels:TextureAtlas;
-        private static var sBitmapFontsLoaded:Boolean;
+        
+		private static var sTextures:Dictionary = new Dictionary();
+		private static var sTextureAtlasAssets:TextureAtlas;
+		private static var sTextureAtlasAssets2:TextureAtlas;
+        
 		
-		// Particles XML files go here
-		/*
-		[Embed(source = "/assets/particles/particle.pex", mimeType = "application/octet-stream")]
-		public static var VictoryParticleXML:Class;
-		
-		[Embed(source = "/assets/particles/particleBurn.pex", mimeType = "application/octet-stream")]
-		public static var BurnParticleXML:Class;
-		*/
-		
-		// Sounds go here
-		
-		
-		// Fonts go here
-		/*
-		[Embed(source = "/assets/fonts/trajanPro.OTF", embedAsCFF = "false", 
-		 fontName = "trajanPro", fontFamily = "trajanPro", 
-		 mimeType="application/x-font-opentype")]
-		private static const trajanPro:Class;
-		
-		[Embed(source = "/assets/fonts/trajanProBold.otf", embedAsCFF = "false", 
-		 fontName = "trajanProBold" , fontFamily = "trajanPro", fontWeight = "bold",
-		 mimeType="application/x-font-opentype")]
-		private static const trajanProBold:Class;
-		*/
-		
-		public static function getTexture(name:String):Texture
+		public static function getTexture(name:String,batchToLookIn:int=1):Texture
         {
             if (sTextures[name] == undefined)
             {
-                var data:Object = create(name);
+                var data:Object = create(name,batchToLookIn);
                 
                 if (data is Bitmap)
                     sTextures[name] = Texture.fromBitmap(data as Bitmap, true, false, sContentScaleFactor);
@@ -68,59 +42,46 @@ package view.util
             return sTextures[name];
         }
         
-        public static function getAssetsTexture(name:String):Texture
+        public static function getAssetsTexture(name:String,batchToLookIn:int=1):Texture
         {
             prepareAtlasAssets();
-            return sTextureAtlasAssets.getTexture(name);
-        }
+            if (batchToLookIn == 1) return sTextureAtlasAssets.getTexture(name);
+			if (batchToLookIn == 2) return sTextureAtlasAssets2.getTexture(name);
+			
+			return null;
+		}
 		
         public static function getAssetsTextures(prefix:String):Vector.<Texture>
         {
             prepareAtlasAssets();
             return sTextureAtlasAssets.getTextures(prefix);
         }
-        		
-		public static function getSound(name:String):Sound
-        {
-            var sound:Sound = sSounds[name] as Sound;
-            if (sound) return sound;
-            else throw new ArgumentError("Sound not found: " + name);
-        }
 		
-        public static function loadBitmapFonts():void
-        {
-            if (!sBitmapFontsLoaded)
-            {
-				/*
-                var texture:Texture = getTexture("DesyrelTexture");
-                var xml:XML = XML(create("DesyrelXml"));
-                TextField.registerBitmapFont(new BitmapFont(texture, xml));
-                sBitmapFontsLoaded = true;
-				*/
-            }
-        }
-        
-        public static function prepareSounds():void
-        {
-			
-        }
-        
         private static function prepareAtlasAssets():void
         {
             if (sTextureAtlasAssets == null)
             {
-                var textureAssets:Texture = getTexture("AtlasTextureAssets");
-                var xmlAssets:XML = XML(create("AtlasXmlAssets"));
+                var textureAssets:Texture = getTexture("AtlasTextureAssets",1);
+                var xmlAssets:XML = XML(create("AtlasXmlAssets",1));
                 sTextureAtlasAssets = new TextureAtlas(textureAssets, xmlAssets);
-
             }
+			
+			if (sTextureAtlasAssets2 == null)
+			{				
+                var textureAssets2:Texture = getTexture("AtlasTextureAssets2",2);
+                var xmlAssets2:XML = XML(create("AtlasXmlAssets2",2));
+                sTextureAtlasAssets2 = new TextureAtlas(textureAssets2, xmlAssets2);
+			}
         }
 		
-        private static function create(name:String):Object
+        private static function create(name:String,batchToLookIn:int):Object
         {
 			
-            var textureClass:Class = sContentScaleFactor == 1 ? AssetsEmbedsSD : AssetsEmbedsHD;
-			trace(textureClass+" texture class i am getting");
+            var textureClass:Class;
+			if(batchToLookIn==1) textureClass = sContentScaleFactor == 1 ? AssetsEmbedsSD : AssetsEmbedsHD;
+			else
+			if(batchToLookIn==2) textureClass = sContentScaleFactor == 1 ? AssetsEmbedsSD2 : AssetsEmbedsHD2;
+			//trace(textureClass+" texture class i am getting");
             return new textureClass[name];
         }
         

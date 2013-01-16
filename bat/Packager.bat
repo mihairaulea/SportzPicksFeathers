@@ -40,6 +40,7 @@ set OUTPUT=%DIST_PATH%\%DIST_NAME%%TARGET%.%DIST_EXT%
 :: Package
 echo Packaging: %OUTPUT%
 echo using certificate: %CERT_FILE%...
+echo using signing options: %SIGNING_OPTIONS%...
 echo.
 call adt -package -target %TYPE%%TARGET% %OPTIONS% %SIGNING_OPTIONS% "%OUTPUT%" "%APP_XML%" %FILE_OR_DIR%
 echo.

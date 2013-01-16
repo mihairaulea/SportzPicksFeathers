@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:a23e6cc54fc2607784fe08ee67097614$ -->
+<TextureAtlas imagePath="assetsHD2.png">
+    <SubTexture name="green_bg" x="2" y="2" width="640" height="960"/>
+</TextureAtlas>

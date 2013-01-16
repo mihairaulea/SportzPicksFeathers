@@ -1,6 +1,7 @@
 package feathers.controls.renderers
 {
 	
+	import feathers.controls.ImageLoader;
 	import feathers.controls.Label;
 	import feathers.controls.List;
 	import feathers.controls.renderers.IListItemRenderer;
@@ -206,15 +207,43 @@ package feathers.controls.renderers
 			{
 				opponentProfilePic = new Image( Assets.getAssetsTexture("profilePic") );
 				this.addChild(opponentProfilePic);
+				opponentProfilePic.x = 10;
+				opponentProfilePic.y = 10;
 			}
+						
+			placeMyPointsAndOpponnentPointsBlock();
+			placeAcceptedChallengesBlock();
+			placeCompletedChallengesBlock();
+			
+			if (!this.newChallengeText)
+			{
+				newChallengeText = new TextFieldTextRenderer();
+				newChallengeText.text = "New Challenge";
+				newChallengeText.x = opponentName.x;
+				newChallengeText.y = opponentName.y + 30;
+				newChallengeText.textFormat = newChallengeTextFormat;
+				newChallengeText.embedFonts = true;
+				this.addChild(newChallengeText);
+				newChallengeText.visible = false;
+			}
+			
+			
+			var greyArrowImage:Image = new Image( Assets.getAssetsTexture("grey_chevron") );
+			addChild(greyArrowImage);
+			greyArrowImage.x = 288;
+			greyArrowImage.y = this.height / 2 - greyArrowImage.height / 2;
+		}
+		
+		private function placeMyPointsAndOpponnentPointsBlock()
+		{
 			if (!this.opponentName)
 			{
 				this.opponentName = new TextFieldTextRenderer();
 				opponentName.textFormat = namesTextFormat;
 				opponentName.embedFonts = true;
-				opponentName.text = "Opponent Name";
+				opponentName.text = "Opponent";
 				opponentName.x = opponentProfilePic.x + opponentProfilePic.width + 10;
-				opponentName.y = 10;
+				opponentName.y = 14;
 				
 				this.addChild(opponentName);
 			}
@@ -224,8 +253,8 @@ package feathers.controls.renderers
 				me.textFormat = namesTextFormat;
 				me.embedFonts = true;
 				me.text = "Me";
-				me.x = opponentProfilePic.x + 2.5 * opponentProfilePic.width + 10;
-				me.y = 10;
+				me.x = 175;
+				me.y = 14;
 				
 				this.addChild(me);
 			}
@@ -253,18 +282,61 @@ package feathers.controls.renderers
 				
 				this.addChild(mePoints);
 			}
+			
+			var textPoints:TextFieldTextRenderer = new TextFieldTextRenderer();
+			addChild(textPoints);
+			textPoints.text = ":";
+			textPoints.x = opponentPoints.x + opponentPoints.width;
+			textPoints.y = opponentPoints.y - 4;
+			textPoints.textFormat = FontFactory.getTextFormat(2, 28, 0xA1A1A1);
+		}
+		
+		private function placeAcceptedChallengesBlock()
+		{
+			
+			if (!this.acceptedChallengesImage)
+			{
+				acceptedChallengesImage = new Image(Assets.getAssetsTexture("new_on"));
+				acceptedChallengesImage.x = 250;
+				acceptedChallengesImage.y = 15;
+				
+				this.addChild(acceptedChallengesImage);	
+			}
+			if (!this.acceptedChallengesOffImage)
+			{
+				acceptedChallengesOffImage = new Image(Assets.getAssetsTexture("new_off"));
+				acceptedChallengesOffImage.x = acceptedChallengesImage.x;
+				acceptedChallengesOffImage.y = acceptedChallengesImage.y;
+				
+				this.addChild(acceptedChallengesOffImage);	
+			}
+			if (!this.acceptedChallengesNumber)
+			{
+				acceptedChallengesNumber = new TextFieldTextRenderer();
+				acceptedChallengesNumber.x = acceptedChallengesImage.x + 17;
+				acceptedChallengesNumber.y = acceptedChallengesImage.y + 1;
+				acceptedChallengesNumber.textFormat = acceptedChallengesTextFormat;
+				acceptedChallengesNumber.embedFonts = true;
+				acceptedChallengesNumber.text = "9+";
+				
+				this.addChild(acceptedChallengesNumber);
+			}
+		}
+		
+		private function placeCompletedChallengesBlock()
+		{
 			if (!this.completedChallengesImage)
 			{
 				completedChallengesImage = new Image(Assets.getAssetsTexture("cup_on"));
-				completedChallengesImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
-				completedChallengesImage.y = mePoints.y + 10;
+				completedChallengesImage.x = acceptedChallengesImage.x - 1;
+				completedChallengesImage.y = 34;
 				
 				this.addChild(completedChallengesImage);
 			}
 			if (!this.completedChallengesNumber)
 			{
 				completedChallengesNumber = new TextFieldTextRenderer();
-				completedChallengesNumber.x = completedChallengesImage.x + 20;
+				completedChallengesNumber.x = acceptedChallengesNumber.x;
 				completedChallengesNumber.y = completedChallengesImage.y + 1;
 				completedChallengesNumber.textFormat = completedChallengesTextFormat;
 				completedChallengesNumber.embedFonts = true;
@@ -272,69 +344,12 @@ package feathers.controls.renderers
 				
 				this.addChild(completedChallengesNumber);
 			}
-			if (!this.acceptedChallengesImage)
-			{
-				acceptedChallengesImage = new Image(Assets.getAssetsTexture("new_on"));
-				acceptedChallengesImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
-				acceptedChallengesImage.y = me.y + 10;
-				
-				this.addChild(acceptedChallengesImage);	
-			}
-			if (!this.acceptedChallengesOffImage)
-			{
-				acceptedChallengesOffImage = new Image(Assets.getAssetsTexture("new_off"));
-				acceptedChallengesOffImage.x = backgroundItemRenderer.width - completedChallengesImage.width * 3;
-				acceptedChallengesOffImage.y = me.y + 10;
-				
-				this.addChild(acceptedChallengesOffImage);	
-			}
-			if (!this.acceptedChallengesNumber)
-			{
-				acceptedChallengesNumber = new TextFieldTextRenderer();
-				acceptedChallengesNumber.x = acceptedChallengesImage.x + 20;
-				acceptedChallengesNumber.y = acceptedChallengesImage.y + 1;
-				acceptedChallengesNumber.textFormat = acceptedChallengesTextFormat;
-				acceptedChallengesNumber.embedFonts = true;
-				acceptedChallengesNumber.text = "9+";
-				
-				this.addChild(acceptedChallengesNumber);
-			}
-			if (!this.acceptedChallengesNumber)
-			{
-				acceptedChallengesNumber = new TextFieldTextRenderer();
-				acceptedChallengesNumber.x = acceptedChallengesImage.x + 20;
-				acceptedChallengesNumber.y = acceptedChallengesImage.y + 1;
-				acceptedChallengesNumber.textFormat = acceptedChallengesTextFormat;
-				acceptedChallengesNumber.embedFonts = true;
-				acceptedChallengesNumber.text = "9+";
-				
-				this.addChild(acceptedChallengesNumber);
-			}
-			
-			if (!this.newChallengeText)
-			{
-				newChallengeText = new TextFieldTextRenderer();
-				newChallengeText.text = "New Challenge";
-				newChallengeText.x = opponentName.x;
-				newChallengeText.y = opponentName.y + 30;
-				newChallengeText.textFormat = newChallengeTextFormat;
-				newChallengeText.embedFonts = true;
-				this.addChild(newChallengeText);
-				newChallengeText.visible = false;
-			}
-			
-			var textPoints:TextFieldTextRenderer = new TextFieldTextRenderer();
-			addChild(textPoints);
-			textPoints.text = ":";
-			textPoints.x = opponentPoints.x + opponentPoints.width;
-			textPoints.y = opponentPoints.y - 2;
-			textPoints.textFormat = FontFactory.getTextFormat(2, 28, 0xA1A1A1);
 		}
 		
 		private function initTextFormats():void
 		{
 			namesTextFormat  = new TextFormat("HelveticaNeueLT", 12, 0x4D4D4D);
-			pointsTextFormat = new TextFormat("HelveticaNeueLT", 30, 0x4D4D4D);
+			pointsTextFormat = new TextFormat("HelveticaNeueLT", 25, 0x4D4D4D);
 			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x5D9B05);
 			completedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x4D4D4D);
 			newChallengeTextFormat = new TextFormat("HelveticaNeueLT", 12, 0x478804);
@@ -391,12 +406,14 @@ package feathers.controls.renderers
 			{
 				if(_data.CountOfNew == 0)
 				{
+					/*
 					this.completedChallengesNumber.text = _data.CountOfResults;
 					this.acceptedChallengesNumber.text = _data.CountOfPending;
 					this.opponentName.text = _data.OpponentName;
 					this.opponentPoints.text = _data.OpponentScore;
 					this.mePoints.text = _data.PlayerScore;
 					this.me.text = "Me";
+					*/
 				}
 				//this.itemLabel.text = this._data.toString();
 			}

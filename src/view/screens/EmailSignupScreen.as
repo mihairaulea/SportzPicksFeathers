@@ -20,19 +20,13 @@ package view.screens
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 			
-	import view.util.Assets;
+	import view.util.*;
 	/**
 	 * ...
 	 * @author Mihai Raulea
 	 */
 	public class EmailSignupScreen extends Screen
-	{
-		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeue:Class;
-		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-MdCn.ttf", embedAsCFF="false", fontName="HelveticaNeue", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helvetica:Class;
+	{		
 		//assets
 		private var smallLogo:Image;
 		private var logoBackground:Image;
@@ -48,16 +42,12 @@ package view.screens
 		private var usernameTitle:TextFieldTextRenderer;
 		private var usernameInput:TextInput;
 		private var usernameErrorFeedback:TextFieldTextRenderer;
-		
-		private var textFormatCreateYourAccount:TextFormat;		
-		private var textFormatFacebookLabel:TextFormat;
-		private var textFormatTitleField:TextFormat;
-		private var textFormatInputField:TextFormat;
-		private var textFormatError:TextFormat;
-		private var textFormatGoBtn:TextFormat;
-		
+				
 		private var backgroundPanel:Image;
 		private var goBtn:Button;
+		private var shadow:Image;
+		
+		private var commonAssets:CommonAssetsScreen = CommonAssetsScreen.getInstance();
 		
 		private static const EVENTS:Vector.<String> = new <String>
 		[
@@ -79,18 +69,11 @@ package view.screens
 			
 			navBarShadow = new Image(Assets.getAssetsTexture("nav_bar_shadow"));
 			addChild(navBarShadow);
-			
-			textFormatCreateYourAccount = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0xFFFFFF);
-			textFormatTitleField = new TextFormat("HelveticaNeue", 14, 0x4D4D4D);
-			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
-			textFormatInputField = new TextFormat("HelveticaNeueLTCom-BdCn", 15, 0xB3B3B3, true);
-			textFormatError = new TextFormat("HelveticaNeueLTCom-BdCn", 11, 0x890B0B);
-			textFormatGoBtn = new TextFormat("HelveticaNeueLTCom-BdCn", 18, 0xFFFFFF);
-			
+						
 			createYourAccount = new TextFieldTextRenderer();
 			createYourAccount.text = "Create your account";
 			addChild(createYourAccount);
-			createYourAccount.textFormat = textFormatCreateYourAccount;
+			createYourAccount.textFormat = FontFactory.getTextFormat(0,18,0xFFFFFF);
 			createYourAccount.embedFonts = true;
 			createYourAccount.validate();
 						
@@ -101,12 +84,13 @@ package view.screens
 			facebookButton.defaultSkin = new Image(Assets.getAssetsTexture("facebook_btn"));
 			facebookButton.downSkin = new Image(Assets.getAssetsTexture("facebook_btn_press"));
 			facebookButton.label = "With Facebook";
+			facebookButton.labelOffsetX = -14;
 			addChild(facebookButton);
 			facebookButton.validate();
 			
 			emailInput = new feathers.controls.TextInput();
 			var inputBackImage:Image = new Image(Assets.getAssetsTexture("form_field"));
-			inputBackImage.pivotX = 5;
+			inputBackImage.pivotX = 15;
 			inputBackImage.pivotY = 3;
 			emailInput.textEditorFactory = getTextInputField;
 			emailInput.backgroundSkin = inputBackImage;
@@ -116,13 +100,13 @@ package view.screens
 			emailInput.validate();
 			
 			emailErrorFeedback = new TextFieldTextRenderer();
-			emailErrorFeedback.textFormat = textFormatError;
+			emailErrorFeedback.textFormat = FontFactory.getTextFormat(2,12,0x890B0B);
 			emailErrorFeedback.embedFonts = true;
 			addChild(emailErrorFeedback);
 						
 			usernameInput = new TextInput();
 			var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
-			inputBackImage2.pivotX = 5;
+			inputBackImage2.pivotX = 15;
 			inputBackImage2.pivotY = 3;
 			usernameInput.backgroundSkin = inputBackImage2;
 			usernameInput.textEditorFactory = getTextInputField;
@@ -130,32 +114,37 @@ package view.screens
 			usernameInput.validate();
 		
 			usernameErrorFeedback = new TextFieldTextRenderer();
-			usernameErrorFeedback.textFormat = textFormatError;
+			usernameErrorFeedback.textFormat = FontFactory.getTextFormat(2,12,0x890B0B);
 			usernameErrorFeedback.embedFonts = true;
 			
 			addChild(usernameErrorFeedback);
 			
+			/*
 			goBtn = new Button();
 			goBtn.defaultSkin = new Image( Assets.getAssetsTexture("go_btn"));
 			goBtn.downSkin = new Image( Assets.getAssetsTexture("go_btn_press"));
 			goBtn.label = "Go";
 			goBtn.labelFactory = getGoBtnTextRenderer;
 			goBtn.validate();
+			*/
+			
+			goBtn = commonAssets.getGoBtn("Go", goBtnHandler);
 			
 			emailAddressTitle = new TextFieldTextRenderer();
 			emailAddressTitle.text = "Email address*";
-			emailAddressTitle.textFormat = textFormatTitleField;
+			emailAddressTitle.textFormat = FontFactory.getTextFormat(0,15,0x4D4D4D);
 			emailAddressTitle.embedFonts = true;
 			addChild(emailAddressTitle);
 			
 			usernameTitle = new TextFieldTextRenderer();
 			usernameTitle.text = "Username";
-			usernameTitle.textFormat = textFormatTitleField;
+			usernameTitle.textFormat = FontFactory.getTextFormat(0,15,0x4D4D4D);
 			usernameTitle.embedFonts = true;
 			addChild(usernameTitle);
 			usernameTitle.validate();
 			
-			triggerSignalOnButtonRelease(goBtn, EVENTS[0]);
+			shadow = new Image(Assets.getAssetsTexture("shadow"));
+			addChild(shadow);	
 		}
 		
 		override protected function draw():void
@@ -165,11 +154,11 @@ package view.screens
 			//logoBackground.x = logoBackground.y = 0;
 			navBarShadow.y = logoBackground.y + logoBackground.height;
 			
-			createYourAccount.x = 25;
-			createYourAccount.y = navBarShadow.y + navBarShadow.height + 20;
+			createYourAccount.x = 26;
+			createYourAccount.y = 71;
 			
-			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
-			facebookButton.y = createYourAccount.y + createYourAccount.height + 20;
+			facebookButton.x = 10//(this.actualWidth - facebookButton.width)/2;
+			facebookButton.y = 218 / 2;//createYourAccount.y + createYourAccount.height + 20;
 			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			backgroundPanel.x = facebookButton.x;
@@ -178,7 +167,7 @@ package view.screens
 			emailAddressTitle.x = backgroundPanel.x + 25;
 			emailAddressTitle.y = facebookButton.y + facebookButton.height + 14;
 			
-			emailInput.x = backgroundPanel.x + 20;
+			emailInput.x = backgroundPanel.x + 26;
 			emailInput.y = emailAddressTitle.y + 25;
 			emailInput.addEventListener("focusIn", focusFormHandler);
 			emailInput.text = "Type your Email Address here";
@@ -204,21 +193,20 @@ package view.screens
 			addChild(goBtn);
 			
 			goBtn.x = backgroundPanel.x + ( (backgroundPanel.width - goBtn.defaultSkin.width) / 2 );
-			goBtn.y = usernameErrorFeedback.y + 22;
+			goBtn.y = usernameErrorFeedback.y + 23;
+						
+			shadow.x = 0;
+			shadow.y = 346;	
+		}
+		
+		private function goBtnHandler()
+		{
+			dispatchEvent(new Event(EVENTS[0]));
 		}
 		
 		private function focusFormHandler(e:Event):void
 		{
 			TextInput(e.target).text = "";
-		}
-		
-		private function triggerSignalOnButtonRelease(button:Button, event:String):void
-		{
-			button.addEventListener( Event.TRIGGERED,(function(e:Event):void
-			{
-				if( checkForm() ) dispatchEvent(new Event(event));
-			}));
-
 		}
 		
 		private function checkForm():Boolean
@@ -246,7 +234,7 @@ package view.screens
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			facebookLabel.textFormat = textFormatFacebookLabel;
+			facebookLabel.textFormat = FontFactory.getTextFormat(0,18,0x4D4D4D);
 			facebookLabel.embedFonts = true;
 			
 			return facebookLabel;
@@ -256,7 +244,7 @@ package view.screens
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			
-			goLabel.textFormat = textFormatGoBtn;
+			goLabel.textFormat = FontFactory.getTextFormat(0,18,0x4D4D4D);
 			goLabel.embedFonts = true;
 			
 			return goLabel;
@@ -266,7 +254,7 @@ package view.screens
 		{
 			var label:TextFieldTextEditor = new TextFieldTextEditor();
 			
-			label.textFormat = textFormatInputField;
+			label.textFormat = FontFactory.getTextFormat(2,15,0xB3B3B3);
 			label.embedFonts = true;
 			
 			return label;

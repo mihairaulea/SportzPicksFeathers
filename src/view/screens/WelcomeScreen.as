@@ -29,20 +29,14 @@ package view.screens
 			
 	import view.util.Assets;
 	import view.util.DeviceConstants;
+	import view.util.FontFactory;
 	 
 	public class WelcomeScreen extends Screen
 	{
-		
-		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BdCn.ttf", embedAsCFF="false", fontName="HelveticaNeueLTCom-BdCn", advancedAntiAliasing="true", mimeType = "application/x-font")]
-		private static const helveticaNeue:Class;
-		
 		//assets
 		
 		private var logoImg:Image;
 		
-		private var textFormatHowConnect:TextFormat;
-		private var textFormatFacebookLabel:TextFormat;
-		private var textFormatEmailLabel:TextFormat;
 		private var howConnectText:TextFieldTextRenderer = new TextFieldTextRenderer();
 		private var facebookButton:Button = new Button();
 		private var emailButton:Button ;
@@ -63,22 +57,13 @@ package view.screens
 		
 		override protected function initialize():void
 		{			
-			trace(DeviceConstants.SCALE + " scale from welcome screen");
-			
 			logoImg = new Image(Assets.getAssetsTexture("logo"));
 			addChild(logoImg);
-			trace(logoImg.width + " logo image width");
-			trace(DeviceCapabilities.dpi + " this is device dpi");
-			//logoImg.y = 
-			
-			textFormatHowConnect = new TextFormat("HelveticaNeueLTCom-BdCn" , 16  , 0xFFFFFF, true);
-			textFormatFacebookLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 16, 0x4D4D4D, true);
-			textFormatEmailLabel = new TextFormat("HelveticaNeueLTCom-BdCn", 12, 0x808080, true);
 			
 			addChild(howConnectText);
 			howConnectText.width = 240;
 			howConnectText.height = 32;
-			howConnectText.textFormat = textFormatHowConnect;
+			howConnectText.textFormat = FontFactory.getTextFormat(0, 18, 0xFFFFFF);
 			howConnectText.embedFonts = true;
 			howConnectText.validate();
 			
@@ -86,21 +71,18 @@ package view.screens
 			facebookButton.defaultSkin = new ImageLoader();
 			facebookButton.defaultSkin = new Image(Assets.getAssetsTexture("facebook_btn"));
 			facebookButton.downSkin = new Image(Assets.getAssetsTexture("facebook_btn_press"));
-			//facebookButton.label = "With facebook";
 			addChild(facebookButton);
-			triggerSignalOnButtonRelease(facebookButton, EVENTS[0]);
 			facebookButton.validate();
 			
 			emailButton = new Button();
-			emailButton.defaultSkin = new Image(Assets.getAssetsTexture("email_btn"));
-			emailButton.downSkin = new Image(Assets.getAssetsTexture("email_btn_press"));
+			emailButton.defaultSkin = new Image(Assets.getAssetsTexture("first_screen_email_btn"));
+			emailButton.downSkin = new Image(Assets.getAssetsTexture("first_screen_email_btn_press"));
 			addChild(emailButton);
 			triggerSignalOnButtonRelease(emailButton, EVENTS[1]);
 			emailButton.validate();
 						
 			shadow = new Image(Assets.getAssetsTexture("shadow"));
-			addChild(shadow);
-			
+			addChild(shadow);			
 		}
 		
 		
@@ -111,28 +93,28 @@ package view.screens
 			logoImg.x = (this.actualWidth - logoImg.width >> 1) - 22.5;
 			logoImg.y = 74;
 			
-			howConnectText.x = logoImg.x;
-			howConnectText.y = logoImg.height + logoImg.y + 30;
+			howConnectText.x = 35;
+			howConnectText.y = 204.5;
 			howConnectText.text = "How would you like to connect?";
 			
 			facebookButton.label = "With Facebook";
 			facebookButton.labelFactory = getFacebookTextRenderer;
 			
-			facebookButton.x = (this.actualWidth - facebookButton.width)/2;
-			facebookButton.y = howConnectText.y + 34;
+			facebookButton.x = 10;
+			facebookButton.y = 234.5;
 			facebookButton.labelOffsetX = -8;
 			
 			// "With your email address",);
 			addChild(emailButton);
 
-			emailButton.x = this.actualWidth - emailButton.width >> 1;
-			emailButton.y = facebookButton.y + facebookButton.height;
+			emailButton.x = 10;
+			emailButton.y = 303.5;
 			emailButton.labelFactory = getEmailTextRenderer;
 			emailButton.label = "With your Email address";
 			emailButton.labelOffsetX = -8;
 			
-			shadow.x = this.actualWidth - shadow.width >> 1;
-			shadow.y = emailButton.y + emailButton.height + 10;					
+			shadow.x = 0;
+			shadow.y = 346;					
 		}
 		
 		override protected function screen_removedFromStageHandler(event:Event):void
@@ -145,7 +127,7 @@ package view.screens
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			facebookLabel.width = 140;
-			facebookLabel.textFormat = textFormatFacebookLabel;
+			facebookLabel.textFormat = FontFactory.getTextFormat(0,18,0x4d4d4d);
 			facebookLabel.textFormat.align = "left";
 			facebookLabel.embedFonts = true;
 			
@@ -156,7 +138,7 @@ package view.screens
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
 			facebookLabel.width = 140;			
-			facebookLabel.textFormat = textFormatEmailLabel;
+			facebookLabel.textFormat = FontFactory.getTextFormat(2,15,0x808080);
 			facebookLabel.textFormat.align = "left";
 			facebookLabel.embedFonts = true;
 			

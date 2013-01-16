@@ -591,6 +591,7 @@ package feathers.controls.renderers
 		 */
 		protected function itemToContent(item:Object):DisplayObject
 		{
+			
 			if(this._contentSourceFunction != null)
 			{
 				var source:Object = this._contentSourceFunction(item);
@@ -628,7 +629,7 @@ package feathers.controls.renderers
 				this.refreshContentLabel(item.toString());
 				return DisplayObject(this.contentLabel);
 			}
-
+			
 			return null;
 		}
 

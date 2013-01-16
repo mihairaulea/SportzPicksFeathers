@@ -63,8 +63,8 @@ package starling.utils
             }
             
             resultRect.setTo(
-                0,//into.x + (into.width  - width)  / 2,
-                0,//into.y + (into.height - height) / 2,
+                into.x + (into.width  - width)  / 2,
+                into.y + (into.height - height) / 2,
                 width, height);
             
             return resultRect;
