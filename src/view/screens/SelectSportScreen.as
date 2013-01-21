@@ -8,7 +8,6 @@ package view.screens
 	import feathers.data.ListCollection;
 	import feathers.controls.Screen;
 	import feathers.layout.VerticalLayout;
-	import flash.events.Event;
 	import starling.display.Sprite;
 	import starling.display.Image;
 	import flash.text.TextRenderer;
@@ -60,12 +59,12 @@ package view.screens
 			addChild(shadow);
 			shadow.y = 403 - 55;
 			
-			nflIcon = commonAssetsScreen.getSportButton(null, "NFL");
-			soccerIcon = commonAssetsScreen.getSportButton(null, "Soccer");
-			baseballIcon = commonAssetsScreen.getSportButton(null, "Baseball");
-			nhlIcon = commonAssetsScreen.getSportButton(null, "NFL");
-			golfIcon = commonAssetsScreen.getSportButton(null, "Golf");
-			tennisIcon = commonAssetsScreen.getSportButton(null, "Tennis");
+			nflIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_nfl_icon")), "NFL");
+			soccerIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_soccer_icon")), "Soccer");
+			baseballIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_baseball_icon")), "Baseball");
+			nhlIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_nhl_icon")), "NHL");
+			golfIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_golf_icon")), "Golf");
+			tennisIcon = commonAssetsScreen.getSportButton(new Image(Assets.getAssetsTexture("sport_select_tennis_icon")), "Tennis");
 			
 			addChild(nflIcon);
 			nflIcon.x = 10;
@@ -86,6 +85,18 @@ package view.screens
 			tennisIcon.x = 159.25;
 			tennisIcon.y = 270;
 			
+			nflIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			soccerIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			baseballIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			nhlIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			golfIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			tennisIcon.addEventListener(Event.TRIGGERED, sportRequest);
+			
+		}
+		
+		private function sportRequest(e:Event)
+		{
+			dispatchEvent(new Event("onSportSelect"));
 		}
 		
 		private function eventSelected(eventId:int):void
@@ -93,9 +104,9 @@ package view.screens
 			trace("selected event with id :" + eventId);
 		}
 		
-		private function headerBackButtonHandler(e:starling.events.Event)
+		private function headerBackButtonHandler()
 		{
-			trace("back handler");
+			dispatchEvent(new Event("onBack"));
 		}
 		
 		private function coinsCallbackHandler(e:starling.events.Event)

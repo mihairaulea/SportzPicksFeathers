@@ -46,7 +46,7 @@ package view
 		private function onAddedToStage(e:Event):void
 		{
 			Assets.contentScaleFactor = Starling.current.contentScaleFactor;
-			//var theme:SportzPicksTheme = new SportzPicksTheme(stage);
+			var theme:SportzPicksTheme = new SportzPicksTheme(stage);
 			this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
 			this.navigator = new ScreenNavigator();
@@ -69,6 +69,7 @@ package view
 			
 			this.navigator.addScreen(LOBBY_SCREEN, new ScreenNavigatorItem(new LobbyScreen(),
 			{
+				onPushStart : NEW_GAME_SCREEN,
 				onChallengerSelected: HEAD_TO_HEAD_SCREEN
 			}
 			
@@ -83,48 +84,54 @@ package view
 			
 			this.navigator.addScreen(EMAIL_OPPONENT_SCREEN, new ScreenNavigatorItem(new EmailOpponentScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onEmailOk: POPULAR_EVENTS_SCREEN,
+				onBack: NEW_GAME_SCREEN
 			}
 			)
 			);
 			
 			this.navigator.addScreen(FACEBOOK_FRIENDS_SCREEN, new ScreenNavigatorItem(new FacebookFriendsScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onBack: NEW_GAME_SCREEN,
+				onFriendSelected: POPULAR_EVENTS_SCREEN
 			}
 			)
 			);
 			
 			this.navigator.addScreen(NEW_GAME_SCREEN, new ScreenNavigatorItem(new NewGameScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onBack: LOBBY_SCREEN,
+				onEmail: EMAIL_OPPONENT_SCREEN,
+				onFacebook: FACEBOOK_FRIENDS_SCREEN
 			}
 			)
 			);
 			
 			this.navigator.addScreen(POPULAR_EVENTS_SCREEN, new ScreenNavigatorItem(new PopularEventsScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onSeeAllEvents: SELECT_SPORT_SCREEN,
+				onBack: NEW_GAME_SCREEN
 			}
 			)
 			);
 			
 			this.navigator.addScreen(SELECT_EVENT_SCREEN, new ScreenNavigatorItem(new SelectEventScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onBack: SELECT_SPORT_SCREEN
 			}
 			)
 			);
 			
 			this.navigator.addScreen(SELECT_SPORT_SCREEN, new ScreenNavigatorItem(new SelectSportScreen(),
 			{
-				onBack: LOBBY_SCREEN
+				onBack: POPULAR_EVENTS_SCREEN,
+				onSportSelect: SELECT_EVENT_SCREEN
 			}
 			)
 			);
 			
-			this.navigator.showScreen(WELCOME_SCREEN);
-			//this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
+			//this.navigator.showScreen(WELCOME_SCREEN);
+			this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
 			//this.navigator.showScreen(LOBBY_SCREEN);
 			//this.navigator.showScreen(HEAD_TO_HEAD_SCREEN);
 			// batch 2
@@ -136,8 +143,8 @@ package view
 			//this.navigator.showScreen(SELECT_SPORT_SCREEN);
 			
 			this.transitionManager = new ScreenSlidingStackTransitionManager(navigator);
-			//this.transitionManager.duration = 0.4;
-			//this.transitionManager.ease = Cubic.easeOut;
+			this.transitionManager.duration = 0.55;
+			this.transitionManager.delay = 0.1;
 		}		
 		
 	}

@@ -8,7 +8,6 @@ package view.screens
 	import feathers.data.ListCollection;
 	import feathers.controls.Screen;
 	import feathers.layout.VerticalLayout;
-	import flash.events.Event;
 	import starling.display.Sprite;
 	import starling.display.Image;
 	import flash.text.TextRenderer;
@@ -41,11 +40,30 @@ package view.screens
 		private var eventsArray:Array = new Array();
 		
 		private var shuffleButton:Button;
+		private var shuffleText:TextFieldTextRenderer;
+		private var coinsCost:TextFieldTextRenderer;
+		
 		private var seeAllEventsButton:Button;
-							
+		private var seeAllEventsText:TextFieldTextRenderer;					
+		
 		public function PopularEventsScreen() 
 		{
 			commonAssetsScreen = CommonAssetsScreen.getInstance();
+			
+			shuffleText = new TextFieldTextRenderer();
+			shuffleText.textFormat = FontFactory.getTextFormat(0, 18, 0xFFFFFF);
+			shuffleText.embedFonts = true;
+			shuffleText.width = 150;
+			
+			seeAllEventsText = new TextFieldTextRenderer();
+			seeAllEventsText.textFormat = FontFactory.getTextFormat(0, 18, 0x4D4D4D);
+			seeAllEventsText.embedFonts = true;
+			seeAllEventsText.width = 150;
+			
+			coinsCost = new TextFieldTextRenderer();
+			coinsCost.textFormat = FontFactory.getTextFormat(2, 15, 0xFFFFFF);
+			coinsCost.embedFonts = true;
+			coinsCost.width = 25;
 		}
 		
 		override protected function initialize():void
@@ -76,6 +94,14 @@ package view.screens
 			addChild(shuffleButton);
 			shuffleButton.x = 6;
 			shuffleButton.y = 335;
+			shuffleText.text = "Shuffle";
+			shuffleButton.addChild( shuffleText );
+			shuffleText.x = 53.5;
+			shuffleText.y = 18.5;
+			coinsCost.text = "50";
+			shuffleButton.addChild(coinsCost);
+			coinsCost.x = 277;
+			coinsCost.y = 19;
 			
 			seeAllEventsButton = new Button();
 			seeAllEventsButton.defaultSkin = new Image(Assets.getAssetsTexture("events_btn"));
@@ -83,16 +109,27 @@ package view.screens
 			addChild(seeAllEventsButton);
 			seeAllEventsButton.x = 10;
 			seeAllEventsButton.y = 400;
+			seeAllEventsText.text = "See All Events";
+			seeAllEventsButton.addChild(seeAllEventsText);
+			seeAllEventsText.x = 47.5;
+			seeAllEventsText.y = 15;
+			seeAllEventsButton.addEventListener(Event.TRIGGERED, seeAllEventsRequest);
 		}
 		
+		private function seeAllEventsRequest(e:Event)
+		{
+			dispatchEvent(new Event("onSeeAllEvents"));
+		}
+				
 		private function eventSelected(eventId:int):void
 		{
 			trace("selected event with id :" + eventId);
 		}
 		
-		private function headerBackButtonHandler(e:starling.events.Event)
+		private function headerBackButtonHandler()
 		{
 			trace("back handler");
+			dispatchEvent(new Event("onBack"));
 		}
 		
 		private function coinsCallbackHandler(e:starling.events.Event)

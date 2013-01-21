@@ -376,10 +376,7 @@ package feathers.controls
 				return;
 			}
 			this._isSelectable = value;
-			if(!this._isSelectable)
-			{
-				this.selectedIndex = -1;
-			}
+			this.selectedIndex = -1;
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
 		}
 		
@@ -406,9 +403,10 @@ package feathers.controls
 			{
 				return;
 			}
+				
 			this._selectedIndex = value;
 			this.invalidate(INVALIDATION_FLAG_SELECTED);
-			this.dispatchEventWith(Event.CHANGE);
+			this.dispatchEventWith(Event.CHANGE);			
 		}
 		
 		/**

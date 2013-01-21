@@ -41,11 +41,13 @@ package view.util
 		private var headerTitle:TextFieldTextRenderer;		
 		private var textFormatTitle:TextFormat;
 		private var backBtn:Button;
+		private var backCallback:Function;
 		
 		private var coinsDisplay:Image;
 		private var coinIcon:Image;
 		private var coinsText:TextFieldTextRenderer;
 		
+		// START NEW GAME BUTTON
 		
 		// GO BTN
 		private var goBtn:Button;
@@ -63,12 +65,7 @@ package view.util
 		{
 			if (allowInstantiation == true)
 			{
-				logoBackground = new Image( Assets.getAssetsTexture("nav_bar") );
 			
-				backBtn = new Button();
-				backBtn.defaultSkin = new Image( Assets.getAssetsTexture("back_arrow") );
-				backBtn.downSkin = new Image( Assets.getAssetsTexture("back_arrow_press") );
-				
 				textFormatTitle = FontFactory.getTextFormat(0, 18, 0xFFFFFF);
 				textFormatTitle.align = "center";
 				
@@ -91,6 +88,12 @@ package view.util
 		{
 			var header:Sprite = new Sprite();
 			var coinHud:Sprite = new Sprite();
+			logoBackground = new Image( Assets.getAssetsTexture("nav_bar") );
+			
+				backBtn = new Button();
+				backBtn.defaultSkin = new Image( Assets.getAssetsTexture("back_arrow") );
+				backBtn.downSkin = new Image( Assets.getAssetsTexture("back_arrow_press") );
+				
 			header.addChild(logoBackground);
 			headerTitle = new TextFieldTextRenderer();
 			headerTitle.text = title;
@@ -125,11 +128,43 @@ package view.util
 				coinHud.y = 8.5;				
 			}
 			
-			backBtn.addEventListener( Event.TRIGGERED, backCallback );
-			
+			if (backCallback != null) 
+			{
+				backBtn.addEventListener( Event.TRIGGERED, backHandler );
+				this.backCallback = backCallback;
+			}
 			if(includeBackBtn) header.addChild(backBtn);
 			
 			return header;
+		}
+		
+		private function backHandler(e:Event)
+		{
+			backCallback.call(); 
+		}
+		
+		public function getStartNewGameButton():Button
+		{
+			var startNewGameButton:Button;
+			
+			startNewGameButton = new Button();
+			startNewGameButton.defaultSkin = new Image( Assets.getAssetsTexture("start_btn") );
+			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
+			startNewGameButton.label = "Start a new game";
+			startNewGameButton.labelOffsetX = 49;
+			startNewGameButton.labelFactory = getStartTextRenderer;		
+			
+			return startNewGameButton;
+		}
+		
+		private function getStartTextRenderer():ITextRenderer
+		{
+			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
+			goLabel.width = 280;
+			goLabel.textFormat = FontFactory.getTextFormat(0, 20,0xFFFFFF);
+			goLabel.embedFonts = true;
+			
+			return goLabel;
 		}
 		
 		private function getCoinsTextRenderer():TextFieldTextRenderer
@@ -258,8 +293,8 @@ package view.util
 		{
 			var result:Button = new Button();
 			
-			result.defaultSkin = new Image(Assets.getAssetsTexture("nfl"));
-			result.downSkin = new Image(Assets.getAssetsTexture("nfl_press"));
+			result.defaultSkin = new Image(Assets.getAssetsTexture("sport_select_top_right"));
+			result.downSkin = new Image(Assets.getAssetsTexture("sport_select_top_right_press"));
 			result.label = "";
 			
 			var sportTextRenderer:TextFieldTextRenderer = new TextFieldTextRenderer();
@@ -272,6 +307,9 @@ package view.util
 			sportTextRenderer.y = 69.25;
 			
 			result.addChild( sportTextRenderer );
+			sportIcon.x = 92/2;
+			sportIcon.y = 49/2;
+			result.addChild( sportIcon );
 			
 			return result;
 		}

@@ -8,7 +8,7 @@ package view.screens
 	import feathers.data.ListCollection;
 	import feathers.controls.Screen;
 	import feathers.layout.VerticalLayout;
-	import flash.events.Event;
+	//import flash.events.Event;
 	import starling.display.Sprite;
 	import starling.display.Image;
 	import flash.text.TextRenderer;
@@ -166,14 +166,25 @@ package view.screens
 			
 		}
 		
-		private function headerBackButtonHandler(e:starling.events.Event)
+		private function headerBackButtonHandler()
 		{
-			trace("back handler");
+			dispatchEvent(new starling.events.Event("onBack"));
 		}
 		
 		override protected function draw():void
 		{
-			
+			withEmailAddressButton.addEventListener(Event.TRIGGERED, emailHandler);
+			withFacebookButton.addEventListener(Event.TRIGGERED, facebookHandler);
+		}
+		
+		private function emailHandler(e:Event)
+		{
+			dispatchEvent(new Event("onEmail"));
+		}
+		
+		private function facebookHandler(e:Event)
+		{
+			dispatchEvent(new Event("onFacebook"));
 		}
 		
 	}

@@ -131,13 +131,8 @@ package view.screens
 			headToHeadText.embedFonts = true;
 			headToHeadText.wordWrap = true;						
 			
-			startNewGameButton = new Button();
-			startNewGameButton.defaultSkin = new Image( Assets.getAssetsTexture("start_btn") );
-			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
+			startNewGameButton = CommonAssetsScreen.getInstance().getStartNewGameButton();
 			addChild(startNewGameButton);
-			startNewGameButton.label = "Start a new game";
-			startNewGameButton.labelOffsetX = -14;
-			startNewGameButton.labelFactory = getGoBtnTextRenderer;
 			
 			mathcesList = new List();
 			mathcesList.itemRendererType = CustomHeadToHeadRenderer;
@@ -240,7 +235,7 @@ package view.screens
 		private function getGoBtnTextRenderer():ITextRenderer
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
-			
+			goLabel.width = 280;
 			goLabel.textFormat = FontFactory.getTextFormat(0,20,0xFFFFFF);
 			goLabel.embedFonts = true;
 			

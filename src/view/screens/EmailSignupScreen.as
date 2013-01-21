@@ -21,6 +21,8 @@ package view.screens
 	import org.osflash.signals.Signal;
 			
 	import view.util.*;
+	
+	import feathers.events.FeathersEventType;
 	/**
 	 * ...
 	 * @author Mihai Raulea
@@ -90,14 +92,17 @@ package view.screens
 			
 			emailInput = new feathers.controls.TextInput();
 			var inputBackImage:Image = new Image(Assets.getAssetsTexture("form_field"));
-			inputBackImage.pivotX = 15;
-			inputBackImage.pivotY = 3;
+			//inputBackImage.pivotX = 15;
+			//inputBackImage.pivotY = 3;
+			emailInput.width = 265;
+			emailInput.height = 27;
 			emailInput.textEditorFactory = getTextInputField;
-			emailInput.backgroundSkin = inputBackImage;
+			//emailInput.backgroundSkin = inputBackImage;
+			//emailInput.addEventListener(FeathersEventType.ENTER, focusFormHandler);
 			
 			addChild(emailInput);	
 			
-			emailInput.validate();
+			//emailInput.validate();
 			
 			emailErrorFeedback = new TextFieldTextRenderer();
 			emailErrorFeedback.textFormat = FontFactory.getTextFormat(2,12,0x890B0B);
@@ -108,6 +113,8 @@ package view.screens
 			var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
 			inputBackImage2.pivotX = 15;
 			inputBackImage2.pivotY = 3;
+			usernameInput.width = 265;
+			usernameInput.height = 27;
 			usernameInput.backgroundSkin = inputBackImage2;
 			usernameInput.textEditorFactory = getTextInputField;
 			addChild(usernameInput);
@@ -118,16 +125,7 @@ package view.screens
 			usernameErrorFeedback.embedFonts = true;
 			
 			addChild(usernameErrorFeedback);
-			
-			/*
-			goBtn = new Button();
-			goBtn.defaultSkin = new Image( Assets.getAssetsTexture("go_btn"));
-			goBtn.downSkin = new Image( Assets.getAssetsTexture("go_btn_press"));
-			goBtn.label = "Go";
-			goBtn.labelFactory = getGoBtnTextRenderer;
-			goBtn.validate();
-			*/
-			
+						
 			goBtn = commonAssets.getGoBtn("Go", goBtnHandler);
 			
 			emailAddressTitle = new TextFieldTextRenderer();
@@ -169,8 +167,9 @@ package view.screens
 			
 			emailInput.x = backgroundPanel.x + 26;
 			emailInput.y = emailAddressTitle.y + 25;
-			emailInput.addEventListener("focusIn", focusFormHandler);
-			emailInput.text = "Type your Email Address here";
+			//emailInput.addEventListener("focusIn", focusFormHandler);
+			//emailInput.addEventListener("focusOut", focusOutFormHandler);
+			//emailInput.text = "Type your Email Address here";
 			
 			emailErrorFeedback.x = emailAddressTitle.x;
 			emailErrorFeedback.y = emailInput.y + 24;
@@ -183,7 +182,8 @@ package view.screens
 			usernameInput.x = emailInput.x;
 			usernameInput.y = usernameTitle.y + 25;
 			usernameInput.text = "Type your username here(optional)";
-			usernameInput.addEventListener("focusIn", focusFormHandler);
+			//usernameInput.addEventListener("focusIn", focusFormHandler);
+			//usernameInput.addEventListener("focusOut", focusOutFormHandler);
 			
 			usernameErrorFeedback.x = usernameTitle.x;
 			usernameErrorFeedback.y = usernameInput.y + 24;
@@ -206,7 +206,13 @@ package view.screens
 		
 		private function focusFormHandler(e:Event):void
 		{
-			TextInput(e.target).text = "";
+			//TextInput(e.target).removeEventListener("focusIn", focusFormHandler);
+			//TextInput(e.target).text = "";
+		}
+		
+		private function focusOutFormHandler(e:Event):void
+		{
+			TextInput(e.target).addEventListener("focusIn", focusFormHandler);
 		}
 		
 		private function checkForm():Boolean
@@ -254,8 +260,8 @@ package view.screens
 		{
 			var label:TextFieldTextEditor = new TextFieldTextEditor();
 			
-			label.textFormat = FontFactory.getTextFormat(2,15,0xB3B3B3);
-			label.embedFonts = true;
+			//label.textFormat = FontFactory.getTextFormat(2,15,0xB3B3B3);
+			//label.embedFonts = true;
 			
 			return label;
 		}

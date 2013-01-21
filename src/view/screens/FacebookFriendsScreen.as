@@ -69,7 +69,7 @@ package view.screens
 		
 		override protected function initialize():void
 		{
-			header = commonAssetsScreen.getHeader("Facebook Friends",true, null, false);
+			header = commonAssetsScreen.getHeader("Facebook Friends",true, backButtonCallback, false);
 			addChild( header );
 			
 			blackStrip = new Image(Assets.getAssetsTexture("black_strip"));
@@ -123,7 +123,7 @@ package view.screens
 			setUpList();
 			
 			abcVerticalPanelBackground = new Image( Assets.getAssetsTexture("az_sel_bg") );
-			addChild(abcVerticalPanelBackground);
+			//addChild(abcVerticalPanelBackground);
 						
 			
 			scrollShadow = new Image(Assets.getAssetsTexture("scroll_shadow"));
@@ -209,8 +209,19 @@ package view.screens
 			
 			facebookFriendsGroupedList.headerRendererType = FacebookFriendsGroupedListHeaderRenderer;
 			facebookFriendsGroupedList.itemRendererType =   FacebookFriendsGroupedListItemRenderer;
+			facebookFriendsGroupedList.addEventListener(Event.CHANGE, facebookFriendChanged);
 			
 			addChild(facebookFriendsGroupedList);
+		}
+		
+		private function facebookFriendChanged(e:Event)
+		{
+			dispatchEvent(new Event("onFriendSelected"));
+		}
+		
+		private function backButtonCallback()
+		{
+			dispatchEvent(new Event("onBack"));
 		}
 		
 		private function buttonGroupChange(e:Event):void

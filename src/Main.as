@@ -22,6 +22,7 @@ package
 		
 		public function Main():void 
 		{
+			
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
@@ -32,35 +33,16 @@ package
 			// entry point
 			
 			var viewPort:Rectangle;
-			
-			//trace(stage.fullScreenWidth);
-			//trace(stage.fullScreenHeight);
-			
-			//test
-			//DeviceConstants.SCALE = 2;
-			//Assets.contentScaleFactor = 2;
-			
-			//if it's not iphone 5
-			
-				viewPort = RectangleUtil.fit( 
+			viewPort = RectangleUtil.fit( 
 					new Rectangle(0,0,DeviceConstants.STAGE_WIDTH, DeviceConstants.STAGE_HEIGHT),
 					new Rectangle(0,0,stage.fullScreenWidth, stage.fullScreenHeight)
 
-					);//= viewPort.width / DeviceConstants.STAGE_WIDTH;
-			
-			//else
-			//if it's iphone 5
-			/*
-			{
-				viewPort = new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight);
-				//Assets.contentScaleFactor = 2;
-			}
-			*/
+			);
 			starling = new Starling(View, stage, viewPort);
 			starling.stage.stageWidth = DeviceConstants.STAGE_WIDTH;
 			starling.stage.stageHeight = DeviceConstants.STAGE_HEIGHT;
 			//starling.simulateMultitouch = true; // Mobile testing
-			//starling.enableErrorChecking = false;
+			starling.enableErrorChecking = false;
 			//starling.showStatsAt();
 			starling.start();
 			

@@ -192,6 +192,7 @@ package feathers.controls.renderers
 				addChild(this.dayText);
 				dayText.text = "Today";
 				dayText.height = 20;
+				dayText.width = 200;
 				this.dayText.textFormat = FontFactory.getTextFormat(1, 15, 0x808080);
 				this.dayText.embedFonts = true;
 				dayText.x = 10;
@@ -202,6 +203,7 @@ package feathers.controls.renderers
 				this.hourText = new TextFieldTextRenderer();
 				addChild(this.hourText);
 				hourText.text = "16:00";
+				hourText.width = 200;
 				hourText.x = dayText.x;
 				hourText.y = dayText.y + 20;
 				this.hourText.textFormat = FontFactory.getTextFormat(1, 15, 0x808080);

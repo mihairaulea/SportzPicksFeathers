@@ -27,6 +27,7 @@ package feathers.controls.renderers
 		{
 			backgroundImage = new Image( Assets.getAssetsTexture("friend_bg") );
 			addChild(backgroundImage);
+			//backgroundImage.addEventListener(TouchEvent.TOUCH, requestFriendHandler);
 			
 			this.width = backgroundImage.width;
 			this.height = backgroundImage.height;
@@ -42,6 +43,11 @@ package feathers.controls.renderers
 			nameRenderer.embedFonts = true;
 			addChild(nameRenderer);
 			nameRenderer.text = "Text";
+		}
+		
+		private function requestFriendHandler(e:Event)
+		{
+			
 		}
 		
 		override protected function draw():void

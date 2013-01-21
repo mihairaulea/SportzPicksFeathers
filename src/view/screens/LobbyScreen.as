@@ -14,6 +14,7 @@ package view.screens
 	import flash.text.TextRenderer;
 	import starling.events.Event;
 	import flash.events.Event;
+	import view.util.CommonAssetsScreen;
 	import view.util.FontFactory;
 	
 	import feathers.controls.Screen;
@@ -34,9 +35,12 @@ package view.screens
 	import model.AppState;
 	import model.DataRetrieval;
 	import model.CountdownClass;
+	
+	import flash.utils.setTimeout;
 	 
 	public class LobbyScreen extends Screen
 	{
+		private var commonAssets:CommonAssetsScreen;
 		
 		private var smallLogo:Image;
 		private var logoBackground:Image;
@@ -47,6 +51,9 @@ package view.screens
 		private var coinsTextFormat:TextFormat;
 		
 		private var timerBackground:Image;
+		
+		private var textFormat1:TextFormat;
+		private var textFormat2:TextFormat;
 		
 		private var tournamentEndsInTextField:TextFieldTextRenderer;
 		private var daysTextField:TextFieldTextRenderer;
@@ -61,7 +68,7 @@ package view.screens
 		private var startNewGameButton:Button;
 	
 		private var challengesList:List;
-		
+	
 		//data
 		private var dataRetrieval:DataRetrieval;
 		private var appState:AppState;
@@ -74,26 +81,43 @@ package view.screens
 		
 		public function LobbyScreen() 
 		{
-			
-		}
-		
-		override protected function initialize():void
-		{			
+			commonAssets = CommonAssetsScreen.getInstance();
 			logoBackground = new Image( Assets.getAssetsTexture("nav_bar") );
-			addChild(logoBackground);
-					
+			
 			coinsDisplayAndBtn = new Button();
 			coinsDisplayAndBtn.defaultSkin = new Image(Assets.getAssetsTexture("coins_hud"));
 			coinsDisplayAndBtn.downSkin    = new Image(Assets.getAssetsTexture("coins_hud_press"));
 			coinsDisplayAndBtn.label = "XXXXX";
 			coinsDisplayAndBtn.labelOffsetY = 7;
 			coinsDisplayAndBtn.labelFactory = getCoinsTextRenderer;
+			
+			menuBtn = new Button();
+			days = new TextFieldTextRenderer();
+			hours = new TextFieldTextRenderer();
+			mins = new TextFieldTextRenderer();
+			secs = new TextFieldTextRenderer();
+			daysTextField = new TextFieldTextRenderer();
+			hoursTextField = new TextFieldTextRenderer();
+			minsTextField = new TextFieldTextRenderer();
+			secsTextField = new TextFieldTextRenderer();
+			startNewGameButton = new Button();
+			
+			textFormat1 = FontFactory.getTextFormat(2, 11, 0xE6E6E6);
+			textFormat2 = FontFactory.getTextFormat(5, 44, 0xE24B37);
+			
+			challengesList = new List();
+		}
+		
+		override protected function initialize():void
+		{			
+			
+			addChild(logoBackground);
+					
 			addChild(coinsDisplayAndBtn);
 			
 			smallLogo = new Image(Assets.getAssetsTexture("logo_small"));
 			addChild(smallLogo);
 			
-			menuBtn = new Button();
 			menuBtn.defaultSkin = new Image(Assets.getAssetsTexture("menu_icon"));
 			menuBtn.downSkin = new Image(Assets.getAssetsTexture("menu_icon_press"));
 			addChild(menuBtn);
@@ -108,71 +132,52 @@ package view.screens
 			addChild(tournamentEndsInTextField);
 			tournamentEndsInTextField.text = "TOURNAMENT ENDS IN:";
 			
-			days = new TextFieldTextRenderer();
-			days.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			days.textFormat = textFormat1
 			days.embedFonts = true;
 			addChild(days);
 			days.text = "DAYS";
 			
-			hours = new TextFieldTextRenderer();
-			hours.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			hours.textFormat = textFormat1;
 			hours.embedFonts = true;
 			addChild(hours);
 			hours.text = "HOURS";
 			
-			mins = new TextFieldTextRenderer();
-			mins.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			mins.textFormat = textFormat1;
 			mins.embedFonts = true;
 			addChild(mins);
 			mins.text = "MINS";
 			
-			secs = new TextFieldTextRenderer();
-			secs.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			secs.textFormat = textFormat1;
 			secs.embedFonts = true;
 			addChild(secs);
 			secs.text = "SECS";
 			
-			daysTextField = new TextFieldTextRenderer();
-			daysTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
+			daysTextField.textFormat = textFormat2;
 			daysTextField.embedFonts = true;
 			addChild(daysTextField);
-			
-			
-			hoursTextField = new TextFieldTextRenderer();
-			hoursTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
+						
+			hoursTextField.textFormat = textFormat2;
 			hoursTextField.embedFonts = true;
 			addChild(hoursTextField);
 			
-			minsTextField = new TextFieldTextRenderer();
-			minsTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
+			minsTextField.textFormat = textFormat2;
 			minsTextField.embedFonts = true;
 			addChild(minsTextField);
 			
-			secsTextField = new TextFieldTextRenderer();
-			secsTextField.textFormat = FontFactory.getTextFormat(5,44,0xE24B37);
+			secsTextField.textFormat = textFormat2;
 			secsTextField.embedFonts = true;
 			addChild(secsTextField);
 			
 			daysTextField.text = hoursTextField.text = minsTextField.text = secsTextField.text = "00";
-			
-			startNewGameButton = new Button();
-			startNewGameButton.defaultSkin = new Image( Assets.getAssetsTexture("start_btn") );
-			startNewGameButton.downSkin    = new Image( Assets.getAssetsTexture("start_btn_press") );
+				
+			startNewGameButton = commonAssets.getStartNewGameButton();
+			startNewGameButton.addEventListener(starling.events.Event.TRIGGERED, startNewGameHandler);
 			addChild(startNewGameButton);
-			startNewGameButton.label = "Start a new game";
-			startNewGameButton.labelOffsetX = -14;
-			startNewGameButton.labelFactory = getGoBtnTextRenderer;
-			
-			challengesList = new List();
-			challengesList.itemRendererType = CustomLobbyItemRenderer;
-			addChild(challengesList);
-			
-			//challengesList.itemRendererProperties.labelField = "text";
-			//challengesList.itemRendererProperties.iconTextureField = "thumbnail";		
-			
-			countdownClass = CountdownClass.getInstance();
-			dataRetrieval = DataRetrieval.getInstance();
-			dataRetrieval.addEventListener(DataRetrieval.LOBBY_DATA_RECEIVED, lobbyDataReceivedHandler);
+		}
+		
+		private function startNewGameHandler(e:starling.events.Event):void
+		{
+			dispatchEvent(new starling.events.Event("onPushStart"));
 		}
 		
 		public function updateDaysHoursMinsSecondsDisplay( array:Array )
@@ -210,11 +215,32 @@ package view.screens
 			
 			startNewGameButton.y = timerBackground.y + timerBackground.height;
 			
+			//data
+			countdownClass = CountdownClass.getInstance();
+			dataRetrieval = DataRetrieval.getInstance();
+			dataRetrieval.addEventListener(DataRetrieval.LOBBY_DATA_RECEIVED, lobbyDataReceivedHandler);
 			
+			//debug countdown
+			setTimeout(setCountdown, 300);		
+			//list
+			setTimeout(setList, 400);			
+			
+			//dataRetrieval.requestLobbyData( AppState.MY_USER_ID );
+		}
+		
+		private function setCountdown()
+		{
+			countdownClass.startCountingFromDaysHoursMinsSecondsFormat( [1,2,43,23], updateDaysHoursMinsSecondsDisplay);
+		}
+				
+		private function setList()
+		{
+			challengesList.itemRendererType = CustomLobbyItemRenderer;
 			challengesList.y = startNewGameButton.y + startNewGameButton.defaultSkin.height;
 			challengesList.width = this.actualWidth;
 			challengesList.height = this.actualHeight - (logoBackground.height + timerBackground.height + startNewGameButton.defaultSkin.height);
-						
+			addChild(challengesList);
+			
 			challengesList.addEventListener(starling.events.Event.CHANGE, listChangedHandler);
 			// dummy data!!!
 			//{isNewChallenge:"false" ,playerPicture:"", playerName:"", playerPoints:"", myPoints:"", noTicks:"",noCups:""}		
@@ -225,10 +251,8 @@ package view.screens
 				{ text: "Bread"},
 				{ text: "Chicken"},
 			]);
-			
-			//dataRetrieval.requestLobbyData( AppState.MY_USER_ID );
 		}
-				
+		
 		private function lobbyDataReceivedHandler(e : flash.events.Event)
 		{
 			trace( dataRetrieval.lobbyInfo );
@@ -245,17 +269,7 @@ package view.screens
 			AppState.SELECTED_OPPONENT_ID = (challengesList.dataProvider.getItemAt(challengesList.selectedIndex).OpponentId);
 			dispatchEvent(new starling.events.Event("onChallengerSelected"));
 		}
-		
-		private function getGoBtnTextRenderer():ITextRenderer
-		{
-			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
-			
-			goLabel.textFormat = FontFactory.getTextFormat(0, 20,0xFFFFFF);
-			goLabel.embedFonts = true;
-			
-			return goLabel;
-		}
-		
+				
 		private function getCoinsTextRenderer():ITextRenderer
 		{
 			var goLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
@@ -264,6 +278,11 @@ package view.screens
 			goLabel.embedFonts = true;
 			
 			return goLabel;
+		}
+		
+		override protected function screen_removedFromStageHandler(event:starling.events.Event):void
+		{
+			super.screen_removedFromStageHandler(event);
 		}
 		
 	}

@@ -8,7 +8,6 @@ package view.screens
 	import feathers.data.ListCollection;
 	import feathers.controls.Screen;
 	import feathers.layout.VerticalLayout;
-	import flash.events.Event;
 	import starling.display.Sprite;
 	import starling.display.Image;
 	import flash.text.TextRenderer;
@@ -41,6 +40,7 @@ package view.screens
 		private var miniHeader:Sprite;
 		
 		private var list:List;
+		private var shadow:Image;
 		
 		public function SelectEventScreen() 
 		{
@@ -109,6 +109,9 @@ package view.screens
 			list.itemRendererType = SelectGameRenderer;
 			
 			addChild(list);
+			
+			shadow = new Image(Assets.getAssetsTexture("scroll_shadow"));
+			addChild(shadow);
 		}
 		
 		private function eventSelected(eventId:int):void
@@ -116,9 +119,9 @@ package view.screens
 			trace("selected event with id :" + eventId);
 		}
 		
-		private function headerBackButtonHandler(e:starling.events.Event)
+		private function headerBackButtonHandler()
 		{
-			trace("back handler");
+			dispatchEvent(new Event("onBack"));
 		}
 		
 		private function coinsCallbackHandler(e:starling.events.Event)
@@ -128,10 +131,13 @@ package view.screens
 		
 		override protected function draw():void
 		{		
-			list.width = 300;
-			list.height = 385.5 - 45;
 			list.x = 10;
 			list.y = 125;
+						
+			list.width = 300;
+			list.height = stage.stageHeight - list.y;
+			
+			shadow.y = stage.stageHeight - shadow.height;
 		}
 		
 	}

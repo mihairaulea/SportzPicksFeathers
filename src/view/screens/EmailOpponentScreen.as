@@ -8,7 +8,6 @@ package view.screens
 	import feathers.data.ListCollection;
 	import feathers.controls.Screen;
 	import feathers.layout.VerticalLayout;
-	import flash.events.Event;
 	import starling.display.Sprite;
 	import starling.display.Image;
 	import flash.text.TextRenderer;
@@ -87,14 +86,14 @@ package view.screens
 			shadow.y = 330;
 		}
 		
-		private function headerBackButtonHandler(e:starling.events.Event)
+		private function headerBackButtonHandler()
 		{
-			trace("back handler");
+			dispatchEvent(new Event("onBack"));
 		}
 		
-		private function goCallback(e:starling.events.Event)
+		private function goCallback()
 		{
-			trace("go handler");
+			dispatchEvent(new Event("onEmailOk"));
 		}
 		
 		override protected function draw():void
