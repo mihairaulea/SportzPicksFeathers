@@ -112,6 +112,11 @@ package view.screens
 		private function coinsCallbackHandler(e:starling.events.Event)
 		{
 			trace("coins callback");
+		}	
+		
+		override protected function screen_addedToStageHandler(event:Event):void
+		{
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
 		}
 		
 		override protected function draw():void

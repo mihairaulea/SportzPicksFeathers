@@ -50,10 +50,7 @@ package view.screens
 		}
 		
 		override protected function initialize():void
-		{
-			header = commonAssetsScreen.getHeader("Email Friends",true, headerBackButtonHandler, false);
-			addChild( header );
-			
+		{			
 			enterOpponentEmailAddress = new TextFieldTextRenderer();
 			enterOpponentEmailAddress.text = "Enter your opponent's \nemail address";
 			enterOpponentEmailAddress.width = 274;
@@ -84,22 +81,36 @@ package view.screens
 			addChild(shadow);
 			shadow.x = 0;
 			shadow.y = 330;
+			
+			header = commonAssetsScreen.getHeader("Email Friends",true, headerBackButtonHandler, false);
+			addChild( header );
+		
+			trace("init from email opponent screen");
+		}
+		
+		override protected function draw():void
+		{
+		
 		}
 		
 		private function headerBackButtonHandler()
 		{
+			trace("header back button");
 			dispatchEvent(new Event("onBack"));
 		}
+		
+		
 		
 		private function goCallback()
 		{
 			dispatchEvent(new Event("onEmailOk"));
 		}
 		
-		override protected function draw():void
+		override protected function screen_addedToStageHandler(event:Event):void
 		{
-			
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
 		}
+		
 		
 	}
 

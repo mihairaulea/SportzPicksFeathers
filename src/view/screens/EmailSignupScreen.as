@@ -15,6 +15,7 @@ package view.screens
 	import feathers.system.DeviceCapabilities;
 	
 	import flash.text.TextFormat;
+	import flash.text.engine.FontWeight;
 	import feathers.core.ITextRenderer;
 	
 	import org.osflash.signals.ISignal;
@@ -92,13 +93,12 @@ package view.screens
 			
 			emailInput = new feathers.controls.TextInput();
 			var inputBackImage:Image = new Image(Assets.getAssetsTexture("form_field"));
-			//inputBackImage.pivotX = 15;
-			//inputBackImage.pivotY = 3;
+			inputBackImage.pivotX = 15;
+			inputBackImage.pivotY = 6;
 			emailInput.width = 265;
 			emailInput.height = 27;
 			emailInput.textEditorFactory = getTextInputField;
-			//emailInput.backgroundSkin = inputBackImage;
-			//emailInput.addEventListener(FeathersEventType.ENTER, focusFormHandler);
+			emailInput.backgroundSkin = inputBackImage;
 			
 			addChild(emailInput);	
 			
@@ -112,7 +112,7 @@ package view.screens
 			usernameInput = new TextInput();
 			var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
 			inputBackImage2.pivotX = 15;
-			inputBackImage2.pivotY = 3;
+			inputBackImage2.pivotY = 6;
 			usernameInput.width = 265;
 			usernameInput.height = 27;
 			usernameInput.backgroundSkin = inputBackImage2;
@@ -153,7 +153,7 @@ package view.screens
 			navBarShadow.y = logoBackground.y + logoBackground.height;
 			
 			createYourAccount.x = 26;
-			createYourAccount.y = 71;
+			createYourAccount.y = 67;
 			
 			facebookButton.x = 10//(this.actualWidth - facebookButton.width)/2;
 			facebookButton.y = 218 / 2;//createYourAccount.y + createYourAccount.height + 20;
@@ -167,9 +167,8 @@ package view.screens
 			
 			emailInput.x = backgroundPanel.x + 26;
 			emailInput.y = emailAddressTitle.y + 25;
-			//emailInput.addEventListener("focusIn", focusFormHandler);
-			//emailInput.addEventListener("focusOut", focusOutFormHandler);
-			//emailInput.text = "Type your Email Address here";
+			emailInput.text = "Type your Email Address here";
+			emailInput.addEventListener("focusIn", inputFocusHandler);
 			
 			emailErrorFeedback.x = emailAddressTitle.x;
 			emailErrorFeedback.y = emailInput.y + 24;
@@ -182,8 +181,7 @@ package view.screens
 			usernameInput.x = emailInput.x;
 			usernameInput.y = usernameTitle.y + 25;
 			usernameInput.text = "Type your username here(optional)";
-			//usernameInput.addEventListener("focusIn", focusFormHandler);
-			//usernameInput.addEventListener("focusOut", focusOutFormHandler);
+			usernameInput.addEventListener("focusIn", inputFocusHandler);
 			
 			usernameErrorFeedback.x = usernameTitle.x;
 			usernameErrorFeedback.y = usernameInput.y + 24;
@@ -203,16 +201,10 @@ package view.screens
 		{
 			dispatchEvent(new Event(EVENTS[0]));
 		}
-		
-		private function focusFormHandler(e:Event):void
+				
+		private function inputFocusHandler(e:Event):void
 		{
-			//TextInput(e.target).removeEventListener("focusIn", focusFormHandler);
-			//TextInput(e.target).text = "";
-		}
-		
-		private function focusOutFormHandler(e:Event):void
-		{
-			TextInput(e.target).addEventListener("focusIn", focusFormHandler);
+			TextInput(e.target).text = "";
 		}
 		
 		private function checkForm():Boolean
@@ -256,12 +248,14 @@ package view.screens
 			return goLabel;
 		}
 		
-		private function getTextInputField():ITextEditor
+		private function getTextInputField():StageTextTextEditor
 		{
-			var label:TextFieldTextEditor = new TextFieldTextEditor();
+			var label:StageTextTextEditor = new StageTextTextEditor();
 			
-			//label.textFormat = FontFactory.getTextFormat(2,15,0xB3B3B3);
-			//label.embedFonts = true;
+			label.color = 0xB3B3B3;
+			label.fontFamily = "Helvetica";
+			label.fontSize = 11 * DeviceConstants.SCALE;
+			label.fontWeight = FontWeight.BOLD;
 			
 			return label;
 		}

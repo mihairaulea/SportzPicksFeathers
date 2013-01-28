@@ -55,6 +55,7 @@ package view.screens
 			selectGameText = new TextFieldTextRenderer();
 			selectGameText.x = 16.5;
 			selectGameText.y = 59;
+			selectGameText.width = 400;
 			selectGameText.textFormat = FontFactory.getTextFormat(0, 18, 0xFFFFFF);
 			selectGameText.embedFonts = true;
 			
@@ -138,6 +139,11 @@ package view.screens
 			list.height = stage.stageHeight - list.y;
 			
 			shadow.y = stage.stageHeight - shadow.height;
+		}
+			
+		override protected function screen_addedToStageHandler(event:Event):void
+		{
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
 		}
 		
 	}

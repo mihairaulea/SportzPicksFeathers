@@ -130,8 +130,8 @@ package view
 			)
 			);
 			
-			//this.navigator.showScreen(WELCOME_SCREEN);
-			this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
+			this.navigator.showScreen(WELCOME_SCREEN);
+			//this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
 			//this.navigator.showScreen(LOBBY_SCREEN);
 			//this.navigator.showScreen(HEAD_TO_HEAD_SCREEN);
 			// batch 2

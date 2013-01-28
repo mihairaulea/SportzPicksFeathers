@@ -4,6 +4,9 @@ package view.util
 	 * ...
 	 * @author Mihai Raulea
 	 */
+	
+	import flash.geom.Point;
+	import flash.text.engine.*;
 	import starling.display.DisplayObject;
 	import starling.display.Image;
 	import starling.display.Sprite;
@@ -54,7 +57,6 @@ package view.util
 		private static var goBtnInit:Boolean = false;
 		
 		// INPUT
-		private var inputField:TextInput;
 		private static var inputFieldInit:Boolean = false;
 				
 		
@@ -127,19 +129,25 @@ package view.util
 				coinHud.x = 256.5;
 				coinHud.y = 8.5;				
 			}
-			
-			if (backCallback != null) 
+						
+			if (includeBackBtn) 
 			{
+				header.addChild(backBtn);
 				backBtn.addEventListener( Event.TRIGGERED, backHandler );
 				this.backCallback = backCallback;
 			}
-			if(includeBackBtn) header.addChild(backBtn);
 			
 			return header;
 		}
 		
+		public function refreshBackCallback(backCallback:Function)
+		{
+			this.backCallback = backCallback;
+		}
+		
 		private function backHandler(e:Event)
 		{
+			trace("calling back from common assets screen");
 			backCallback.call(); 
 		}
 		
@@ -191,30 +199,33 @@ package view.util
 				goBtnInit = true;
 			}
 			
+			goBtn.addEventListener( Event.TRIGGERED, goCallback );
+			
 			return goBtn;
 		}
 		
-		public function getInputField(defaultText:String, paddingLeft:int, paddingTop:int, eraseAllOnFocus:Boolean):TextInput
+		public function refreshGoCallback(goCallback:Function)
 		{
-			if (inputFieldInit == false)
-			{
-				inputField = new TextInput();
-				var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
 			
-				inputField.backgroundSkin = inputBackImage2;
-				inputField.textEditorFactory = getTextInputField;
-				inputField.paddingLeft = paddingLeft;
-				inputField.paddingTop = paddingTop;
-				inputField.text = defaultText;
-				inputField.validate();		
-				inputFieldInit = true;
-			}
+		}
+		
+		public function getInputField(defaultText:String, paddingLeft:int, paddingTop:int, eraseAllOnFocus:Boolean):TextInput
+		{			
+			var inputField:TextInput = new TextInput();
+			var inputBackImage2:Image = new Image(Assets.getAssetsTexture("form_field"));
 			
+			inputField.backgroundSkin = inputBackImage2;
+			inputField.textEditorFactory = getTextInputField;
+			inputField.paddingLeft = paddingLeft;
+			inputField.paddingTop = paddingTop;
+			inputField.text = defaultText;
+			//inputFieldInit = true;
+						
 			if (eraseAllOnFocus)
 				inputField.addEventListener("focusIn", inputFocusHandler);
-			else
-				inputField.removeEventListener("focusIn", inputFocusHandler);
-				
+			//else
+				//inputField.removeEventListener("focusIn", inputFocusHandler);
+							
 			return inputField;
 		}
 			
@@ -222,8 +233,14 @@ package view.util
 		{
 			var result:Button= new Button();
 			
-			result.defaultSkin = new Image(Assets.getAssetsTexture("pop_event_btn1"));
-			result.downSkin    = new Image(Assets.getAssetsTexture("pop_event_btn1_press"));
+			var codeButton:int = id + 1;
+			var code:String;
+			if (codeButton == 2 || codeButton == 3) code = "2_3";
+			else
+			code = String(codeButton);
+			
+			result.defaultSkin = new Image(Assets.getAssetsTexture("pop_event_btn"+code));
+			result.downSkin    = new Image(Assets.getAssetsTexture("pop_event_btn"+code+"_press"));
 				
 			result.width = result.defaultSkin.width;
 			result.height = result.defaultSkin.height;
@@ -235,17 +252,19 @@ package view.util
 			dayTimeText.width = 80;
 			dayTimeText.height = 41;
 			dayTimeText.x = 9;
-			dayTimeText.y = 11;
+			dayTimeText.y = 8;
 			dayTimeText.textFormat = FontFactory.getTextFormat(2, 15, 0x808080);
 			dayTimeText.embedFonts = true;
+			dayTimeText.textFormat.leading = 2;
 			
 			team1Team2Text.text = team1 + "\n" + team2;
 			team1Team2Text.width = 150;
 			team1Team2Text.height = 41;
 			team1Team2Text.x = 100;
-			team1Team2Text.y = 10;
+			team1Team2Text.y = 8;
 			team1Team2Text.textFormat = FontFactory.getTextFormat(1, 15, 0x4d4d4d);
 			team1Team2Text.embedFonts = true;
+			team1Team2Text.textFormat.leading = 1.2;
 			
 			result.label = "";
 			result.addChild(dayTimeText);
@@ -263,20 +282,22 @@ package view.util
 			
 			return result;
 		}
-		
-		private function getTextInputField():ITextEditor
+				
+		private function getTextInputField():StageTextTextEditor
 		{
-			var label:TextFieldTextEditor = new TextFieldTextEditor();
+			var label:StageTextTextEditor = new StageTextTextEditor();
 			
-			label.textFormat = FontFactory.getTextFormat(0,15,0xB3B3B3);
-			label.embedFonts = true;
+			label.color = 0xB3B3B3;
+			label.fontFamily = "Helvetica";
+			label.fontSize = 11*DeviceConstants.SCALE;
+			label.fontWeight = FontWeight.BOLD;
 			
 			return label;
 		}
 		
 		private function inputFocusHandler(e:Event):void
 		{
-			inputField.text = "";
+			TextInput(e.target).text = "";
 		}
 		
 		private function getGoBtnTextRenderer():ITextRenderer

@@ -69,6 +69,8 @@ package view.screens
 	
 		private var challengesList:List;
 	
+		private var shadow:Image;
+		
 		//data
 		private var dataRetrieval:DataRetrieval;
 		private var appState:AppState;
@@ -102,10 +104,13 @@ package view.screens
 			secsTextField = new TextFieldTextRenderer();
 			startNewGameButton = new Button();
 			
-			textFormat1 = FontFactory.getTextFormat(2, 11, 0xE6E6E6);
+			textFormat1 = FontFactory.getTextFormat(7, 8, 0xE6E6E6);
+			trace(textFormat1.font);
 			textFormat2 = FontFactory.getTextFormat(5, 44, 0xE24B37);
 			
 			challengesList = new List();
+			
+			shadow = new Image(Assets.getAssetsTexture("scroll_shadow"));
 		}
 		
 		override protected function initialize():void
@@ -127,7 +132,7 @@ package view.screens
 			addChild(timerBackground);
 			
 			tournamentEndsInTextField = new TextFieldTextRenderer();
-			tournamentEndsInTextField.textFormat = FontFactory.getTextFormat(2,11,0xE6E6E6);
+			tournamentEndsInTextField.textFormat = FontFactory.getTextFormat(7,9,0xE6E6E6);
 			tournamentEndsInTextField.embedFonts = true;
 			addChild(tournamentEndsInTextField);
 			tournamentEndsInTextField.text = "TOURNAMENT ENDS IN:";
@@ -173,6 +178,7 @@ package view.screens
 			startNewGameButton = commonAssets.getStartNewGameButton();
 			startNewGameButton.addEventListener(starling.events.Event.TRIGGERED, startNewGameHandler);
 			addChild(startNewGameButton);
+			
 		}
 		
 		private function startNewGameHandler(e:starling.events.Event):void
@@ -197,8 +203,8 @@ package view.screens
 			
 			timerBackground.y = logoBackground.y + logoBackground.height;
 			
-			tournamentEndsInTextField.x = 33;
-			tournamentEndsInTextField.y = timerBackground.y + 20;
+			tournamentEndsInTextField.x = 37;
+			tournamentEndsInTextField.y = timerBackground.y + 23;
 			
 			daysTextField.y = hoursTextField.y = minsTextField.y = secsTextField.y = timerBackground.y + (timerBackground.height - 48) / 2; 
 			
@@ -251,6 +257,10 @@ package view.screens
 				{ text: "Bread"},
 				{ text: "Chicken"},
 			]);
+			
+			
+			addChild(shadow);
+			shadow.y = stage.stageHeight - shadow.height;
 		}
 		
 		private function lobbyDataReceivedHandler(e : flash.events.Event)
@@ -265,9 +275,11 @@ package view.screens
 				
 		private function listChangedHandler(e : starling.events.Event):void
 		{
-			trace("list index changed");
-			AppState.SELECTED_OPPONENT_ID = (challengesList.dataProvider.getItemAt(challengesList.selectedIndex).OpponentId);
-			dispatchEvent(new starling.events.Event("onChallengerSelected"));
+			if (challengesList.selectedIndex != -1)
+			{
+				AppState.SELECTED_OPPONENT_ID = (challengesList.dataProvider.getItemAt(challengesList.selectedIndex).OpponentId);
+				dispatchEvent(new starling.events.Event("onChallengerSelected"));
+			}
 		}
 				
 		private function getCoinsTextRenderer():ITextRenderer
@@ -278,6 +290,18 @@ package view.screens
 			goLabel.embedFonts = true;
 			
 			return goLabel;
+		}
+		
+		override protected function screen_addedToStageHandler(event:starling.events.Event):void
+		{
+			challengesList.dataProvider = new ListCollection(
+			[
+				{ text: "Milk" },
+				{ text: "Eggs"},
+				{ text: "Bread"},
+				{ text: "Chicken"},
+			]);
+			challengesList.selectedIndex = -1;
 		}
 		
 		override protected function screen_removedFromStageHandler(event:starling.events.Event):void

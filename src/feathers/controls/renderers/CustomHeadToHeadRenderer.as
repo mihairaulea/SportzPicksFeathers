@@ -196,7 +196,7 @@ package feathers.controls.renderers
 				this.dayText.textFormat = FontFactory.getTextFormat(1, 15, 0x808080);
 				this.dayText.embedFonts = true;
 				dayText.x = 10;
-				dayText.y = backgroundItemRenderer.height/2 - 19;
+				dayText.y = backgroundItemRenderer.height/2 - 22;
 			}
 			if (!this.hourText)
 			{
@@ -205,7 +205,7 @@ package feathers.controls.renderers
 				hourText.text = "16:00";
 				hourText.width = 200;
 				hourText.x = dayText.x;
-				hourText.y = dayText.y + 20;
+				hourText.y = dayText.y + 22;
 				this.hourText.textFormat = FontFactory.getTextFormat(1, 15, 0x808080);
 				this.hourText.embedFonts = true;
 			}
@@ -220,7 +220,7 @@ package feathers.controls.renderers
 			{
 				this.team1Text = new TextFieldTextRenderer();
 				addChild(this.team1Text);
-				team1Text.x = this.backgroundItemRenderer.width / 3;
+				team1Text.x = 102;
 				team1Text.y = this.dayText.y;
 				team1Text.textFormat = FontFactory.getTextFormat(3, 15, 0x4D4D4D);
 				team1Text.embedFonts = true;
@@ -230,7 +230,7 @@ package feathers.controls.renderers
 			{
 				this.team2Text = new TextFieldTextRenderer();
 				addChild(this.team2Text);
-				team2Text.x = this.backgroundItemRenderer.width / 3;
+				team2Text.x = 102;
 				team2Text.y = this.hourText.y;
 				team2Text.textFormat = FontFactory.getTextFormat(3, 15, 0x4D4D4D);
 				team2Text.embedFonts = true;
@@ -244,9 +244,9 @@ package feathers.controls.renderers
 				acceptButton.labelFactory = getLabelRenderer;
 				acceptButton.labelOffsetX = 9;
 				acceptButton.label = "Accept";
-				//addChild(acceptButton);
-				acceptButton.x = backgroundItemRenderer.width / 1.5;
-				acceptButton.y = backgroundItemRenderer.height - acceptButton.defaultSkin.height >> 1;
+				addChild(acceptButton);
+				acceptButton.x = 222;
+				acceptButton.y = 14;
 			}
 			if (!this.resultsButton)
 			{
@@ -256,7 +256,7 @@ package feathers.controls.renderers
 				resultsButton.labelFactory = getLabelRenderer;
 				resultsButton.label = "Results";
 				resultsButton.labelOffsetX = 9;
-				addChild(resultsButton);
+				//addChild(resultsButton);
 				resultsButton.x = backgroundItemRenderer.width - 10 - resultsButton.defaultSkin.width;
 				resultsButton.y = backgroundItemRenderer.height - resultsButton.defaultSkin.height >> 1;
 			}

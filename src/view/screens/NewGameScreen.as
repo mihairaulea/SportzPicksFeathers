@@ -72,7 +72,7 @@ package view.screens
 			
 			findOpponentText = new TextFieldTextRenderer();
 			findOpponentText.text = "How do you want to find \nyour opponent";
-			findOpponentText.width = 274;
+			findOpponentText.width = 400;
 			findOpponentText.height = 70;
 			findOpponentText.x = 37;
 			findOpponentText.y = 74;
@@ -89,6 +89,7 @@ package view.screens
 			
 			withFacebookTitleText = new TextFieldTextRenderer();
 			withFacebookTitleText.text = "With Facebook";
+			withFacebookTitleText.width = 400;
 			withFacebookTitleText.textFormat = FontFactory.getTextFormat(1, 18, 0x4D4D4D);
 			withFacebookTitleText.embedFonts = true;
 			withFacebookTitleText.x = 71;
@@ -96,6 +97,7 @@ package view.screens
 			
 			withFacebookSubtitleText = new TextFieldTextRenderer();
 			withFacebookSubtitleText.text = "Play with your Facebook friends";
+			withFacebookSubtitleText.width = 400;
 			withFacebookSubtitleText.textFormat = FontFactory.getTextFormat(2, 11, 0x808080);
 			withFacebookSubtitleText.embedFonts = true;
 			withFacebookSubtitleText.x = 71;
@@ -121,6 +123,7 @@ package view.screens
 			randomOpponentTitleText.embedFonts = true;
 			randomOpponentTitleText.x = 71;
 			randomOpponentTitleText.y = 15.4;
+			randomOpponentTitleText.width = 400;
 			
 			randomOpponentSubtitleText = new TextFieldTextRenderer();
 			randomOpponentSubtitleText.text = "Let us find your opponent for you";
@@ -128,6 +131,7 @@ package view.screens
 			randomOpponentSubtitleText.embedFonts = true;
 			randomOpponentSubtitleText.x = 71;
 			randomOpponentSubtitleText.y = 35;
+			randomOpponentSubtitleText.width = 400;
 			
 			randomOpponentButton.addChild(randomOpponentTitleText);
 			randomOpponentButton.addChild(randomOpponentSubtitleText);
@@ -149,6 +153,7 @@ package view.screens
 			withEmailAddressTitleText.embedFonts = true;
 			withEmailAddressTitleText.x = 71;
 			withEmailAddressTitleText.y = 15.4;
+			withEmailAddressTitleText.width = 400;
 			
 			withEmailAddressSubtitleText = new TextFieldTextRenderer();
 			withEmailAddressSubtitleText.text = "Search for an opponent by email";
@@ -156,6 +161,7 @@ package view.screens
 			withEmailAddressSubtitleText.embedFonts = true;
 			withEmailAddressSubtitleText.x = 71;
 			withEmailAddressSubtitleText.y = 35;
+			withEmailAddressSubtitleText.width = 400;
 			
 			withEmailAddressButton.addChild(withEmailAddressTitleText);
 			withEmailAddressButton.addChild(withEmailAddressSubtitleText);
@@ -185,6 +191,11 @@ package view.screens
 		private function facebookHandler(e:Event)
 		{
 			dispatchEvent(new Event("onFacebook"));
+		}
+					
+		override protected function screen_addedToStageHandler(event:Event):void
+		{
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
 		}
 		
 	}

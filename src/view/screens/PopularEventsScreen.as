@@ -141,6 +141,11 @@ package view.screens
 		{
 			
 		}
+					
+		override protected function screen_addedToStageHandler(event:Event):void
+		{
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
+		}
 		
 	}
 

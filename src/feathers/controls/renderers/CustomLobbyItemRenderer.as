@@ -286,8 +286,8 @@ package feathers.controls.renderers
 			var textPoints:TextFieldTextRenderer = new TextFieldTextRenderer();
 			addChild(textPoints);
 			textPoints.text = ":";
-			textPoints.x = opponentPoints.x + opponentPoints.width;
-			textPoints.y = opponentPoints.y - 4;
+			textPoints.x = 131;
+			textPoints.y = 26;
 			textPoints.textFormat = FontFactory.getTextFormat(2, 28, 0xA1A1A1);
 		}
 		
@@ -348,8 +348,8 @@ package feathers.controls.renderers
 		
 		private function initTextFormats():void
 		{
-			namesTextFormat  = new TextFormat("HelveticaNeueLT", 12, 0x4D4D4D);
-			pointsTextFormat = new TextFormat("HelveticaNeueLT", 25, 0x4D4D4D);
+			namesTextFormat  = FontFactory.getTextFormat(1, 12, 0x4D4D4D);
+			pointsTextFormat =  FontFactory.getTextFormat(1, 25, 0x4D4D4D);
 			acceptedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x5D9B05);
 			completedChallengesTextFormat = new TextFormat("HelveticaNeueBold", 12, 0x4D4D4D);
 			newChallengeTextFormat = new TextFormat("HelveticaNeueLT", 12, 0x478804);

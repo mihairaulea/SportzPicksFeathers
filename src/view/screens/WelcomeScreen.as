@@ -63,7 +63,7 @@ package view.screens
 			addChild(howConnectText);
 			howConnectText.width = 240;
 			howConnectText.height = 32;
-			howConnectText.textFormat = FontFactory.getTextFormat(0, 18, 0xFFFFFF);
+			howConnectText.textFormat = FontFactory.getTextFormat(1, 18, 0xFFFFFF);
 			howConnectText.embedFonts = true;
 			howConnectText.validate();
 			
@@ -73,6 +73,7 @@ package view.screens
 			facebookButton.downSkin = new Image(Assets.getAssetsTexture("facebook_btn_press"));
 			addChild(facebookButton);
 			facebookButton.validate();
+			facebookButton.horizontalAlign = Button.HORIZONTAL_ALIGN_LEFT;
 			
 			emailButton = new Button();
 			emailButton.defaultSkin = new Image(Assets.getAssetsTexture("first_screen_email_btn"));
@@ -80,6 +81,7 @@ package view.screens
 			addChild(emailButton);
 			triggerSignalOnButtonRelease(emailButton, EVENTS[1]);
 			emailButton.validate();
+			emailButton.horizontalAlign = Button.HORIZONTAL_ALIGN_LEFT;
 						
 			shadow = new Image(Assets.getAssetsTexture("shadow"));
 			addChild(shadow);			
@@ -90,28 +92,28 @@ package view.screens
 		override protected function draw():void
 		{						
 			//logo
-			logoImg.x = (this.actualWidth - logoImg.width >> 1) - 22.5;
-			logoImg.y = 74;
+			logoImg.x = 35;
+			logoImg.y = 57;
 			
-			howConnectText.x = 35;
-			howConnectText.y = 204.5;
+			howConnectText.x = 37;
+			howConnectText.y = 179.5;
 			howConnectText.text = "How would you like to connect?";
 			
 			facebookButton.label = "With Facebook";
 			facebookButton.labelFactory = getFacebookTextRenderer;
 			
 			facebookButton.x = 10;
-			facebookButton.y = 234.5;
-			facebookButton.labelOffsetX = -8;
+			facebookButton.y = 214;
+			facebookButton.labelOffsetX = 70;
 			
 			// "With your email address",);
 			addChild(emailButton);
 
 			emailButton.x = 10;
-			emailButton.y = 303.5;
+			emailButton.y = 283;
 			emailButton.labelFactory = getEmailTextRenderer;
 			emailButton.label = "With your Email address";
-			emailButton.labelOffsetX = -8;
+			emailButton.labelOffsetX = 70;
 			
 			shadow.x = 0;
 			shadow.y = 346;					
@@ -137,7 +139,7 @@ package view.screens
 		private function getEmailTextRenderer():ITextRenderer
 		{
 			var facebookLabel:TextFieldTextRenderer = new TextFieldTextRenderer();
-			facebookLabel.width = 140;			
+			facebookLabel.width = 180;			
 			facebookLabel.textFormat = FontFactory.getTextFormat(2,15,0x808080);
 			facebookLabel.textFormat.align = "left";
 			facebookLabel.embedFonts = true;

@@ -5,6 +5,7 @@ package feathers.controls.renderers
 	 * @author ...
 	 */
 	
+	import feathers.controls.Button;
 	import feathers.controls.List;
 	import feathers.controls.text.TextFieldTextRenderer;
 	import starling.display.Image;
@@ -14,7 +15,7 @@ package feathers.controls.renderers
 	public class FacebookFriendsGroupedListItemRenderer extends DefaultGroupedListItemRenderer
 	{
 		
-		private var backgroundImage:Image;
+		private var backgroundImage:Button;
 		private var profilePic:Image;
 		private var nameRenderer:TextFieldTextRenderer;
 		
@@ -25,12 +26,14 @@ package feathers.controls.renderers
 		
 		override protected function initialize():void
 		{
-			backgroundImage = new Image( Assets.getAssetsTexture("friend_bg") );
+			backgroundImage = new Button();
+			backgroundImage.defaultSkin = new Image( Assets.getAssetsTexture("friend_bg") );
+			backgroundImage.downSkin =  new Image(Assets.getAssetsTexture("friend_bg_press") );
 			addChild(backgroundImage);
 			//backgroundImage.addEventListener(TouchEvent.TOUCH, requestFriendHandler);
 			
 			this.width = backgroundImage.width;
-			this.height = backgroundImage.height;
+			this.height = backgroundImage.defaultSkin.height;
 			profilePic = new Image( Assets.getAssetsTexture("profilePic") );
 			addChild(profilePic);
 			

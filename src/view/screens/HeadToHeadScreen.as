@@ -50,6 +50,9 @@ package view.screens
 		private var timeRecurrence:TextFieldTextRenderer;
 		private var scoreStripHeadToHead:TextFieldTextRenderer;
 		
+		private var myOtherPointsTextField:TextFieldTextRenderer;
+		private var opponentOtherPointsTextField:TextFieldTextRenderer;
+		
 		private var startNewGameButton:Button;
 	
 		private var mathcesList:List;
@@ -62,6 +65,8 @@ package view.screens
 		private var weeklyText:TextFieldTextRenderer;
 		private var headToHeadText:TextFieldTextRenderer;
 		//onChallengerSelected
+		
+		private var shadow:Image;
 		
 		public function HeadToHeadScreen() 
 		{
@@ -126,10 +131,34 @@ package view.screens
 			headToHeadText = new TextFieldTextRenderer();
 			addChild(headToHeadText);
 			headToHeadText.text = "HEAD TO HEAD";
-			headToHeadText.textFormat = FontFactory.getTextFormat(2,14,0xE6E6E6);;
+			headToHeadText.textFormat = FontFactory.getTextFormat(6,13,0xE6E6E6);;
 			headToHeadText.textFormat.align = "center";
 			headToHeadText.embedFonts = true;
 			headToHeadText.wordWrap = true;						
+			
+			myOtherPointsTextField = new TextFieldTextRenderer();
+			myOtherPointsTextField.text = "1";
+			myOtherPointsTextField.width = 45;
+			myOtherPointsTextField.height = 27;
+			myOtherPointsTextField.y = 112;
+			myOtherPointsTextField.textFormat = FontFactory.getTextFormat(6,20,0xCCCCCC);;
+			myOtherPointsTextField.textFormat.align = "center";
+			myOtherPointsTextField.embedFonts = true;
+			myOtherPointsTextField.wordWrap = true;		
+			addChild(myOtherPointsTextField);			
+			myOtherPointsTextField.validate();
+			
+			opponentOtherPointsTextField = new TextFieldTextRenderer();
+			opponentOtherPointsTextField.text = "0";
+			opponentOtherPointsTextField.width = 45;
+			opponentOtherPointsTextField.height = 27;
+			opponentOtherPointsTextField.y = 112;
+			opponentOtherPointsTextField.textFormat = FontFactory.getTextFormat(6,20,0xCCCCCC);;
+			opponentOtherPointsTextField.textFormat.align = "center";
+			opponentOtherPointsTextField.embedFonts = true;
+			opponentOtherPointsTextField.wordWrap = true;	
+			addChild(opponentOtherPointsTextField);
+			opponentOtherPointsTextField.validate();
 			
 			startNewGameButton = CommonAssetsScreen.getInstance().getStartNewGameButton();
 			addChild(startNewGameButton);
@@ -148,6 +177,8 @@ package view.screens
 			addChild(coinsDisplayAndBtn);
 			coinsDisplayAndBtn.y = -4;
 			coinsDisplayAndBtn.x = headToHeadBackground.width - coinsDisplayAndBtn.defaultSkin.width;
+			
+			shadow = new Image(Assets.getAssetsTexture("scroll_shadow"));
 		}
 		
 		override protected function draw():void
@@ -159,7 +190,8 @@ package view.screens
 			backBtn.addEventListener(Event.TRIGGERED, backTriggeredHandler);
 			
 			headToHeadBackground.y = logoBackground.y + logoBackground.height;
-			vsImage.x = headToHeadBackground.width - vsImage.width >> 1;
+			vsImage.x = 144.6;
+			vsImage.y = 67.3;
 			
 			myProfilePic.height = headToHeadBackground.height * 0.56;
 			myProfilePic.scaleX = myProfilePic.scaleY;
@@ -171,14 +203,15 @@ package view.screens
 			opponentProfilePic.x = headToHeadBackground.width - opponentProfilePic.width - 15;
 			opponentProfilePic.y = myProfilePic.y;//headToHeadBackground.y + headToHeadBackground.height - opponentProfilePic.height - 5; 
 						
-			vsImage.y = myProfilePic.y;
+			myOtherPointsTextField.x = myProfilePic.x;
+			opponentOtherPointsTextField.x = opponentProfilePic.x;;
 			
-			myName.x = myProfilePic.x;
+			myName.x = myProfilePic.x - 3;
 			myName.y = headToHeadBackground.y + 5;
 			myName.text = "XXXXXX";
 			
 			trace(opponentName.maxWidth + " op width");
-			opponentName.x = headToHeadBackground.width - opponentName.maxWidth-15;
+			opponentName.x = headToHeadBackground.width - opponentName.maxWidth - 12;
 			opponentName.y = headToHeadBackground.y + 5;
 			opponentName.text = "YYYYYY";
 			
@@ -225,6 +258,9 @@ package view.screens
 			]);
 			
 			mathcesList.dataProvider = groceryList;
+			
+			addChild(shadow);
+			shadow.y = stage.stageHeight - shadow.height;
 		}
 		
 		private function backTriggeredHandler(e:Event)

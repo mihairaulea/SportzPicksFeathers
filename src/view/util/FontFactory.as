@@ -25,8 +25,14 @@ package view.util
 		
 		[Embed(source = "../../assets/fonts/DS-DIGIB.TTF",embedAsCFF="false", fontName="DSDIG", advancedAntiAliasing="true", mimeType = "application/x-font")]
 		private static const helveticaNeue5:Class;
-				
-		private static var fontNames:Array = ["helvetica","HNBdCn","HNMdCn","HNHvCn","HNCn","DSDIG"];
+		
+		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-BlkCn.ttf",embedAsCFF="false",fontName="HNBlk", advancedAntiAliasing="true", mimeType = "application/x-font")]
+		private static const helveticaNeue6:Class;
+		
+		[Embed(source="../../assets/fonts/HelveticaNeueLTCom-Md.ttf",embedAsCFF="false", fontName="HNMd", advancedAntiAliasing="true", mimeType = "application/x-font")]
+		private static const helveticaNeue7:Class;
+		
+		private static var fontNames:Array = ["helvetica","HNBdCn","HNMdCn","HNHvCn","HNCn","DSDIG","HNBlk","HNMd"];
 		
 		public function FontFactory() 
 		{

@@ -69,8 +69,6 @@ package view.screens
 		
 		override protected function initialize():void
 		{
-			header = commonAssetsScreen.getHeader("Facebook Friends",true, backButtonCallback, false);
-			addChild( header );
 			
 			blackStrip = new Image(Assets.getAssetsTexture("black_strip"));
 			addChild(blackStrip);
@@ -131,7 +129,10 @@ package view.screens
 		}
 		
 		override protected function draw():void
-		{;//36.5;
+		{   			
+			header = commonAssetsScreen.getHeader("Facebook Friends",true, headerBackButtonHandler, false);
+			addChild( header );
+			
 			facebookFriendsGroupedList.x = 10;
 			facebookFriendsGroupedList.y = 100;
 					
@@ -219,7 +220,7 @@ package view.screens
 			dispatchEvent(new Event("onFriendSelected"));
 		}
 		
-		private function backButtonCallback()
+		private function headerBackButtonHandler()
 		{
 			dispatchEvent(new Event("onBack"));
 		}
@@ -262,6 +263,11 @@ package view.screens
 			button.addChild(abcTextRenderer);
 			button.addEventListener(Event.TRIGGERED, letterButtonTriggered);
 			return button;			
+		}
+				
+		override protected function screen_addedToStageHandler(event:Event):void
+		{
+			commonAssetsScreen.refreshBackCallback( headerBackButtonHandler );
 		}
 		
 		private function letterButtonTriggered(e:Event)
