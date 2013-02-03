@@ -57,7 +57,7 @@ package view.screens
 		
 		private var facebookFriendsGroupedList:GroupedList;
 		
-		private var abcVerticalPanelBackground:Image;
+		//private var abcVerticalPanelBackground:Image;
 		private var abcTextRenderer:TextFieldTextRenderer;
 		
 		private var scrollShadow:Image;
@@ -120,7 +120,7 @@ package view.screens
 						
 			setUpList();
 			
-			abcVerticalPanelBackground = new Image( Assets.getAssetsTexture("az_sel_bg") );
+			//abcVerticalPanelBackground = new Image( Assets.getAssetsTexture("az_sel_bg") );
 			//addChild(abcVerticalPanelBackground);
 						
 			
@@ -139,8 +139,8 @@ package view.screens
 			facebookFriendsGroupedList.width = 300;
 			facebookFriendsGroupedList.height = this.actualHeight - facebookFriendsGroupedList.y
 			
-			abcVerticalPanelBackground.x = 283.5;
-			abcVerticalPanelBackground.y = facebookFriendsGroupedList.y + 5;
+			//abcVerticalPanelBackground.x = 283.5;
+			//abcVerticalPanelBackground.y = facebookFriendsGroupedList.y + 5;
 			
 			scrollShadow.y = this.actualHeight - scrollShadow.height;
 		}

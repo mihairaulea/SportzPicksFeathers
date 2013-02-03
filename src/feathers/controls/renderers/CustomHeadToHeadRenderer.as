@@ -25,7 +25,7 @@ package feathers.controls.renderers
 			this.addEventListener(Event.REMOVED_FROM_STAGE, removedFromStageHandler);
 		}
  
-		protected var backgroundItemRenderer:Image;
+		protected var backgroundItemRenderer:Button;
 		protected var itemLabel:Label;
 		
 		// custom assets
@@ -181,27 +181,29 @@ package feathers.controls.renderers
 			}
 			if (!this.backgroundItemRenderer)
 			{
-				this.backgroundItemRenderer = new Image(Assets.getAssetsTexture("lobby_list_bg"));
+				this.backgroundItemRenderer = new Button();
+				this.backgroundItemRenderer.defaultSkin =  new Image(Assets.getAssetsTexture("h2h_list_bg"));
+				this.backgroundItemRenderer.downSkin = new Image(Assets.getAssetsTexture("h2h_list_bg_press"));
 				this.addChild(backgroundItemRenderer);
-				this.width = backgroundItemRenderer.width;
-				this.height = backgroundItemRenderer.height;
+				this.width = backgroundItemRenderer.defaultSkin.width;
+				this.height = backgroundItemRenderer.defaultSkin.height;
 			}
 			if (!this.dayText)
 			{
 				this.dayText = new TextFieldTextRenderer();
-				addChild(this.dayText);
+				backgroundItemRenderer.addChild(this.dayText);
 				dayText.text = "Today";
 				dayText.height = 20;
 				dayText.width = 200;
 				this.dayText.textFormat = FontFactory.getTextFormat(1, 15, 0x808080);
 				this.dayText.embedFonts = true;
 				dayText.x = 10;
-				dayText.y = backgroundItemRenderer.height/2 - 22;
+				dayText.y = backgroundItemRenderer.defaultSkin.height/2 - 22;
 			}
 			if (!this.hourText)
 			{
 				this.hourText = new TextFieldTextRenderer();
-				addChild(this.hourText);
+				backgroundItemRenderer.addChild(this.hourText);
 				hourText.text = "16:00";
 				hourText.width = 200;
 				hourText.x = dayText.x;
@@ -212,14 +214,14 @@ package feathers.controls.renderers
 			if (!this.sportImage)
 			{
 				this.sportImage = new Image(Assets.getAssetsTexture("h2h_soccer_icon"));
-				addChild(sportImage);
+				backgroundItemRenderer.addChild(sportImage);
 				sportImage.x = 59;
 				sportImage.y = 22;
 			}
 			if (!this.team1Text)
 			{
 				this.team1Text = new TextFieldTextRenderer();
-				addChild(this.team1Text);
+				backgroundItemRenderer.addChild(this.team1Text);
 				team1Text.x = 102;
 				team1Text.y = this.dayText.y;
 				team1Text.textFormat = FontFactory.getTextFormat(3, 15, 0x4D4D4D);
@@ -229,7 +231,7 @@ package feathers.controls.renderers
 			if (!this.team2Text)
 			{
 				this.team2Text = new TextFieldTextRenderer();
-				addChild(this.team2Text);
+				backgroundItemRenderer.addChild(this.team2Text);
 				team2Text.x = 102;
 				team2Text.y = this.hourText.y;
 				team2Text.textFormat = FontFactory.getTextFormat(3, 15, 0x4D4D4D);
@@ -257,8 +259,8 @@ package feathers.controls.renderers
 				resultsButton.label = "Results";
 				resultsButton.labelOffsetX = 9;
 				//addChild(resultsButton);
-				resultsButton.x = backgroundItemRenderer.width - 10 - resultsButton.defaultSkin.width;
-				resultsButton.y = backgroundItemRenderer.height - resultsButton.defaultSkin.height >> 1;
+				resultsButton.x = backgroundItemRenderer.defaultSkin.width - 10 - resultsButton.defaultSkin.width;
+				resultsButton.y = backgroundItemRenderer.defaultSkin.height - resultsButton.defaultSkin.height >> 1;
 			}
 			if (!this.inPlayButton)
 			{
@@ -268,8 +270,8 @@ package feathers.controls.renderers
 				inPlayButton.label = "In-Play";
 				inPlayButton.labelOffsetX = 9;
 				//addChild(inPlayButton);
-				inPlayButton.x = backgroundItemRenderer.width / 1.5;
-				inPlayButton.y = backgroundItemRenderer.height - inPlayButton.defaultSkin.height >> 1;
+				inPlayButton.x = backgroundItemRenderer.defaultSkin.width / 1.5;
+				inPlayButton.y = backgroundItemRenderer.defaultSkin.height - inPlayButton.defaultSkin.height >> 1;
 			}
 			if (!this.waitingButton)
 			{
@@ -279,8 +281,8 @@ package feathers.controls.renderers
 				waitingButton.label = "Waiting";
 				waitingButton.labelOffsetX = 9;
 				//addChild(waitingButton);
-				waitingButton.x = backgroundItemRenderer.width / 1.5;
-				waitingButton.y = backgroundItemRenderer.height - waitingButton.defaultSkin.height >> 1;
+				waitingButton.x = backgroundItemRenderer.defaultSkin.width / 1.5;
+				waitingButton.y = backgroundItemRenderer.defaultSkin.height - waitingButton.defaultSkin.height >> 1;
 			}
 		}
 		

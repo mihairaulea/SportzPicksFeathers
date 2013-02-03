@@ -35,6 +35,14 @@ package view
 		private static const SELECT_EVENT_SCREEN:String = "selectEventScreen";
 		private static const SELECT_SPORT_SCREEN:String = "selectSportScreen";
 		
+		private static const CHALLENGE_LOADING_SCREEN:String = "challengeLoadingScreen";
+		private static const PREDICTION_WITHOUT_DIAL_SCREEN:String = "predictionWithoutDialScreen";
+		private static const PREDICTION_WITH_DIAL_SCREEN:String = "predictionWithDialScreen";
+		private static const PREDICTION_CHOICES_CONFIRMED_SCREEN:String = "predictionChoicesConfirmedScreen";
+		private static const CHALLENGE_SENT_SCREEN:String = "challengeSentScreen";
+		private static const FACEBOOK_FRIENDS_SELECT_SCREEN:String = "facebookFriendsSelectScreen";
+		
+		
 		private var navigator:ScreenNavigator;
 		private var transitionManager:ScreenSlidingStackTransitionManager;
 		
@@ -130,7 +138,42 @@ package view
 			)
 			);
 			
-			this.navigator.showScreen(WELCOME_SCREEN);
+			//batch 2
+			this.navigator.addScreen(CHALLENGE_LOADING_SCREEN, new ScreenNavigatorItem(new ChallengeLoadingScreen(),
+			{
+			
+			}
+			)
+			);
+			this.navigator.addScreen(PREDICTION_WITHOUT_DIAL_SCREEN, new ScreenNavigatorItem(new PredictionScreen(),
+			{
+			
+			}
+			)
+			);
+			
+			this.navigator.addScreen(PREDICTION_CHOICES_CONFIRMED_SCREEN, new ScreenNavigatorItem(new PredictionChoicesConfirmedScreen(),
+			{
+			
+			}
+			)
+			);
+			this.navigator.addScreen(CHALLENGE_SENT_SCREEN, new ScreenNavigatorItem(new ChallengeSentScreen(),
+			{
+			
+			}
+			)
+			);
+			this.navigator.addScreen(FACEBOOK_FRIENDS_SELECT_SCREEN, new ScreenNavigatorItem(new FacebookFriendsSelectScreen(),
+			{
+			
+			}
+			)
+			);
+			//batch 3
+			
+			
+			//this.navigator.showScreen(WELCOME_SCREEN);
 			//this.navigator.showScreen(EMAIL_SIGNUP_SCREEN);
 			//this.navigator.showScreen(LOBBY_SCREEN);
 			//this.navigator.showScreen(HEAD_TO_HEAD_SCREEN);
@@ -141,6 +184,13 @@ package view
 			//this.navigator.showScreen(POPULAR_EVENTS_SCREEN);
 			//this.navigator.showScreen(SELECT_EVENT_SCREEN);
 			//this.navigator.showScreen(SELECT_SPORT_SCREEN);
+			
+			
+			//this.navigator.showScreen(CHALLENGE_LOADING_SCREEN);
+			//this.navigator.showScreen(PREDICTION_WITHOUT_DIAL_SCREEN);
+			//this.navigator.showScreen(PREDICTION_CHOICES_CONFIRMED_SCREEN);
+			//this.navigator.showScreen(CHALLENGE_SENT_SCREEN);
+			//this.navigator.showScreen(FACEBOOK_FRIENDS_SELECT_SCREEN);
 			
 			this.transitionManager = new ScreenSlidingStackTransitionManager(navigator);
 			this.transitionManager.duration = 0.55;

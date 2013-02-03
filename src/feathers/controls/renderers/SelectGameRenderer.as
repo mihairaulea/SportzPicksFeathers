@@ -77,7 +77,6 @@ package feathers.controls.renderers
 			if(this._data)
 			{
 				trace("commit data");
-				//nameRenderer.text = this._data.text;
 			}
 		}
 		

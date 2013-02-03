@@ -32,10 +32,10 @@ package feathers.controls.renderers
 			addChild(backgroundImage);
 			//backgroundImage.addEventListener(TouchEvent.TOUCH, requestFriendHandler);
 			
-			this.width = backgroundImage.width;
+			this.width = backgroundImage.defaultSkin.width;
 			this.height = backgroundImage.defaultSkin.height;
 			profilePic = new Image( Assets.getAssetsTexture("profilePic") );
-			addChild(profilePic);
+			backgroundImage.addChild(profilePic);
 			
 			nameRenderer = new TextFieldTextRenderer();
 			nameRenderer.x = 56.5;
@@ -44,7 +44,7 @@ package feathers.controls.renderers
 			nameRenderer.height = 21;
 			nameRenderer.textFormat = FontFactory.getTextFormat(1, 15, 0x4D4D4D);
 			nameRenderer.embedFonts = true;
-			addChild(nameRenderer);
+			backgroundImage.addChild(nameRenderer);
 			nameRenderer.text = "Text";
 		}
 		

@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:e6d00968c12c6011b1a91730ef461a08$ -->
+<!-- $TexturePacker:SmartUpdate:11d88af97950634e2532d813ec10c94c$ -->
 <TextureAtlas imagePath="assetsLD2.png">
-    <SubTexture name="green_bg" x="2" y="2" width="320" height="480"/>
+    <SubTexture name="answer_bg_bottom" x="626" y="852" width="300" height="55"/>
+    <SubTexture name="answer_bg_bottom_press" x="612" y="966" width="300" height="55"/>
+    <SubTexture name="answer_bg_mid" x="324" y="909" width="300" height="55"/>
+    <SubTexture name="answer_bg_mid_press" x="324" y="852" width="300" height="55"/>
+    <SubTexture name="answer_bg_top" x="612" y="795" width="300" height="55"/>
+    <SubTexture name="answer_bg_top_press" x="310" y="966" width="300" height="55"/>
+    <SubTexture name="chal_sent_panel" x="612" y="641" width="300" height="152"/>
+    <SubTexture name="dd_btn" x="626" y="909" width="164" height="44" frameX="-3" frameY="0" frameWidth="168" frameHeight="46"/>
+    <SubTexture name="dd_btn_press" x="792" y="909" width="160" height="40" frameX="-5" frameY="0" frameWidth="168" frameHeight="46"/>
+    <SubTexture name="dd_icon" x="934" y="2" width="64" height="38" frameX="-97" frameY="-3" frameWidth="168" frameHeight="46"/>
+    <SubTexture name="filter_wheel_bg" x="2" y="966" width="306" height="55" frameX="-7" frameY="-3" frameWidth="320" frameHeight="59"/>
+    <SubTexture name="green_bg" x="2" y="484" width="320" height="480"/>
+    <SubTexture name="green_black_bg" x="2" y="2" width="320" height="480"/>
+    <SubTexture name="loading_panel" x="612" y="429" width="300" height="210"/>
+    <SubTexture name="progress_off" x="978" y="42" width="42" height="4" frameX="-1" frameY="-1" frameWidth="44" frameHeight="6"/>
+    <SubTexture name="progress_on" x="934" y="42" width="42" height="4" frameX="-1" frameY="-1" frameWidth="44" frameHeight="6"/>
+    <SubTexture name="results_bg" x="612" y="2" width="320" height="327"/>
+    <SubTexture name="select_all" x="441" y="2" width="115" height="30"/>
+    <SubTexture name="select_all_on" x="324" y="2" width="115" height="30"/>
+    <SubTexture name="send_challenge_btn" x="612" y="331" width="314" height="50" frameX="-2" frameY="0" frameWidth="320" frameHeight="50"/>
+    <SubTexture name="send_challenge_btn_press" x="612" y="383" width="302" height="44" frameX="-8" frameY="0" frameWidth="320" frameHeight="50"/>
+    <SubTexture name="tick" x="934" y="48" width="25" height="21"/>
 </TextureAtlas>

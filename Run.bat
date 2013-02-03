@@ -6,7 +6,7 @@ call bat\SetupApplication.bat
 :target
 ::
 
-::goto desktop
+goto desktop
 ::goto android-debug
 ::goto android-test
 ::set INTERPRETER=-interpreter

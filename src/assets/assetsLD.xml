@@ -1,94 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:3c091399a06f99c26f9cb7077066412d$ -->
+<!-- $TexturePacker:SmartUpdate:f64c05617be5dde5c3ed42bcedbe68cc$ -->
 <TextureAtlas imagePath="assetsLD.png">
-    <SubTexture name="a_bar" x="554" y="429" width="300" height="17"/>
-    <SubTexture name="accept_btn" x="911" y="560" width="90" height="50"/>
-    <SubTexture name="accept_btn_press" x="816" y="893" width="90" height="50"/>
-    <SubTexture name="add_coins" x="877" y="945" width="25" height="25"/>
-    <SubTexture name="add_coins_press" x="304" y="715" width="25" height="25"/>
-    <SubTexture name="az_sel_bg" x="21" y="344" width="17" height="352"/>
-    <SubTexture name="az_sel_bg_press" x="2" y="344" width="17" height="352"/>
-    <SubTexture name="b-z_bar" x="252" y="427" width="300" height="17"/>
-    <SubTexture name="back_arrow" x="923" y="612" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="back_arrow_press" x="903" y="612" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="black_strip" x="304" y="310" width="320" height="44"/>
-    <SubTexture name="coin" x="948" y="528" width="23" height="23"/>
-    <SubTexture name="coins_bg" x="910" y="833" width="85" height="27"/>
-    <SubTexture name="coins_bg_small" x="910" y="833" width="85" height="27"/>
-    <SubTexture name="coins_hud" x="611" y="983" width="85" height="36" frameX="0" frameY="-4" frameWidth="85" frameHeight="40"/>
-    <SubTexture name="coins_hud_press" x="790" y="945" width="85" height="34" frameX="0" frameY="-6" frameWidth="85" frameHeight="40"/>
-    <SubTexture name="cup_off" x="965" y="612" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
-    <SubTexture name="cup_on" x="948" y="174" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
-    <SubTexture name="email_btn" x="495" y="518" width="300" height="67"/>
-    <SubTexture name="email_btn_press" x="193" y="516" width="300" height="67"/>
-    <SubTexture name="email_friends_panel" x="2" y="205" width="300" height="137"/>
-    <SubTexture name="events_btn" x="495" y="587" width="300" height="49"/>
-    <SubTexture name="events_btn_press" x="193" y="585" width="300" height="49"/>
-    <SubTexture name="facebook_btn" x="554" y="358" width="300" height="69"/>
-    <SubTexture name="facebook_btn_press" x="252" y="356" width="300" height="69"/>
-    <SubTexture name="first_screen_email_btn" x="304" y="910" width="300" height="47"/>
-    <SubTexture name="first_screen_email_btn_press" x="362" y="695" width="300" height="47"/>
-    <SubTexture name="flag" x="1000" y="2" width="22" height="11"/>
-    <SubTexture name="form_field" x="608" y="861" width="285" height="30"/>
-    <SubTexture name="form_field_error" x="324" y="986" width="285" height="30"/>
-    <SubTexture name="friend_bg" x="606" y="788" width="300" height="44"/>
-    <SubTexture name="friend_bg_press" x="664" y="742" width="300" height="44"/>
-    <SubTexture name="game_listing_bg" x="304" y="801" width="300" height="55"/>
-    <SubTexture name="game_listing_bg_press" x="304" y="744" width="300" height="55"/>
-    <SubTexture name="go_btn" x="654" y="638" width="294" height="50" frameX="-3" frameY="0" frameWidth="300" frameHeight="50"/>
-    <SubTexture name="go_btn_press" x="664" y="690" width="292" height="50" frameX="-4" frameY="0" frameWidth="300" frameHeight="50"/>
-    <SubTexture name="grey_chevron" x="895" y="861" width="13" height="18"/>
-    <SubTexture name="h2h_bg" x="626" y="75" width="320" height="69"/>
-    <SubTexture name="h2h_list_bg" x="304" y="238" width="320" height="70"/>
-    <SubTexture name="h2h_soccer_icon" x="331" y="715" width="23" height="23" frameX="-5" frameY="-3" frameWidth="31" frameHeight="27"/>
-    <SubTexture name="in_play_icon" x="948" y="152" width="18" height="20" frameX="-12" frameY="-13" frameWidth="90" frameHeight="50"/>
-    <SubTexture name="league_bg_mid" x="608" y="834" width="300" height="25"/>
-    <SubTexture name="league_bg_top" x="304" y="959" width="300" height="25"/>
-    <SubTexture name="lobby_list_bg" x="626" y="2" width="320" height="71"/>
-    <SubTexture name="logo" x="40" y="344" width="210" height="83" frameX="-2" frameY="0" frameWidth="218" frameHeight="87"/>
-    <SubTexture name="logo_small" x="797" y="560" width="112" height="30" frameX="0" frameY="-7" frameWidth="112" frameHeight="44"/>
-    <SubTexture name="menu_icon" x="948" y="128" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="menu_icon_press" x="948" y="504" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
-    <SubTexture name="nav_bar" x="626" y="272" width="320" height="44"/>
-    <SubTexture name="nav_bar_shadow" x="2" y="1000" width="320" height="6"/>
-    <SubTexture name="new_off" x="1000" y="15" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
-    <SubTexture name="new_on" x="943" y="612" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
-    <SubTexture name="nfl" x="40" y="530" width="151" height="99"/>
-    <SubTexture name="nfl_press" x="40" y="429" width="151" height="99"/>
-    <SubTexture name="panel_bottom" x="2" y="2" width="300" height="201"/>
-    <SubTexture name="pop_event_btn1" x="352" y="638" width="300" height="55"/>
-    <SubTexture name="pop_event_btn1_press" x="2" y="943" width="300" height="55"/>
-    <SubTexture name="pop_event_btn2_3" x="2" y="886" width="300" height="55"/>
-    <SubTexture name="pop_event_btn2_3_press" x="2" y="829" width="300" height="55"/>
-    <SubTexture name="pop_event_btn4" x="2" y="772" width="300" height="55"/>
-    <SubTexture name="pop_event_btn4_press" x="2" y="715" width="300" height="55"/>
-    <SubTexture name="profilePic" x="948" y="2" width="50" height="50"/>
-    <SubTexture name="radio_l_off" x="608" y="893" width="104" height="36" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
-    <SubTexture name="radio_l_on" x="714" y="893" width="100" height="38" frameX="-4" frameY="-6" frameWidth="104" frameHeight="44"/>
-    <SubTexture name="radio_r_off" x="698" y="985" width="102" height="32" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
-    <SubTexture name="radio_r_on" x="797" y="592" width="104" height="38" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
-    <SubTexture name="random_btn" x="495" y="448" width="300" height="68"/>
-    <SubTexture name="random_btn_press" x="193" y="446" width="300" height="68"/>
-    <SubTexture name="results_btn" x="698" y="933" width="90" height="50"/>
-    <SubTexture name="results_btn_press" x="606" y="931" width="90" height="50"/>
-    <SubTexture name="score_strip" x="626" y="318" width="320" height="30"/>
-    <SubTexture name="scroll_shadow" x="40" y="696" width="320" height="17"/>
-    <SubTexture name="shadow" x="304" y="2" width="320" height="129" frameX="0" frameY="0" frameWidth="320" frameHeight="133"/>
-    <SubTexture name="shuffle_btn" x="40" y="636" width="310" height="58" frameX="0" frameY="-2" frameWidth="310" frameHeight="60"/>
-    <SubTexture name="shuffle_btn_press" x="304" y="858" width="302" height="50" frameX="-3" frameY="-5" frameWidth="310" frameHeight="60"/>
-    <SubTexture name="sport_select_baseball_icon" x="606" y="744" width="43" height="41" frameX="-8" frameY="-3" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_golf_icon" x="948" y="459" width="39" height="43" frameX="-10" frameY="-2" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_nfl_icon" x="849" y="981" width="43" height="41" frameX="-7" frameY="-3" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_nhl_icon" x="908" y="788" width="41" height="43" frameX="-14" frameY="-1" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_soccer_icon" x="948" y="54" width="41" height="41" frameX="-8" frameY="-3" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_tennis_icon" x="802" y="981" width="45" height="41" frameX="-7" frameY="-3" frameWidth="57" frameHeight="49"/>
-    <SubTexture name="sport_select_top_right" x="797" y="459" width="149" height="99"/>
-    <SubTexture name="sport_select_top_right_press" x="856" y="358" width="149" height="99"/>
-    <SubTexture name="start_btn" x="626" y="209" width="320" height="61"/>
-    <SubTexture name="start_btn_press" x="626" y="146" width="320" height="61"/>
-    <SubTexture name="timer_bg" x="304" y="133" width="320" height="103"/>
-    <SubTexture name="under_shadow" x="626" y="350" width="320" height="6"/>
-    <SubTexture name="vs" x="948" y="97" width="32" height="29"/>
-    <SubTexture name="waiting_icon" x="989" y="459" width="16" height="20" frameX="-13" frameY="-13" frameWidth="90" frameHeight="50"/>
+    <SubTexture name="a_bar" x="2" y="858" width="300" height="17"/>
+    <SubTexture name="accept_btn" x="908" y="763" width="90" height="50"/>
+    <SubTexture name="accept_btn_press" x="908" y="711" width="90" height="50"/>
+    <SubTexture name="b-z_bar" x="2" y="839" width="300" height="17"/>
+    <SubTexture name="back_arrow" x="304" y="326" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="back_arrow_press" x="304" y="300" width="18" height="24" frameX="-8" frameY="-10" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="black_strip" x="324" y="242" width="320" height="44"/>
+    <SubTexture name="coin" x="983" y="364" width="23" height="23"/>
+    <SubTexture name="coins_bg" x="2" y="877" width="85" height="27"/>
+    <SubTexture name="coins_bg_small" x="2" y="877" width="85" height="27"/>
+    <SubTexture name="coins_hud" x="908" y="815" width="85" height="36" frameX="0" frameY="-4" frameWidth="85" frameHeight="40"/>
+    <SubTexture name="coins_hud_press" x="908" y="853" width="85" height="34" frameX="0" frameY="-6" frameWidth="85" frameHeight="40"/>
+    <SubTexture name="cup_off" x="628" y="336" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="cup_on" x="628" y="318" width="14" height="16" frameX="-1" frameY="-4" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="email_btn" x="304" y="557" width="300" height="67"/>
+    <SubTexture name="email_btn_press" x="606" y="494" width="300" height="67"/>
+    <SubTexture name="email_friends_panel" x="324" y="348" width="300" height="137"/>
+    <SubTexture name="events_btn" x="304" y="740" width="300" height="49"/>
+    <SubTexture name="events_btn_press" x="606" y="734" width="300" height="49"/>
+    <SubTexture name="facebook_btn" x="626" y="423" width="300" height="69"/>
+    <SubTexture name="facebook_btn_press" x="644" y="352" width="300" height="69"/>
+    <SubTexture name="first_screen_email_btn" x="606" y="785" width="300" height="47"/>
+    <SubTexture name="first_screen_email_btn_press" x="2" y="744" width="300" height="47"/>
+    <SubTexture name="flag" x="946" y="372" width="22" height="11"/>
+    <SubTexture name="form_field" x="652" y="913" width="285" height="30"/>
+    <SubTexture name="form_field_error" x="153" y="978" width="285" height="30"/>
+    <SubTexture name="friend_bg" x="2" y="793" width="300" height="44"/>
+    <SubTexture name="friend_bg_press" x="304" y="791" width="300" height="44"/>
+    <SubTexture name="game_listing_bg" x="2" y="687" width="300" height="55"/>
+    <SubTexture name="game_listing_bg_press" x="304" y="683" width="300" height="55"/>
+    <SubTexture name="go_btn" x="606" y="861" width="294" height="50" frameX="-3" frameY="0" frameWidth="300" frameHeight="50"/>
+    <SubTexture name="go_btn_press" x="304" y="864" width="292" height="50" frameX="-4" frameY="0" frameWidth="300" frameHeight="50"/>
+    <SubTexture name="grey_chevron" x="1009" y="271" width="13" height="18"/>
+    <SubTexture name="h2h_bg" x="646" y="148" width="320" height="69"/>
+    <SubTexture name="h2h_list_bg" x="2" y="133" width="320" height="70"/>
+    <SubTexture name="h2h_list_bg_press" x="324" y="107" width="320" height="70"/>
+    <SubTexture name="h2h_soccer_icon" x="958" y="347" width="23" height="23" frameX="-5" frameY="-3" frameWidth="31" frameHeight="27"/>
+    <SubTexture name="in_play_icon" x="304" y="352" width="18" height="20" frameX="-12" frameY="-13" frameWidth="90" frameHeight="50"/>
+    <SubTexture name="league_bg_mid" x="304" y="837" width="300" height="25"/>
+    <SubTexture name="league_bg_top" x="606" y="834" width="300" height="25"/>
+    <SubTexture name="lobby_list_bg" x="646" y="75" width="320" height="71"/>
+    <SubTexture name="lobby_list_bg_press" x="646" y="2" width="320" height="71"/>
+    <SubTexture name="logo" x="440" y="916" width="210" height="83" frameX="-2" frameY="0" frameWidth="218" frameHeight="87"/>
+    <SubTexture name="logo_small" x="908" y="527" width="112" height="30" frameX="0" frameY="-7" frameWidth="112" frameHeight="44"/>
+    <SubTexture name="menu_icon" x="992" y="340" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="menu_icon_press" x="992" y="316" width="28" height="22" frameX="-8" frameY="-11" frameWidth="44" frameHeight="44"/>
+    <SubTexture name="nav_bar" x="646" y="219" width="320" height="44"/>
+    <SubTexture name="nav_bar_shadow" x="324" y="288" width="320" height="6"/>
+    <SubTexture name="new_off" x="968" y="389" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="new_on" x="946" y="385" width="20" height="16" frameX="0" frameY="-2" frameWidth="20" frameHeight="20"/>
+    <SubTexture name="panel_bottom" x="2" y="300" width="300" height="201"/>
+    <SubTexture name="pop_event_btn1" x="606" y="677" width="300" height="55"/>
+    <SubTexture name="pop_event_btn1_press" x="2" y="630" width="300" height="55"/>
+    <SubTexture name="pop_event_btn2_3" x="304" y="626" width="300" height="55"/>
+    <SubTexture name="pop_event_btn2_3_press" x="606" y="620" width="300" height="55"/>
+    <SubTexture name="pop_event_btn4" x="606" y="563" width="300" height="55"/>
+    <SubTexture name="pop_event_btn4_press" x="2" y="573" width="300" height="55"/>
+    <SubTexture name="profilePic" x="968" y="2" width="50" height="50"/>
+    <SubTexture name="radio_l_off" x="908" y="599" width="104" height="36" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
+    <SubTexture name="radio_l_on" x="908" y="671" width="100" height="38" frameX="-4" frameY="-6" frameWidth="104" frameHeight="44"/>
+    <SubTexture name="radio_r_off" x="908" y="637" width="102" height="32" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
+    <SubTexture name="radio_r_on" x="908" y="559" width="104" height="38" frameX="0" frameY="-6" frameWidth="104" frameHeight="44"/>
+    <SubTexture name="random_btn" x="2" y="503" width="300" height="68"/>
+    <SubTexture name="random_btn_press" x="304" y="487" width="300" height="68"/>
+    <SubTexture name="results_btn" x="928" y="475" width="90" height="50"/>
+    <SubTexture name="results_btn_press" x="928" y="423" width="90" height="50"/>
+    <SubTexture name="score_strip" x="2" y="268" width="320" height="30"/>
+    <SubTexture name="scroll_shadow" x="646" y="265" width="320" height="17"/>
+    <SubTexture name="shadow" x="2" y="2" width="320" height="129" frameX="0" frameY="0" frameWidth="320" frameHeight="133"/>
+    <SubTexture name="shuffle_btn" x="646" y="292" width="310" height="58" frameX="0" frameY="-2" frameWidth="310" frameHeight="60"/>
+    <SubTexture name="shuffle_btn_press" x="324" y="296" width="302" height="50" frameX="-3" frameY="-5" frameWidth="310" frameHeight="60"/>
+    <SubTexture name="sport_select_baseball_icon" x="968" y="140" width="43" height="41" frameX="-8" frameY="-3" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_golf_icon" x="968" y="271" width="39" height="43" frameX="-10" frameY="-2" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_nfl_icon" x="968" y="97" width="43" height="41" frameX="-7" frameY="-3" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_nhl_icon" x="968" y="183" width="41" height="43" frameX="-14" frameY="-1" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_soccer_icon" x="968" y="228" width="41" height="41" frameX="-8" frameY="-3" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_tennis_icon" x="968" y="54" width="45" height="41" frameX="-7" frameY="-3" frameWidth="57" frameHeight="49"/>
+    <SubTexture name="sport_select_top_right" x="153" y="877" width="149" height="99"/>
+    <SubTexture name="sport_select_top_right_press" x="2" y="916" width="149" height="99"/>
+    <SubTexture name="start_btn" x="2" y="205" width="320" height="61"/>
+    <SubTexture name="start_btn_press" x="324" y="179" width="320" height="61"/>
+    <SubTexture name="timer_bg" x="324" y="2" width="320" height="103"/>
+    <SubTexture name="under_shadow" x="646" y="284" width="320" height="6"/>
+    <SubTexture name="vs" x="958" y="316" width="32" height="29"/>
+    <SubTexture name="waiting_icon" x="628" y="296" width="16" height="20" frameX="-13" frameY="-13" frameWidth="90" frameHeight="50"/>
 </TextureAtlas>
